@@ -338,9 +338,11 @@ select.input { appearance: none; background-image: linear-gradient(transparent, 
 /* — login — */
 .login-grid { grid-template-columns: 1fr; }
 .login-brand { display: none !important; }
+.login-back { display: inline-flex !important; }   /* tautan kembali tampil hanya saat panel brand tersembunyi */
 @media (min-width: 900px) {
   .login-grid { grid-template-columns: 1.05fr 1fr; }
   .login-brand { display: flex !important; }
+  .login-back { display: none !important; }
 }
 
 /* — interactive helpers (replacing prototype style-hover) — */
