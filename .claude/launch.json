@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "arsiva-dev",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "set TEMP=D:\\_tmp&& set TMP=D:\\_tmp&& set TMPDIR=D:\\_tmp&& npm run dev"],
+      "port": 3000
+    }
+  ]
+}
