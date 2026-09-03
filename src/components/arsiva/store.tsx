@@ -99,7 +99,7 @@ type Ctx = {
   // master data
   addCategory: (nama: string, desk: string) => Promise<boolean>;
   removeCategory: (id: number) => Promise<void>;
-  editCategory: (id: number) => void;
+  updateCategory: (id: number, fields: { nama: string; desk: string }) => Promise<boolean>;
   addType: (nama: string) => Promise<boolean>;
   removeType: (id: number) => Promise<void>;
   addPurpose: (nama: string) => Promise<boolean>;
@@ -271,12 +271,13 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
     async (id: number) => { await run(() => api(`/api/categories/${id}`, { method: "DELETE" }), "Kategori dihapus."); },
     [run],
   );
-  const editCategory = React.useCallback(
-    (id: number) => {
-      const c = state.cats.find((x) => x.id === id);
-      toast(`Form ubah kategori "${c?.nama ?? ""}" akan tersedia pada tahap berikutnya.`);
-    },
-    [state.cats],
+  const updateCategory = React.useCallback(
+    (id: number, fields: { nama: string; desk: string }) =>
+      run(
+        () => api(`/api/categories/${id}`, { method: "PATCH", body: JSON.stringify(fields) }),
+        `Kategori "${fields.nama}" diperbarui.`,
+      ),
+    [run],
   );
 
   const addType = React.useCallback(
@@ -406,7 +407,7 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
     allDocs, counts, stats,
     refresh, setThreshold,
     tandai, addDoc, updateDoc, removeDoc,
-    addCategory, removeCategory, editCategory,
+    addCategory, removeCategory, updateCategory,
     addType, removeType, addPurpose, removePurpose,
     setNotarisAktif, addNotaris, removeNotaris, addSchedule, cancelSchedule,
     addShare, revokeShare, clearShares,

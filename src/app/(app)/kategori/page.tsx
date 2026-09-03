@@ -1,16 +1,28 @@
 "use client";
 
 import * as React from "react";
-import { Info, Plus, X } from "@phosphor-icons/react";
+import { Info, Plus, X, FloppyDisk } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
 
 export default function KategoriPage() {
-  const { state, isAdmin, addCategory, removeCategory, editCategory, addType, removeType, addPurpose, removePurpose } = useArsiva();
+  const { state, isAdmin, addCategory, removeCategory, updateCategory, addType, removeType, addPurpose, removePurpose, say } = useArsiva();
   const isStaf = !isAdmin;
 
   const [nc, setNc] = React.useState({ nama: "", desk: "" });
   const [newType, setNewType] = React.useState("");
   const [newPurpose, setNewPurpose] = React.useState("");
+
+  const [editKat, setEditKat] = React.useState<{ id: number; nama: string; desk: string } | null>(null);
+  const [menyimpan, setMenyimpan] = React.useState(false);
+
+  const simpanEditKat = async () => {
+    if (!editKat) return;
+    if (!editKat.nama.trim()) return say("Nama kategori wajib diisi.");
+    setMenyimpan(true);
+    const ok = await updateCategory(editKat.id, { nama: editKat.nama.trim(), desk: editKat.desk.trim() });
+    setMenyimpan(false);
+    if (ok) setEditKat(null);
+  };
 
   const catRows = state.cats;
 
@@ -64,7 +76,7 @@ export default function KategoriPage() {
                     <td style={{ textAlign: "right" }}>
                       {isAdmin && (
                         <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
-                          <button type="button" className="btn btn-ghost" onClick={() => editCategory(c.id)} style={{ fontSize: 12 }}>Ubah</button>
+                          <button type="button" className="btn btn-ghost" onClick={() => setEditKat({ id: c.id, nama: c.nama, desk: c.desk })} style={{ fontSize: 12 }}>Ubah</button>
                           <button type="button" className="btn btn-ghost" onClick={() => void removeCategory(c.id)} style={{ fontSize: 12, color: "var(--color-danger)" }}>Hapus</button>
                         </div>
                       )}
@@ -122,6 +134,50 @@ export default function KategoriPage() {
           </div>
         </div>
       </div>
+
+      {/* Dialog: ubah kategori */}
+      {editKat && (
+        <div className="dialog-backdrop" onClick={() => !menyimpan && setEditKat(null)}>
+          <div className="dialog" style={{ width: "min(440px, 100%)" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <h5 style={{ margin: 0 }}>Ubah kategori</h5>
+              <button type="button" className="btn btn-secondary btn-icon" onClick={() => setEditKat(null)} style={{ marginLeft: "auto" }} aria-label="Tutup">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="field">
+              <label>Nama kategori</label>
+              <input
+                className="input"
+                value={editKat.nama}
+                onChange={(e) => setEditKat((v) => (v ? { ...v, nama: e.target.value } : v))}
+              />
+            </div>
+            <div className="field">
+              <label>Keterangan</label>
+              <input
+                className="input"
+                placeholder="Keterangan singkat"
+                value={editKat.desk}
+                onChange={(e) => setEditKat((v) => (v ? { ...v, desk: e.target.value } : v))}
+              />
+            </div>
+
+            <div className="text-muted" style={{ fontSize: 11.5 }}>
+              Dokumen yang sudah memakai kategori ini akan ikut memperlihatkan nama barunya.
+            </div>
+
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 2 }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setEditKat(null)} disabled={menyimpan}>Batal</button>
+              <button type="button" className="btn btn-primary" onClick={() => void simpanEditKat()} disabled={menyimpan}>
+                <FloppyDisk size={15} />
+                {menyimpan ? "Menyimpan…" : "Simpan Perubahan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
