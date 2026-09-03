@@ -177,7 +177,21 @@ export default function DetailPage() {
               <ArrowsOut size={15} />
               Buka layar penuh
             </a>
-            <button type="button" className="btn btn-secondary" onClick={() => say("Dokumen dikirim ke antrian cetak.")} style={{ flex: 1 }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => {
+                if (!cur.hasFile) return say("Belum ada berkas scan untuk dokumen ini.");
+                // Buka berkas di tab baru lalu coba panggil dialog cetak. Bila
+                // browser memblokir print() otomatis pada penampil PDF-nya,
+                // berkasnya tetap terbuka dan bisa dicetak manual (Ctrl+P).
+                const w = window.open(`/api/documents/${cur.id}/file`, "_blank");
+                w?.addEventListener("load", () => {
+                  try { w.print(); } catch { /* penampil PDF menolak — cetak manual */ }
+                });
+              }}
+              style={{ flex: 1 }}
+            >
               <Printer size={15} />
               Cetak
             </button>

@@ -88,7 +88,7 @@ function DistCard({ title, subtitle, bars, barColor }: { title: string; subtitle
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { me, counts, stats, allDocs, state, threshold, say } = useArsiva();
+  const { me, counts, stats, allDocs, state, threshold } = useArsiva();
   const th = threshold;
 
   const prioritas = React.useMemo(
@@ -119,10 +119,10 @@ export default function DashboardPage() {
           <div className="text-muted" style={{ fontSize: 13 }}>Ringkasan dan analitik arsip dokumen legal per {fmt(todayISO())}</div>
         </div>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8, flex: "none" }}>
-          <button type="button" className="btn btn-secondary" onClick={() => say("Laporan analitik arsip disiapkan dalam format XLSX.")}>
+          <a className="btn btn-secondary" href="/api/laporan" download>
             <FileArrowDown size={16} />
             Unduh Laporan
-          </button>
+          </a>
           <button type="button" className="btn btn-primary" onClick={() => router.push("/unggah")}>
             <UploadSimple size={16} />
             Unggah Dokumen
