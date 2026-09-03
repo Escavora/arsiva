@@ -144,13 +144,13 @@ function LoginForm() {
           Beranda
         </a>
 
-        <form onSubmit={doLogin} style={{ width: "min(376px, 100%)" }}>
-          <h4 style={{ margin: "0 0 5px", fontSize: 20, letterSpacing: "-0.02em" }}>Masuk ke akun pegawai</h4>
-          <p className="text-muted" style={{ fontSize: 13, marginBottom: 24 }}>
+        <form className="login-form" onSubmit={doLogin} style={{ width: "min(432px, 100%)" }}>
+          <h4 style={{ margin: "0 0 7px", fontSize: 26, letterSpacing: "-0.025em" }}>Masuk ke akun pegawai</h4>
+          <p className="text-muted" style={{ fontSize: 14.5, marginBottom: 30 }}>
             Gunakan email korporat dan kata sandi internal Anda.
           </p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
             {error && (
               <div
                 role="alert"
@@ -172,7 +172,7 @@ function LoginForm() {
               <input
                 id="email" className="input" type="email" autoComplete="username" required
                 placeholder="nama@bank.co.id" value={email}
-                onChange={(e) => setEmail(e.target.value)} style={{ minHeight: 44 }}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="field">
@@ -180,7 +180,7 @@ function LoginForm() {
               <input
                 id="password" className="input" type="password" autoComplete="current-password" required
                 placeholder="••••••••" value={password}
-                onChange={(e) => setPassword(e.target.value)} style={{ minHeight: 44 }}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -194,13 +194,13 @@ function LoginForm() {
               </a>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-block" disabled={loading} style={{ minHeight: 46 }}>
-              <SignIn size={16} />
+            <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+              <SignIn size={17} />
               {loading ? "Memproses…" : "Masuk"}
             </button>
 
-            <div style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 11.5, color: muted(50), marginTop: 2 }}>
-              <ShieldCheck size={15} style={{ flex: "none", marginTop: 1 }} />
+            <div style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12.5, lineHeight: 1.5, color: muted(52), marginTop: 2 }}>
+              <ShieldCheck size={16} style={{ flex: "none", marginTop: 1 }} />
               <span>
                 Sesi berakhir otomatis setelah 30 menit tanpa aktivitas. Jangan bagikan kredensial Anda kepada pihak ketiga.
               </span>

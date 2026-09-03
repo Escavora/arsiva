@@ -344,6 +344,11 @@ select.input { appearance: none; background-image: linear-gradient(transparent, 
   .login-brand { display: flex !important; }
   .login-back { display: none !important; }
 }
+/* form login dibesarkan - hanya di sini, komponen form global tidak tersentuh */
+.login-form .field > label { font-size: 13px; margin-bottom: 7px; }
+.login-form .input { min-height: 54px; font-size: 15.5px; padding: 10px 15px; }
+.login-form .radio { font-size: 14.5px; }
+.login-form .btn { min-height: 54px; font-size: 15.5px; }
 
 /* — interactive helpers (replacing prototype style-hover) — */
 .nav-item { transition: background 0.12s ease, color 0.12s ease; }
