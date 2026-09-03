@@ -51,7 +51,9 @@ function namaFolderBulan(): string {
 // berkas yang ditulis driver ini TIDAK bertahan antar-deployment/request di
 // sana, jadi wajib diganti ke driver "blob" sebelum deploy.
 
-const ROOT = path.resolve(process.env.STORAGE_LOCAL_DIR ?? "./storage/uploads");
+// Pakai `|| default` (bukan `??`) agar string kosong "" — yang bisa muncul bila
+// variabel di-set kosong di platform deploy — diperlakukan seperti tidak diisi.
+const ROOT = path.resolve(process.env.STORAGE_LOCAL_DIR?.trim() || "./storage/uploads");
 
 /** Cegah path traversal: kunci hasil resolveKey wajib tetap di dalam ROOT. */
 function resolveKey(key: string): string {
@@ -174,16 +176,32 @@ const blobDriver: StorageDriver = {
  * pola yang sama dengan getMailer() di src/lib/notify.ts — supaya nilai
  * STORAGE_DRIVER dari .env selalu terbaca terkini, termasuk oleh skrip
  * standalone yang memuat .env belakangan.
+ *
+ * Ketahanan tambahan (dipetik dari bug produksi 03/09/2026):
+ *  - Bila STORAGE_DRIVER tidak diisi TAPI ada BLOB_READ_WRITE_TOKEN, otomatis
+ *    pakai "blob". Token blob = niat jelas memakai penyimpanan cloud.
+ *  - Bila resolusi jatuh ke "local" padahal sedang berjalan di Vercel
+ *    (filesystem read-only), gagalkan dengan pesan jelas — bukan ENOENT yang
+ *    membingungkan saat mkdir di /var/task.
  */
 export function getStorage(): StorageDriver {
-  switch (process.env.STORAGE_DRIVER ?? "local") {
-    case "local":
-      return localDriver;
+  const explicit = process.env.STORAGE_DRIVER?.trim();
+  const driver = explicit || (process.env.BLOB_READ_WRITE_TOKEN ? "blob" : "local");
+
+  switch (driver) {
     case "blob":
       return blobDriver;
+    case "local":
+      if (process.env.VERCEL) {
+        throw new Error(
+          "Penyimpanan berkas belum dikonfigurasi untuk produksi. Set STORAGE_DRIVER=blob " +
+            "dan BLOB_READ_WRITE_TOKEN di Environment Variables Vercel, lalu redeploy.",
+        );
+      }
+      return localDriver;
     // TODO: tambahkan driver "s3" di sini bila diperlukan.
     default:
-      console.warn(`[arsiva:storage] driver tidak dikenal, memakai "local".`);
+      console.warn(`[arsiva:storage] driver "${driver}" tidak dikenal, memakai "local".`);
       return localDriver;
   }
 }
