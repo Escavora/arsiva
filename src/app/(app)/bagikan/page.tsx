@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { LockKey, PaperPlaneTilt, Copy, ArrowSquareOut, Check, Info } from "@phosphor-icons/react";
+import { LockKey, PaperPlaneTilt, Copy, ArrowSquareOut, Check, Info, Broom, WarningCircle } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useArsiva } from "@/components/arsiva/store";
 import { fmtShort } from "@/lib/arsiva";
@@ -29,13 +29,15 @@ async function salinTeks(teks: string): Promise<boolean> {
 }
 
 export default function BagikanPage() {
-  const { allDocs, state, canWrite, addShare, revokeShare, say } = useArsiva();
+  const { allDocs, state, canWrite, isAdmin, addShare, revokeShare, clearShares, say } = useArsiva();
 
   const [docId, setDocId] = React.useState("");
   const [tipe, setTipe] = React.useState<"Notaris" | "Rekanan">("Notaris");
   const [email, setEmail] = React.useState("");
   const [hari, setHari] = React.useState("7");
   const [kirim, setKirim] = React.useState(false);
+  const [bersihOpen, setBersihOpen] = React.useState(false);
+  const [membersihkan, setMembersihkan] = React.useState(false);
 
   // Tautan yang baru saja dibuat, ditampilkan agar bisa langsung disalin.
   const [hasil, setHasil] = React.useState<{
@@ -72,6 +74,14 @@ export default function BagikanPage() {
   );
 
   const aktifText = `${shareRows.filter((x) => x.status === "Aktif").length} tautan aktif`;
+  const jumlahTidakAktif = shareRows.filter((x) => x.status !== "Aktif").length;
+
+  const bersihkan = async () => {
+    setMembersihkan(true);
+    await clearShares();
+    setMembersihkan(false);
+    setBersihOpen(false);
+  };
 
   const submit = async () => {
     if (!docId) return say("Pilih dokumen terlebih dahulu.");
@@ -226,6 +236,19 @@ export default function BagikanPage() {
           <div style={{ display: "flex", alignItems: "center" }}>
             <h5 style={{ margin: 0 }}>Riwayat tautan</h5>
             <span className="text-muted" style={{ marginLeft: "auto", fontSize: 12 }}>{aktifText}</span>
+            {isAdmin && (
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => setBersihOpen(true)}
+                disabled={jumlahTidakAktif === 0}
+                title={jumlahTidakAktif === 0 ? "Tidak ada tautan tidak aktif" : "Hapus tautan dicabut & kadaluarsa"}
+                style={{ marginLeft: 12, fontSize: 12 }}
+              >
+                <Broom size={14} />
+                Bersihkan
+              </button>
+            )}
           </div>
           <div style={{ overflowX: "auto" }}>
             <table className="table">
@@ -287,6 +310,32 @@ export default function BagikanPage() {
           )}
         </div>
       </div>
+
+      {/* Dialog: konfirmasi bersihkan riwayat */}
+      {bersihOpen && (
+        <div className="dialog-backdrop" onClick={() => !membersihkan && setBersihOpen(false)}>
+          <div className="dialog" style={{ width: "min(420px, 100%)" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <div style={{ width: 36, height: 36, flex: "none", borderRadius: "var(--radius-md)", background: "var(--color-danger-800)", color: "var(--color-danger-100)", display: "grid", placeItems: "center" }}>
+                <WarningCircle size={19} />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <h5 style={{ margin: "0 0 4px" }}>Bersihkan riwayat tautan?</h5>
+                <div className="text-muted" style={{ fontSize: 12.5 }}>
+                  <strong style={{ color: "var(--color-text)" }}>{jumlahTidakAktif} tautan</strong> yang sudah dicabut atau kadaluarsa akan dihapus permanen dari riwayat. Tautan yang masih <strong style={{ color: "var(--color-text)" }}>aktif tetap dipertahankan</strong>.
+                </div>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 2 }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setBersihOpen(false)} disabled={membersihkan}>Batal</button>
+              <button type="button" className="btn btn-primary" onClick={() => void bersihkan()} disabled={membersihkan} style={{ color: "var(--color-danger)", borderColor: "var(--color-danger)" }}>
+                <Broom size={15} />
+                {membersihkan ? "Membersihkan…" : "Bersihkan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
-import { desc } from "drizzle-orm";
+import { desc, or, lt, isNotNull } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { envUrl } from "@/lib/env";
-import { handle, requireUser, requireWriter, HttpError } from "@/lib/guard";
+import { handle, requireUser, requireWriter, requireAdmin, HttpError } from "@/lib/guard";
 import { notify, emailHtml } from "@/lib/notify";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -116,5 +116,27 @@ export async function POST(req: Request) {
       with: { dokumen: { columns: { namaDokumen: true } } },
     });
     return { share: full ? mapShare(full) : null, url, email: kirim };
+  });
+}
+
+/**
+ * DELETE /api/shares — bersihkan riwayat tautan yang sudah tidak aktif
+ * (dicabut ATAU kadaluarsa). Khusus Admin. Tautan yang masih aktif TIDAK
+ * disentuh, supaya penerima yang sedang memakainya tidak kehilangan akses.
+ */
+export async function DELETE() {
+  return handle(async () => {
+    await requireAdmin();
+    const now = new Date();
+    const hasil = await db
+      .delete(schema.documentShares)
+      .where(
+        or(
+          isNotNull(schema.documentShares.revokedAt),
+          lt(schema.documentShares.expiresAt, now),
+        ),
+      )
+      .returning({ id: schema.documentShares.id });
+    return { dihapus: hasil.length };
   });
 }
