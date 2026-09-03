@@ -91,6 +91,11 @@ type Ctx = {
   // dokumen
   tandai: (id: number, sudah: boolean) => Promise<void>;
   addDoc: (form: FormData) => Promise<boolean>;
+  updateDoc: (id: number, fields: {
+    nama: string; ket: string; exp: string;
+    categoryId: number | null; typeId: number | null; purposeId: number | null;
+  }) => Promise<boolean>;
+  removeDoc: (id: number) => Promise<boolean>;
   // master data
   addCategory: (nama: string, desk: string) => Promise<boolean>;
   removeCategory: (id: number) => Promise<void>;
@@ -238,6 +243,23 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
     [run],
   );
 
+  const updateDoc = React.useCallback(
+    (id: number, fields: {
+      nama: string; ket: string; exp: string;
+      categoryId: number | null; typeId: number | null; purposeId: number | null;
+    }) =>
+      run(
+        () => api(`/api/documents/${id}`, { method: "PATCH", body: JSON.stringify(fields) }),
+        "Informasi dokumen diperbarui.",
+      ),
+    [run],
+  );
+
+  const removeDoc = React.useCallback(
+    (id: number) => run(() => api(`/api/documents/${id}`, { method: "DELETE" }), "Dokumen dihapus dari arsip."),
+    [run],
+  );
+
   const addCategory = React.useCallback(
     (nama: string, desk: string) =>
       run(() => api("/api/categories", { method: "POST", body: JSON.stringify({ nama, desk }) }), `Kategori "${nama}" ditambahkan.`),
@@ -362,7 +384,7 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
     canWrite: peran === "Admin" || peran === "Team Member",
     allDocs, counts, stats,
     refresh, setThreshold,
-    tandai, addDoc,
+    tandai, addDoc, updateDoc, removeDoc,
     addCategory, removeCategory, editCategory,
     addType, removeType, addPurpose, removePurpose,
     setNotarisAktif, addNotaris, removeNotaris, addSchedule, cancelSchedule,

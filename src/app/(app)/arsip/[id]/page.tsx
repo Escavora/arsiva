@@ -12,6 +12,10 @@ import {
   PencilSimple,
   CheckSquareOffset,
   LinkSimple,
+  Trash,
+  FloppyDisk,
+  X,
+  WarningCircle,
 } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
 import { fmt, fmtShort } from "@/lib/arsiva";
@@ -19,10 +23,54 @@ import { fmt, fmtShort } from "@/lib/arsiva";
 export default function DetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
-  const { allDocs, state, threshold, tandai, say } = useArsiva();
+  const { allDocs, state, threshold, isAdmin, tandai, updateDoc, removeDoc, say } = useArsiva();
 
   const id = Number(params.id);
   const cur = allDocs.find((d) => d.id === id) ?? allDocs[0];
+
+  const [editOpen, setEditOpen] = React.useState(false);
+  const [hapusOpen, setHapusOpen] = React.useState(false);
+  const [sedang, setSedang] = React.useState(false);
+  const [form, setForm] = React.useState({ nama: "", ket: "", exp: "", categoryId: "", typeId: "", purposeId: "" });
+
+  const bukaEdit = () => {
+    if (!cur) return;
+    setForm({
+      nama: cur.n,
+      ket: cur.ket ?? "",
+      exp: cur.e,
+      categoryId: cur.categoryId != null ? String(cur.categoryId) : "",
+      typeId: cur.typeId != null ? String(cur.typeId) : "",
+      purposeId: cur.purposeId != null ? String(cur.purposeId) : "",
+    });
+    setEditOpen(true);
+  };
+
+  const simpanEdit = async () => {
+    if (!cur) return;
+    if (!form.nama.trim()) return say("Nama dokumen wajib diisi.");
+    if (!form.categoryId) return say("Kategori wajib dipilih.");
+    if (!form.typeId) return say("Jenis dokumen wajib dipilih.");
+    setSedang(true);
+    const ok = await updateDoc(cur.id, {
+      nama: form.nama.trim(),
+      ket: form.ket,
+      exp: form.exp,
+      categoryId: Number(form.categoryId),
+      typeId: Number(form.typeId),
+      purposeId: form.purposeId ? Number(form.purposeId) : null,
+    });
+    setSedang(false);
+    if (ok) setEditOpen(false);
+  };
+
+  const konfirmHapus = async () => {
+    if (!cur) return;
+    setSedang(true);
+    const ok = await removeDoc(cur.id);
+    setSedang(false);
+    if (ok) router.push("/arsip");
+  };
 
   const curShares = React.useMemo(() => {
     if (!cur) return [];
@@ -57,6 +105,23 @@ export default function DetailPage() {
     ];
   }, [cur, curShares, threshold]);
 
+  // Data belum termuat (mis. akses langsung via URL/refresh) atau id tak ditemukan.
+  if (!cur) {
+    return (
+      <div>
+        <button type="button" className="btn btn-ghost" onClick={() => router.push("/arsip")} style={{ marginBottom: 12, fontSize: 12.5 }}>
+          <ArrowLeft size={14} />
+          Kembali ke arsip
+        </button>
+        <div className="card elev-sm" style={{ padding: "var(--space-6)", textAlign: "center" }}>
+          <div className="text-muted" style={{ fontSize: 13 }}>
+            {state.loading ? "Memuat dokumen…" : "Dokumen tidak ditemukan."}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <button type="button" className="btn btn-ghost" onClick={() => router.push("/arsip")} style={{ marginBottom: 12, fontSize: 12.5 }}>
@@ -74,6 +139,12 @@ export default function DetailPage() {
           <div className="text-muted" style={{ fontSize: 13 }}>Diunggah {cur.upText} oleh {cur.o} · No. arsip {cur.kode}</div>
         </div>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8, flex: "none" }}>
+          {isAdmin && (
+            <button type="button" className="btn btn-secondary" onClick={() => setHapusOpen(true)} style={{ color: "var(--color-danger)" }}>
+              <Trash size={16} />
+              Hapus
+            </button>
+          )}
           <button type="button" className="btn btn-secondary" onClick={() => router.push("/bagikan")}>
             <ShareNetwork size={16} />
             Bagikan
@@ -126,7 +197,7 @@ export default function DetailPage() {
               <div className="text-muted">Ambang pengingat</div><div>{threshold} hari sebelum kadaluarsa</div>
             </div>
             <div style={{ display: "flex", gap: 8, marginTop: 2, flexWrap: "wrap" }}>
-              <button type="button" className="btn btn-secondary" onClick={() => say("Form ubah informasi dokumen dibuka.")}>
+              <button type="button" className="btn btn-secondary" onClick={bukaEdit}>
                 <PencilSimple size={15} />
                 Ubah informasi
               </button>
@@ -175,6 +246,90 @@ export default function DetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Dialog: ubah informasi dokumen */}
+      {editOpen && cur && (
+        <div className="dialog-backdrop" onClick={() => !sedang && setEditOpen(false)}>
+          <div className="dialog" style={{ width: "min(520px, 100%)" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <h5 style={{ margin: 0 }}>Ubah informasi dokumen</h5>
+              <button type="button" className="btn btn-secondary btn-icon" onClick={() => setEditOpen(false)} style={{ marginLeft: "auto" }} aria-label="Tutup">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="field">
+              <label>Nama dokumen</label>
+              <input className="input" value={form.nama} onChange={(e) => setForm((v) => ({ ...v, nama: e.target.value }))} />
+            </div>
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+              <div className="field">
+                <label>Jenis dokumen</label>
+                <select className="input" value={form.typeId} onChange={(e) => setForm((v) => ({ ...v, typeId: e.target.value }))}>
+                  <option value="">Pilih jenis…</option>
+                  {state.types.map((t) => <option key={t.id} value={String(t.id)}>{t.nama}</option>)}
+                </select>
+              </div>
+              <div className="field">
+                <label>Tujuan dokumen</label>
+                <select className="input" value={form.purposeId} onChange={(e) => setForm((v) => ({ ...v, purposeId: e.target.value }))}>
+                  <option value="">Pilih tujuan…</option>
+                  {state.purposes.map((t) => <option key={t.id} value={String(t.id)}>{t.nama}</option>)}
+                </select>
+              </div>
+              <div className="field">
+                <label>Kategori / label</label>
+                <select className="input" value={form.categoryId} onChange={(e) => setForm((v) => ({ ...v, categoryId: e.target.value }))}>
+                  <option value="">Pilih kategori…</option>
+                  {state.cats.map((c) => <option key={c.id} value={String(c.id)}>{c.nama}</option>)}
+                </select>
+              </div>
+              <div className="field">
+                <label>Tanggal kadaluarsa</label>
+                <input className="input" type="date" value={form.exp} onChange={(e) => setForm((v) => ({ ...v, exp: e.target.value }))} />
+              </div>
+            </div>
+            <div className="field">
+              <label>Keterangan tambahan (opsional)</label>
+              <textarea className="input" value={form.ket} onChange={(e) => setForm((v) => ({ ...v, ket: e.target.value }))} style={{ minHeight: 64 }} />
+            </div>
+
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 2 }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setEditOpen(false)} disabled={sedang}>Batal</button>
+              <button type="button" className="btn btn-primary" onClick={() => void simpanEdit()} disabled={sedang}>
+                <FloppyDisk size={15} />
+                {sedang ? "Menyimpan…" : "Simpan Perubahan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dialog: konfirmasi hapus */}
+      {hapusOpen && cur && (
+        <div className="dialog-backdrop" onClick={() => !sedang && setHapusOpen(false)}>
+          <div className="dialog" style={{ width: "min(420px, 100%)" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <div style={{ width: 36, height: 36, flex: "none", borderRadius: "var(--radius-md)", background: "var(--color-danger-800)", color: "var(--color-danger-100)", display: "grid", placeItems: "center" }}>
+                <WarningCircle size={19} />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <h5 style={{ margin: "0 0 4px" }}>Hapus dokumen ini?</h5>
+                <div className="text-muted" style={{ fontSize: 12.5 }}>
+                  <strong style={{ color: "var(--color-text)" }}>{cur.n}</strong> beserta berkas hasil scannya akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
+                </div>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 2 }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setHapusOpen(false)} disabled={sedang}>Batal</button>
+              <button type="button" className="btn btn-primary" onClick={() => void konfirmHapus()} disabled={sedang} style={{ color: "var(--color-danger)", borderColor: "var(--color-danger)" }}>
+                <Trash size={15} />
+                {sedang ? "Menghapus…" : "Hapus Permanen"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
