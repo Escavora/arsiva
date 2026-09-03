@@ -116,6 +116,7 @@ type Ctx = {
     documentId: number; email: string; tipe: "Notaris" | "Rekanan"; hari: number;
   }) => Promise<{ url: string; email: HasilKirim } | null>;
   revokeShare: (id: number) => Promise<void>;
+  clearShares: () => Promise<void>;
   // pengguna
   setUserPeran: (id: string, peran: Role) => Promise<void>;
   toggleUser: (id: string, aktif: boolean) => Promise<void>;
@@ -345,6 +346,20 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
     [run],
   );
 
+  const clearShares = React.useCallback(async () => {
+    try {
+      const res = await api<{ dihapus: number }>("/api/shares", { method: "DELETE" });
+      await refresh();
+      toast.success(
+        res.dihapus > 0
+          ? `${res.dihapus} tautan tidak aktif dihapus dari riwayat.`
+          : "Tidak ada tautan tidak aktif untuk dibersihkan.",
+      );
+    } catch (e) {
+      fail(e);
+    }
+  }, [refresh, fail]);
+
   const setUserPeran = React.useCallback(
     async (id: string, p: Role) => {
       await run(() => api(`/api/users/${id}`, { method: "PATCH", body: JSON.stringify({ peran: p }) }), `Peran diubah menjadi ${p}.`);
@@ -388,7 +403,7 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
     addCategory, removeCategory, editCategory,
     addType, removeType, addPurpose, removePurpose,
     setNotarisAktif, addNotaris, removeNotaris, addSchedule, cancelSchedule,
-    addShare, revokeShare,
+    addShare, revokeShare, clearShares,
     setUserPeran, toggleUser, removeUser, addUser,
     markNotificationsRead, logout, say,
   };
