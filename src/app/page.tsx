@@ -31,12 +31,12 @@ const muted = (pct: number) => `color-mix(in srgb, var(--color-text) ${pct}%, tr
 /* ───────────────────────── Konten ───────────────────────── */
 
 const FITUR = [
-  { icon: Folders, judul: "Arsip terpusat", desk: "PKS, akta notaris, dan sertifikat agunan tersimpan di satu tempat dan mudah ditelusuri.", kelas: "md:col-span-7", tekstur: "arsiva-rak-arsip-legal" },
-  { icon: UploadSimple, judul: "Unggah dan kategorikan", desk: "Simpan hasil scan lalu lengkapi jenis, tujuan, kategori, dan masa berlaku dalam satu langkah.", kelas: "md:col-span-5", tekstur: null },
-  { icon: BellRinging, judul: "Pengingat kadaluarsa", desk: "Notifikasi otomatis sebelum masa berlaku habis, pada ambang 30, 60, atau 90 hari.", kelas: "md:col-span-5", tekstur: null },
-  { icon: ShareNetwork, judul: "Berbagi berbatas waktu", desk: "Tautan aman untuk notaris atau rekanan, dan aksesnya dapat dicabut kapan pun.", kelas: "md:col-span-7", tekstur: "arsiva-meja-kerja-dokumen" },
-  { icon: CalendarDots, judul: "Jadwal notaris", desk: "Mitra notaris beserta agenda kerja samanya tercatat dalam satu tempat.", kelas: "md:col-span-6", tekstur: null },
-  { icon: ShieldCheck, judul: "Hak akses berperan", desk: "Admin, Team Member, dan Pembaca dengan wewenang berbeda yang ditegakkan di sisi server.", kelas: "md:col-span-6", tekstur: null },
+  { icon: Folders, judul: "Arsip terpusat", desk: "PKS, akta notaris, dan sertifikat agunan tersimpan di satu tempat dan mudah ditelusuri.", kelas: "md:col-span-7", sorot: true },
+  { icon: UploadSimple, judul: "Unggah dan kategorikan", desk: "Simpan hasil scan lalu lengkapi jenis, tujuan, kategori, dan masa berlaku dalam satu langkah.", kelas: "md:col-span-5", sorot: false },
+  { icon: BellRinging, judul: "Pengingat kadaluarsa", desk: "Notifikasi otomatis sebelum masa berlaku habis, pada ambang 30, 60, atau 90 hari.", kelas: "md:col-span-5", sorot: false },
+  { icon: ShareNetwork, judul: "Berbagi berbatas waktu", desk: "Tautan aman untuk notaris atau rekanan, dan aksesnya dapat dicabut kapan pun.", kelas: "md:col-span-7", sorot: true },
+  { icon: CalendarDots, judul: "Jadwal notaris", desk: "Mitra notaris beserta agenda kerja samanya tercatat dalam satu tempat.", kelas: "md:col-span-6", sorot: false },
+  { icon: ShieldCheck, judul: "Hak akses berperan", desk: "Admin, Team Member, dan Pembaca dengan wewenang berbeda yang ditegakkan di sisi server.", kelas: "md:col-span-6", sorot: false },
 ];
 
 // Status nyata yang diturunkan aplikasi dari tanggal kadaluarsa tiap dokumen.
@@ -148,7 +148,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Panel visual - tekstur, bukan pratinjau produk palsu */}
+          {/* Panel visual - status nyata yang dipantau, bukan pratinjau produk palsu */}
           <div
             className="hidden lg:block lg:col-span-5"
             style={{
@@ -194,7 +194,7 @@ export default function LandingPage() {
               style={{
                 position: "relative", overflow: "hidden",
                 padding: "26px 24px", borderRadius: 12,
-                background: f.tekstur
+                background: f.sorot
                   ? "linear-gradient(140deg, var(--color-section) 0%, var(--color-surface) 70%)"
                   : "var(--color-surface)",
                 boxShadow: "inset 0 0 0 1px var(--color-divider)",
@@ -277,21 +277,42 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* PENUTUP - pita penuh, keluarga tata letak berbeda lagi */}
-      <section style={{ borderTop: "1px solid var(--color-divider)", background: "linear-gradient(170deg, var(--color-section) 0%, var(--color-bg) 76%)" }}>
+      {/* PENUTUP - pita penuh, judul kiri dan aksi rapat ke tepi kanan */}
+      <section style={{ borderTop: "1px solid var(--color-divider)", background: "linear-gradient(165deg, var(--color-section) 0%, var(--color-bg) 82%)" }}>
         <div
-          className="grid grid-cols-1 md:grid-cols-12"
-          style={{ maxWidth: 1240, margin: "0 auto", padding: "64px 24px", gap: 28, alignItems: "center" }}
+          style={{
+            maxWidth: 1240, margin: "0 auto", padding: "92px 24px",
+            display: "flex", flexWrap: "wrap", gap: 36,
+            alignItems: "center", justifyContent: "space-between",
+          }}
         >
-          <h2 className="md:col-span-7" style={{ fontSize: "clamp(24px, 2.8vw, 32px)", fontWeight: 600, letterSpacing: "-0.03em", margin: 0 }}>
-            Siap merapikan arsip legal Anda?
-          </h2>
-          <div className="md:col-span-5" style={{ display: "flex", justifyContent: "flex-start" }}>
-            <Link href="/login" className="btn btn-primary" style={{ textDecoration: "none", minHeight: 48, paddingInline: 26, borderRadius: 8, whiteSpace: "nowrap" }}>
-              <SignIn size={17} />
-              Masuk
-            </Link>
+          <div style={{ minWidth: 0 }}>
+            <h2
+              style={{
+                fontSize: "clamp(28px, 3.4vw, 42px)",
+                fontWeight: 600, letterSpacing: "-0.035em", lineHeight: 1.08,
+                margin: "0 0 12px", maxWidth: "32ch",
+              }}
+            >
+              Siap merapikan arsip legal Anda?
+            </h2>
+            <p style={{ fontSize: 14.5, lineHeight: 1.6, color: muted(58), margin: 0, maxWidth: "46ch" }}>
+              Belum punya akun? Hubungi Admin unit kerja Anda untuk didaftarkan.
+            </p>
           </div>
+
+          <Link
+            href="/login"
+            className="btn btn-primary"
+            style={{
+              textDecoration: "none", flex: "none",
+              minHeight: 54, paddingInline: 34, borderRadius: 8,
+              fontSize: 15.5, whiteSpace: "nowrap",
+            }}
+          >
+            <SignIn size={18} />
+            Masuk
+          </Link>
         </div>
       </section>
 
