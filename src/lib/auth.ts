@@ -8,6 +8,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { db, schema } from "@/db";
+import { envUrl } from "@/lib/env";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -44,7 +45,7 @@ export const auth = betterAuth({
   },
 
   secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  baseURL: envUrl(process.env.BETTER_AUTH_URL, "http://localhost:3000"),
 
   // Wajib paling akhir: menjahit cookie ke Next.js server actions/route handlers.
   plugins: [nextCookies()],

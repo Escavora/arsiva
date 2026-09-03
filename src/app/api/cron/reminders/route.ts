@@ -12,6 +12,7 @@
 import { db, schema } from "@/db";
 import { notify, emailHtml, getMailer } from "@/lib/notify";
 import { fmt } from "@/lib/arsiva";
+import { envUrl } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +58,7 @@ async function jalankan() {
         : `Dokumen "${d.namaDokumen}" akan berakhir masa berlakunya pada ${fmt(d.tanggalKadaluarsa)}.`,
       "Silakan tindak lanjuti melalui halaman Pengingat Kadaluarsa di ARSIVA.",
     ];
-    const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const base = envUrl(process.env.NEXT_PUBLIC_APP_URL, "http://localhost:3000");
 
     const kirim = await notify({
       userId: owner.id,

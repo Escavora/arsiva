@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { desc } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { envUrl } from "@/lib/env";
 import { handle, requireUser, requireWriter, HttpError } from "@/lib/guard";
 import { notify, emailHtml } from "@/lib/notify";
 
@@ -80,7 +81,7 @@ export async function POST(req: Request) {
       })
       .returning();
 
-    const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const base = envUrl(process.env.NEXT_PUBLIC_APP_URL, "http://localhost:3000");
     const url = `${base}/s/${token}`;
     const berlaku = expiresAt.toLocaleDateString("id-ID", {
       day: "numeric",
