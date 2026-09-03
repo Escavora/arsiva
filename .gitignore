@@ -49,3 +49,6 @@ next-env.d.ts
 .claude/settings.local.json
 
 .claude/
+
+# skill agen pihak ketiga (pasang ulang: npx skills add ...)
+.agents/
