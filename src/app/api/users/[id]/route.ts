@@ -4,6 +4,7 @@ import { handle, requireAdmin, HttpError } from "@/lib/guard";
 
 type Ctx = { params: Promise<{ id: string }> };
 const PERAN = ["Admin", "Team Member", "Pembaca"] as const;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** PATCH /api/users/:id — ubah peran atau status aktif (Admin). */
 export async function PATCH(req: Request, { params }: Ctx) {
@@ -34,6 +35,18 @@ export async function PATCH(req: Request, { params }: Ctx) {
     }
 
     if (typeof body.unit === "string" && body.unit.trim()) patch.unit = body.unit.trim();
+
+    if (typeof body.nama === "string" && body.nama.trim()) patch.name = body.nama.trim();
+
+    if (typeof body.email === "string" && body.email.trim()) {
+      const email = body.email.trim().toLowerCase();
+      if (!EMAIL_RE.test(email)) throw new HttpError(400, "Format email tidak valid.");
+      if (email !== target.email) {
+        const dipakai = await db.query.user.findFirst({ where: eq(schema.user.email, email) });
+        if (dipakai) throw new HttpError(409, "Email sudah dipakai pengguna lain.");
+        patch.email = email;
+      }
+    }
 
     const [row] = await db.update(schema.user).set(patch).where(eq(schema.user.id, id)).returning();
     return {

@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { LockKey, CheckCircle, Minus, UserPlus, Key } from "@phosphor-icons/react";
-import { useArsiva } from "@/components/arsiva/store";
+import { LockKey, CheckCircle, Minus, UserPlus, Key, PencilSimple, X, FloppyDisk } from "@phosphor-icons/react";
+import { useArsiva, type ApiUser } from "@/components/arsiva/store";
 import type { Role } from "@/lib/arsiva";
 
 type Perm = { nama: string; a: boolean; s: boolean; p: boolean };
@@ -24,15 +24,38 @@ function PermIcon({ on }: { on: boolean }) {
 
 export default function AksesPage() {
   const router = useRouter();
-  const { state, isAdmin, setUserPeran, toggleUser, removeUser, addUser } = useArsiva();
+  const { state, isAdmin, setUserPeran, toggleUser, removeUser, addUser, updateUser, say } = useArsiva();
   const isStaf = !isAdmin;
 
   const [nu, setNu] = React.useState<{ nama: string; email: string; unit: string; peran: Role }>({ nama: "", email: "", unit: "", peran: "Team Member" });
+
+  const [editUser, setEditUser] = React.useState<ApiUser | null>(null);
+  const [editForm, setEditForm] = React.useState({ nama: "", email: "", unit: "" });
+  const [menyimpan, setMenyimpan] = React.useState(false);
 
   const userCountText = `${state.users.length} pengguna · ${state.users.filter((u) => u.aktif).length} aktif`;
 
   const tambah = async () => {
     if (await addUser(nu)) setNu({ nama: "", email: "", unit: "", peran: "Team Member" });
+  };
+
+  const bukaEditUser = (u: ApiUser) => {
+    setEditUser(u);
+    setEditForm({ nama: u.nama, email: u.email, unit: u.unit });
+  };
+
+  const simpanEditUser = async () => {
+    if (!editUser) return;
+    if (!editForm.nama.trim()) return say("Nama pengguna wajib diisi.");
+    if (!editForm.email.trim()) return say("Email wajib diisi.");
+    setMenyimpan(true);
+    const ok = await updateUser(editUser.id, {
+      nama: editForm.nama.trim(),
+      email: editForm.email.trim(),
+      unit: editForm.unit.trim(),
+    });
+    setMenyimpan(false);
+    if (ok) setEditUser(null);
   };
 
   return (
@@ -64,7 +87,7 @@ export default function AksesPage() {
                   <th style={{ width: 112 }}>Unit kerja</th>
                   <th style={{ width: 132 }}>Peran</th>
                   <th style={{ width: 96 }}>Status</th>
-                  <th style={{ width: 150 }} />
+                  <th style={{ width: 178 }} />
                 </tr>
               </thead>
               <tbody>
@@ -92,6 +115,9 @@ export default function AksesPage() {
                     <td style={{ textAlign: "right" }}>
                       {isAdmin && (
                         <div style={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
+                          <button type="button" className="btn btn-ghost btn-icon" onClick={() => bukaEditUser(u)} title="Ubah data pengguna" style={{ width: 26, height: 26 }}>
+                            <PencilSimple size={13} />
+                          </button>
                           <button type="button" className="btn btn-ghost" onClick={() => void toggleUser(u.id, !u.aktif)} style={{ fontSize: 11.5 }}>{u.aktif ? "Nonaktifkan" : "Aktifkan"}</button>
                           <button type="button" className="btn btn-ghost" onClick={() => void removeUser(u.id)} style={{ fontSize: 11.5, color: "var(--color-danger)" }}>Hapus</button>
                         </div>
@@ -166,6 +192,48 @@ export default function AksesPage() {
           </div>
         </div>
       </div>
+
+      {/* Dialog: ubah data pengguna */}
+      {editUser && (
+        <div className="dialog-backdrop" onClick={() => !menyimpan && setEditUser(null)}>
+          <div className="dialog" style={{ width: "min(440px, 100%)" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <h5 style={{ margin: 0 }}>Ubah data pengguna</h5>
+              <button type="button" className="btn btn-secondary btn-icon" onClick={() => setEditUser(null)} style={{ marginLeft: "auto" }} aria-label="Tutup">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="field">
+              <label>Nama</label>
+              <input className="input" value={editForm.nama} onChange={(e) => setEditForm((v) => ({ ...v, nama: e.target.value }))} />
+            </div>
+            <div className="field">
+              <label>Email korporat</label>
+              <input className="input" type="email" value={editForm.email} onChange={(e) => setEditForm((v) => ({ ...v, email: e.target.value }))} />
+            </div>
+            <div className="field">
+              <label>Unit kerja</label>
+              <input className="input" value={editForm.unit} onChange={(e) => setEditForm((v) => ({ ...v, unit: e.target.value }))} />
+            </div>
+
+            {editForm.email.trim().toLowerCase() !== editUser.email && (
+              <div style={{ fontSize: 11.5, color: "color-mix(in srgb, var(--color-text) 55%, transparent)", display: "flex", gap: 7 }}>
+                <LockKey size={14} style={{ flex: "none", marginTop: 1 }} />
+                <span>Mengubah email berarti pengguna ini akan masuk memakai alamat baru mulai sekarang.</span>
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 2 }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setEditUser(null)} disabled={menyimpan}>Batal</button>
+              <button type="button" className="btn btn-primary" onClick={() => void simpanEditUser()} disabled={menyimpan}>
+                <FloppyDisk size={15} />
+                {menyimpan ? "Menyimpan…" : "Simpan Perubahan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

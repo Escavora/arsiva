@@ -122,6 +122,7 @@ type Ctx = {
   toggleUser: (id: string, aktif: boolean) => Promise<void>;
   removeUser: (id: string) => Promise<void>;
   addUser: (u: { nama: string; email: string; unit: string; peran: Role }) => Promise<boolean>;
+  updateUser: (id: string, fields: { nama: string; email: string; unit: string }) => Promise<boolean>;
   // lain-lain
   markNotificationsRead: () => Promise<void>;
   logout: () => Promise<void>;
@@ -381,6 +382,11 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
       run(() => api("/api/users", { method: "POST", body: JSON.stringify(u) }), `Pengguna ${u.nama} ditambahkan (kata sandi awal: arsiva123).`),
     [run],
   );
+  const updateUser = React.useCallback(
+    (id: string, fields: { nama: string; email: string; unit: string }) =>
+      run(() => api(`/api/users/${id}`, { method: "PATCH", body: JSON.stringify(fields) }), "Data pengguna diperbarui."),
+    [run],
+  );
 
   const markNotificationsRead = React.useCallback(
     async () => { await run(() => api("/api/notifications", { method: "PATCH" })); },
@@ -404,7 +410,7 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
     addType, removeType, addPurpose, removePurpose,
     setNotarisAktif, addNotaris, removeNotaris, addSchedule, cancelSchedule,
     addShare, revokeShare, clearShares,
-    setUserPeran, toggleUser, removeUser, addUser,
+    setUserPeran, toggleUser, removeUser, addUser, updateUser,
     markNotificationsRead, logout, say,
   };
 
