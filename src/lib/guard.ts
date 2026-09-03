@@ -45,9 +45,9 @@ export async function requireAdmin(): Promise<AuthUser> {
   return requireRole("Admin");
 }
 
-/** Boleh menulis dokumen: Admin & Staf Legal (Pembaca hanya membaca). */
+/** Boleh menulis dokumen: Admin & Team Member (Pembaca hanya membaca). */
 export async function requireWriter(): Promise<AuthUser> {
-  return requireRole("Admin", "Staf Legal");
+  return requireRole("Admin", "Team Member");
 }
 
 /** Bungkus handler route agar HttpError otomatis jadi respons JSON yang rapi. */

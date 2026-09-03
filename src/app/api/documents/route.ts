@@ -16,7 +16,7 @@ export async function GET() {
   });
 }
 
-/** POST /api/documents — unggah dokumen baru (Admin & Staf Legal). */
+/** POST /api/documents — unggah dokumen baru (Admin & Team Member). */
 export async function POST(req: Request) {
   return handle(async () => {
     const user = await requireWriter();

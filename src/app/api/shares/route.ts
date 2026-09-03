@@ -45,7 +45,7 @@ export async function GET() {
   });
 }
 
-/** POST /api/shares — buat tautan aman (Admin & Staf Legal). */
+/** POST /api/shares — buat tautan aman (Admin & Team Member). */
 export async function POST(req: Request) {
   return handle(async () => {
     const user = await requireWriter();

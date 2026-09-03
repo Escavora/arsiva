@@ -3,7 +3,7 @@ import { db, schema } from "@/db";
 import { handle, requireAdmin, HttpError } from "@/lib/guard";
 
 type Ctx = { params: Promise<{ id: string }> };
-const PERAN = ["Admin", "Staf Legal", "Pembaca"] as const;
+const PERAN = ["Admin", "Team Member", "Pembaca"] as const;
 
 /** PATCH /api/users/:id — ubah peran atau status aktif (Admin). */
 export async function PATCH(req: Request, { params }: Ctx) {

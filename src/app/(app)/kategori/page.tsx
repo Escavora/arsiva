@@ -37,7 +37,7 @@ export default function KategoriPage() {
       {isStaf && (
         <div style={{ display: "flex", gap: 9, alignItems: "center", padding: "11px 14px", marginBottom: 16, borderRadius: "var(--radius-md)", background: "var(--color-accent-2-900)", boxShadow: "inset 0 0 0 1px var(--color-accent-2-800)", fontSize: 12.5 }}>
           <Info size={16} style={{ color: "var(--color-accent-2-400)", flex: "none" }} />
-          Peran Staf Legal hanya dapat melihat master data. Hubungi Admin untuk perubahan kategori.
+          Peran Team Member hanya dapat melihat master data. Hubungi Admin untuk perubahan kategori.
         </div>
       )}
 

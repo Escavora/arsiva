@@ -20,7 +20,7 @@ export function todayISO(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-export type Role = "Admin" | "Staf Legal" | "Pembaca";
+export type Role = "Admin" | "Team Member" | "Pembaca";
 
 export type Category = { nama: string; desk: string };
 
@@ -133,10 +133,10 @@ export const seedShares: Share[] = [
 ];
 
 export const seedUsers: User[] = [
-  { nama: "Rina Astuti", email: "rina.astuti@bank.co.id", unit: "Legal Korporasi", peran: "Admin", aktif: true },
-  { nama: "Dimas Prakoso", email: "dimas.prakoso@bank.co.id", unit: "Legal Kredit", peran: "Staf Legal", aktif: true },
-  { nama: "Hendra Wijaya", email: "hendra.wijaya@bank.co.id", unit: "Kepatuhan", peran: "Staf Legal", aktif: true },
-  { nama: "Sari Melati", email: "sari.melati@bank.co.id", unit: "Sekretariat Perusahaan", peran: "Staf Legal", aktif: true },
+  { nama: "Rina Astuti", email: "admin.cop@bri.co.id", unit: "Legal Korporasi", peran: "Admin", aktif: true },
+  { nama: "Dimas Prakoso", email: "teammember.cop@bri.co.id", unit: "Legal Kredit", peran: "Team Member", aktif: true },
+  { nama: "Hendra Wijaya", email: "hendra.wijaya@bank.co.id", unit: "Kepatuhan", peran: "Team Member", aktif: true },
+  { nama: "Sari Melati", email: "sari.melati@bank.co.id", unit: "Sekretariat Perusahaan", peran: "Team Member", aktif: true },
   { nama: "Agus Nugroho", email: "agus.nugroho@bank.co.id", unit: "Audit Internal", peran: "Pembaca", aktif: true },
   { nama: "Yuni Kartika", email: "yuni.kartika@bank.co.id", unit: "Legal Kredit", peran: "Pembaca", aktif: false },
 ];

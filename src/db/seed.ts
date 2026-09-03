@@ -160,9 +160,9 @@ async function main() {
   }
 
   console.log("\n✅ Selesai. Masuk dengan:");
-  console.log(`   Admin      : rina.astuti@bank.co.id / ${PASSWORD}`);
-  console.log(`   Staf Legal : dimas.prakoso@bank.co.id / ${PASSWORD}`);
-  console.log(`   Pembaca    : agus.nugroho@bank.co.id / ${PASSWORD}`);
+  console.log(`   Admin       : admin.cop@bri.co.id / ${PASSWORD}`);
+  console.log(`   Team Member : teammember.cop@bri.co.id / ${PASSWORD}`);
+  console.log(`   Pembaca     : agus.nugroho@bank.co.id / ${PASSWORD}`);
 }
 
 main()
