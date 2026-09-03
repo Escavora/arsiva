@@ -19,6 +19,7 @@ import {
   Bell,
   List,
   X,
+  CheckCircle,
   type Icon,
 } from "@phosphor-icons/react";
 import { useArsiva } from "./store";
@@ -289,8 +290,167 @@ function RolePill({ peran }: { peran: string }) {
   );
 }
 
+/** Ubah timestamp ISO jadi keterangan relatif singkat ("3 jam lalu"). */
+function waktuRelatif(iso: string): string {
+  const detik = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (detik < 60) return "baru saja";
+  const menit = Math.floor(detik / 60);
+  if (menit < 60) return `${menit} menit lalu`;
+  const jam = Math.floor(menit / 60);
+  if (jam < 24) return `${jam} jam lalu`;
+  const hari = Math.floor(jam / 24);
+  if (hari < 30) return `${hari} hari lalu`;
+  return new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+}
+
+const WARNA_TIPE: Record<string, string> = {
+  kadaluarsa: "var(--color-accent-2)",
+  berbagi: "var(--color-accent)",
+  sistem: "var(--color-neutral-500)",
+};
+
+/** Lonceng notifikasi + panel daftar notifikasi in-app. */
+function LoncengNotifikasi() {
+  const { state, markNotificationsRead } = useArsiva();
+  const router = useRouter();
+  const [buka, setBuka] = React.useState(false);
+  const wadah = React.useRef<HTMLDivElement>(null);
+
+  const notif = state.notifications;
+  const belumDibaca = notif.filter((n) => !n.dibaca).length;
+
+  // Tutup saat klik di luar panel.
+  React.useEffect(() => {
+    if (!buka) return;
+    const onClick = (e: MouseEvent) => {
+      if (wadah.current && !wadah.current.contains(e.target as Node)) setBuka(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [buka]);
+
+  const bukaPanel = () => {
+    setBuka((v) => !v);
+  };
+
+  const klikNotif = (documentId: number | null) => {
+    setBuka(false);
+    if (documentId) router.push(`/arsip/${documentId}`);
+  };
+
+  return (
+    <div ref={wadah} style={{ position: "relative", flex: "none" }}>
+      <button
+        type="button"
+        className="btn btn-secondary btn-icon"
+        onClick={bukaPanel}
+        style={{ position: "relative" }}
+        title="Notifikasi"
+        aria-label={`Notifikasi${belumDibaca ? ` (${belumDibaca} belum dibaca)` : ""}`}
+      >
+        <Bell size={17} />
+        {belumDibaca > 0 && (
+          <span
+            style={{
+              position: "absolute", top: -5, right: -5, minWidth: 17, height: 17,
+              padding: "0 4px", borderRadius: 999,
+              background: "var(--color-accent-2)", color: "#1a1200",
+              fontSize: 10, fontWeight: 700, lineHeight: "17px", textAlign: "center",
+              boxShadow: "0 0 0 2px var(--color-bg)",
+            }}
+          >
+            {belumDibaca > 9 ? "9+" : belumDibaca}
+          </span>
+        )}
+      </button>
+
+      {buka && (
+        <div
+          className="card elev-lg"
+          style={{
+            position: "absolute", top: "calc(100% + 8px)", right: 0, zIndex: 30,
+            width: "min(360px, calc(100vw - 32px))", padding: 0, gap: 0, overflow: "hidden",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 14px", borderBottom: "1px solid var(--color-divider)" }}>
+            <h5 style={{ margin: 0, fontSize: 14 }}>Notifikasi</h5>
+            <span className="text-muted" style={{ fontSize: 11.5 }}>
+              {belumDibaca > 0 ? `${belumDibaca} belum dibaca` : "semua terbaca"}
+            </span>
+            {belumDibaca > 0 && (
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => void markNotificationsRead()}
+                style={{ marginLeft: "auto", fontSize: 11.5 }}
+              >
+                Tandai dibaca
+              </button>
+            )}
+          </div>
+
+          <div style={{ maxHeight: 340, overflowY: "auto" }}>
+            {notif.length === 0 && (
+              <div style={{ padding: "28px 14px", textAlign: "center" }}>
+                <CheckCircle size={26} style={{ color: "var(--color-neutral-700)", margin: "0 auto" }} />
+                <div className="text-muted" style={{ fontSize: 12.5, marginTop: 8 }}>Belum ada notifikasi.</div>
+              </div>
+            )}
+            {notif.map((n) => (
+              <div
+                key={n.id}
+                role={n.documentId ? "button" : undefined}
+                tabIndex={n.documentId ? 0 : undefined}
+                onClick={() => klikNotif(n.documentId)}
+                className={n.documentId ? "row-hover" : undefined}
+                style={{
+                  display: "flex", gap: 10, padding: "11px 14px",
+                  borderBottom: "1px solid var(--color-divider)",
+                  cursor: n.documentId ? "pointer" : "default",
+                  background: n.dibaca ? "transparent" : "color-mix(in srgb, var(--color-accent) 7%, transparent)",
+                }}
+              >
+                <span
+                  style={{
+                    width: 7, height: 7, borderRadius: "50%", flex: "none", marginTop: 5,
+                    background: WARNA_TIPE[n.tipe] ?? WARNA_TIPE.sistem,
+                  }}
+                />
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: 12.5, lineHeight: 1.4, fontWeight: n.dibaca ? 400 : 600 }}>{n.judul}</div>
+                  <div
+                    className="text-muted"
+                    style={{
+                      fontSize: 11.5, lineHeight: 1.45, marginTop: 2,
+                      display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+                    }}
+                  >
+                    {n.pesan}
+                  </div>
+                  <div style={{ fontSize: 10.5, marginTop: 4, color: "color-mix(in srgb, var(--color-text) 40%, transparent)" }}>
+                    {waktuRelatif(n.createdAt)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => { setBuka(false); router.push("/pengingat"); }}
+            style={{ width: "100%", borderRadius: 0, padding: "10px", fontSize: 12, borderTop: "1px solid var(--color-divider)" }}
+          >
+            Lihat pengingat kadaluarsa
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
-  const { me, counts } = useArsiva();
+  const { me } = useArsiva();
   const router = useRouter();
   const [q, setQ] = React.useState("");
 
@@ -367,28 +527,7 @@ function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
           />
         </div>
         <RolePill peran={me.peran} />
-        <button
-          type="button"
-          className="btn btn-secondary btn-icon"
-          onClick={() => router.push("/pengingat")}
-          style={{ position: "relative" }}
-          title="Notifikasi kadaluarsa"
-        >
-          <Bell size={17} />
-          {counts.perluAksi > 0 && (
-            <span
-              style={{
-                position: "absolute",
-                top: 5,
-                right: 5,
-                width: 7,
-                height: 7,
-                borderRadius: "50%",
-                background: "var(--color-accent-2)",
-              }}
-            />
-          )}
-        </button>
+        <LoncengNotifikasi />
       </div>
     </div>
   );
