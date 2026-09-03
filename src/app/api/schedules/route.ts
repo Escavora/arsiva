@@ -24,7 +24,7 @@ export async function GET() {
   });
 }
 
-/** POST /api/schedules — tambah jadwal (Admin & Staf Legal). */
+/** POST /api/schedules — tambah jadwal (Admin & Team Member). */
 export async function POST(req: Request) {
   return handle(async () => {
     await requireWriter();

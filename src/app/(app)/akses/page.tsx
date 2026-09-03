@@ -27,12 +27,12 @@ export default function AksesPage() {
   const { state, isAdmin, setUserPeran, toggleUser, removeUser, addUser } = useArsiva();
   const isStaf = !isAdmin;
 
-  const [nu, setNu] = React.useState<{ nama: string; email: string; unit: string; peran: Role }>({ nama: "", email: "", unit: "", peran: "Staf Legal" });
+  const [nu, setNu] = React.useState<{ nama: string; email: string; unit: string; peran: Role }>({ nama: "", email: "", unit: "", peran: "Team Member" });
 
   const userCountText = `${state.users.length} pengguna · ${state.users.filter((u) => u.aktif).length} aktif`;
 
   const tambah = async () => {
-    if (await addUser(nu)) setNu({ nama: "", email: "", unit: "", peran: "Staf Legal" });
+    if (await addUser(nu)) setNu({ nama: "", email: "", unit: "", peran: "Team Member" });
   };
 
   return (
@@ -61,8 +61,8 @@ export default function AksesPage() {
               <thead>
                 <tr>
                   <th>Nama</th>
-                  <th style={{ width: 136 }}>Unit kerja</th>
-                  <th style={{ width: 136 }}>Peran</th>
+                  <th style={{ width: 112 }}>Unit kerja</th>
+                  <th style={{ width: 132 }}>Peran</th>
                   <th style={{ width: 96 }}>Status</th>
                   <th style={{ width: 150 }} />
                 </tr>
@@ -71,20 +71,20 @@ export default function AksesPage() {
                 {state.users.map((u) => (
                   <tr key={u.id}>
                     <td>
-                      <div style={{ fontSize: 13.5 }}>{u.nama}</div>
-                      <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 42%, transparent)" }}>{u.email}</div>
+                      <div style={{ fontSize: 13.5, maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.nama}</div>
+                      <div style={{ fontSize: 11, maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "color-mix(in srgb, var(--color-text) 42%, transparent)" }}>{u.email}</div>
                     </td>
-                    <td style={{ fontSize: 12.5 }}>{u.unit}</td>
+                    <td style={{ fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.unit}</td>
                     <td>
                       <select
                         className="input"
                         value={u.peran}
                         onChange={(e) => void setUserPeran(u.id, e.target.value as Role)}
                         disabled={isStaf}
-                        style={{ minHeight: 30, fontSize: 12.5, padding: "3px 8px" }}
+                        style={{ minHeight: 30, minWidth: 122, fontSize: 12.5, padding: "3px 8px" }}
                       >
                         <option>Admin</option>
-                        <option>Staf Legal</option>
+                        <option>Team Member</option>
                         <option>Pembaca</option>
                       </select>
                     </td>
@@ -113,7 +113,7 @@ export default function AksesPage() {
                 <label>Peran</label>
                 <select className="input" value={nu.peran} onChange={(e) => setNu((v) => ({ ...v, peran: e.target.value as Role }))}>
                   <option>Admin</option>
-                  <option>Staf Legal</option>
+                  <option>Team Member</option>
                   <option>Pembaca</option>
                 </select>
               </div>
@@ -135,7 +135,7 @@ export default function AksesPage() {
                   <tr>
                     <th>Kewenangan</th>
                     <th style={{ width: 56 }}>Admin</th>
-                    <th style={{ width: 66 }}>Staf</th>
+                    <th style={{ width: 66 }}>Tim</th>
                     <th style={{ width: 66 }}>Pembaca</th>
                   </tr>
                 </thead>

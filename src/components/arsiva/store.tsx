@@ -359,7 +359,7 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
   const value: Ctx = {
     state, me, threshold,
     isAdmin: peran === "Admin",
-    canWrite: peran === "Admin" || peran === "Staf Legal",
+    canWrite: peran === "Admin" || peran === "Team Member",
     allDocs, counts, stats,
     refresh, setThreshold,
     tandai, addDoc,

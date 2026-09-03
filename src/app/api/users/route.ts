@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { handle, requireUser, requireAdmin, HttpError } from "@/lib/guard";
 import { eq } from "drizzle-orm";
 
-const PERAN = ["Admin", "Staf Legal", "Pembaca"] as const;
+const PERAN = ["Admin", "Team Member", "Pembaca"] as const;
 
 /** GET /api/users — daftar pengguna (semua peran boleh melihat, mode baca). */
 export async function GET() {

@@ -30,8 +30,8 @@ Buka http://localhost:3000 → diarahkan ke `/login`.
 
 | Peran | Email |
 | --- | --- |
-| Admin | `rina.astuti@bank.co.id` |
-| Staf Legal | `dimas.prakoso@bank.co.id` |
+| Admin | `admin.cop@bri.co.id` |
+| Team Member | `teammember.cop@bri.co.id` |
 | Pembaca | `agus.nugroho@bank.co.id` |
 
 ## Tech Stack
@@ -49,7 +49,7 @@ Buka http://localhost:3000 → diarahkan ke `/login`.
 
 ## Keamanan
 
-Peran (**Admin / Staf Legal / Pembaca**) berasal dari **sesi server Better Auth**,
+Peran (**Admin / Team Member / Pembaca**) berasal dari **sesi server Better Auth**,
 tidak pernah dari klien. Tidak ada tombol ganti peran di aplikasi — untuk berganti
 peran, keluar lalu masuk sebagai akun lain.
 

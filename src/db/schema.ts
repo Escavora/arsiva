@@ -20,7 +20,7 @@ export const user = sqliteTable("user", {
   emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
   image: text("image"),
   // Kolom tambahan ARSIVA (PRD: peran, reminder_threshold_days)
-  peran: text("peran", { enum: ["Admin", "Staf Legal", "Pembaca"] }).notNull().default("Staf Legal"),
+  peran: text("peran", { enum: ["Admin", "Team Member", "Pembaca"] }).notNull().default("Team Member"),
   unit: text("unit").notNull().default("Divisi Legal"),
   aktif: integer("aktif", { mode: "boolean" }).notNull().default(true),
   reminderThresholdDays: integer("reminder_threshold_days").notNull().default(60),

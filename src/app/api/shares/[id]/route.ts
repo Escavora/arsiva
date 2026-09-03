@@ -4,7 +4,7 @@ import { handle, requireWriter, HttpError } from "@/lib/guard";
 
 type Ctx = { params: Promise<{ id: string }> };
 
-/** DELETE /api/shares/:id — cabut akses tautan (Admin & Staf Legal). */
+/** DELETE /api/shares/:id — cabut akses tautan (Admin & Team Member). */
 export async function DELETE(_req: Request, { params }: Ctx) {
   return handle(async () => {
     await requireWriter();

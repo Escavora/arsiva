@@ -30,7 +30,7 @@ export const auth = betterAuth({
   // Kolom tambahan ARSIVA agar ikut terbawa di objek session.user
   user: {
     additionalFields: {
-      peran: { type: "string", required: false, input: false, defaultValue: "Staf Legal" },
+      peran: { type: "string", required: false, input: false, defaultValue: "Team Member" },
       unit: { type: "string", required: false, input: false, defaultValue: "Divisi Legal" },
       aktif: { type: "boolean", required: false, input: false, defaultValue: true },
       reminderThresholdDays: { type: "number", required: false, input: false, defaultValue: 60 },
