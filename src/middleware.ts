@@ -21,7 +21,7 @@ const RUTE_TERLINDUNGI = [
   "/sandi",
 ];
 
-export function proxy(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const punyaSesi = !!getSessionCookie(req);
 

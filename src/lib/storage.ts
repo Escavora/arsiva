@@ -53,7 +53,11 @@ function namaFolderBulan(): string {
 
 // Pakai `|| default` (bukan `??`) agar string kosong "" — yang bisa muncul bila
 // variabel di-set kosong di platform deploy — diperlakukan seperti tidak diisi.
-const ROOT = path.resolve(process.env.STORAGE_LOCAL_DIR?.trim() || "./storage/uploads");
+// turbopackIgnore: path dinamis ini membuat Turbopack menelusuri SELURUH proyek
+// (termasuk .env, data/, storage/) ke output server.
+const ROOT = path.resolve(
+  /*turbopackIgnore: true*/ process.env.STORAGE_LOCAL_DIR?.trim() || "./storage/uploads",
+);
 
 /** Cegah path traversal: kunci hasil resolveKey wajib tetap di dalam ROOT. */
 function resolveKey(key: string): string {
@@ -82,11 +86,11 @@ const localDriver: StorageDriver = {
   async get(key) {
     try {
       const full = resolveKey(key);
-      const body = await readFile(full);
+      const body = await readFile(/*turbopackIgnore: true*/ full);
       let fileName = path.basename(key);
       let mimeType = "application/octet-stream";
       try {
-        const meta = JSON.parse(await readFile(`${full}.meta.json`, "utf8"));
+        const meta = JSON.parse(await readFile(/*turbopackIgnore: true*/ `${full}.meta.json`, "utf8"));
         fileName = meta.fileName ?? fileName;
         mimeType = meta.mimeType ?? mimeType;
       } catch {
