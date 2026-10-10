@@ -354,6 +354,85 @@ select.input { appearance: none; background-image: linear-gradient(transparent, 
 .login-form .radio { font-size: 14.5px; }
 .login-form .btn { min-height: 54px; font-size: 15.5px; }
 
+/* — landing — gerak hanya dengan CSS; semua dimatikan bila pengguna memilih reduced motion.
+   Keadaan dasar setiap elemen adalah keadaan akhir, sehingga tanpa animasi halaman tetap utuh. */
+html:has(.landing) { scroll-padding-top: 82px; }
+
+@keyframes landing-naik { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes landing-sorot {
+  from { background: transparent; box-shadow: none; }
+  to { background: color-mix(in srgb, var(--color-accent-2-500) 12%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent-2-500) 45%, transparent); }
+}
+@keyframes landing-denyut {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent-2-500) 60%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 9px transparent; }
+}
+@keyframes landing-bel { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(14deg); } 40% { transform: rotate(-11deg); } 60% { transform: rotate(7deg); } 80% { transform: rotate(-4deg); } }
+@keyframes landing-napas { from { opacity: 0.7; transform: scale(0.94); } to { opacity: 1; transform: scale(1.04); } }
+
+/* masuk saat halaman dimuat; jeda diatur lewat style={{ animationDelay }} */
+.landing-muncul { animation: landing-naik 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+/* muncul saat digulir — hanya di peramban yang mendukung scroll-driven animation */
+@supports (animation-timeline: view()) {
+  .landing-gulir {
+    animation: landing-naik linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 22%;
+  }
+}
+
+/* navigasi atas: garis bawah tumbuh dari kiri */
+.landing-nav a { position: relative; color: color-mix(in srgb, var(--color-text) 70%, transparent); text-decoration: none; transition: color 0.18s ease; }
+.landing-nav a::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -5px; height: 1.5px; border-radius: 2px;
+  background: var(--color-accent-400); transform: scaleX(0); transform-origin: left; transition: transform 0.22s ease;
+}
+.landing-nav a:hover, .landing-nav a:focus-visible { color: var(--color-text); }
+.landing-nav a:hover::after, .landing-nav a:focus-visible::after { transform: scaleX(1); }
+
+/* tombol: sedikit terangkat, tombol utama bercahaya, panah bergeser */
+.landing .btn { transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.2s ease; }
+.landing .btn:hover { transform: translateY(-1px); }
+.landing .btn:active { transform: translateY(0); }
+.landing .btn-solid:hover { box-shadow: 0 8px 22px -8px color-mix(in srgb, var(--color-accent-500) 75%, transparent); }
+.landing-panah { transition: transform 0.2s ease; }
+.landing .btn:hover .landing-panah { transform: translateX(3px); }
+
+/* kartu fitur bukan tautan: hanya tepi dan ikon yang menyala, tanpa terangkat */
+.landing-kartu { box-shadow: inset 0 0 0 1px var(--color-divider); transition: box-shadow 0.25s ease; }
+.landing-kartu:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent-500) 45%, transparent), 0 12px 32px -14px rgba(0, 0, 0, 0.65); }
+.landing-kartu-ikon { display: inline-flex; color: var(--color-accent-300); transition: transform 0.25s ease, color 0.25s ease; }
+.landing-kartu:hover .landing-kartu-ikon { color: var(--color-accent-200); transform: translateY(-2px) scale(1.08); }
+
+/* baris keamanan */
+.landing-baris-ikon { color: var(--color-accent-400); transition: color 0.2s ease, transform 0.2s ease; }
+.landing-baris:hover .landing-baris-ikon { color: var(--color-accent-200); transform: scale(1.1); }
+
+/* kartu dokumen di hero: tahap aktif menyala, titiknya berdenyut, lalu pengingat datang */
+.landing-kini {
+  background: color-mix(in srgb, var(--color-accent-2-500) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent-2-500) 45%, transparent);
+  animation: landing-sorot 0.6s ease 0.9s both;
+}
+.landing-kini-titik { animation: landing-denyut 2.4s ease-out 1.4s infinite; }
+.landing-bel { display: inline-flex; transform-origin: 50% 10%; animation: landing-bel 0.9s ease-in-out 2.2s both; }
+
+/* cahaya di belakang kartu hero bernapas pelan */
+.landing-cahaya { position: relative; isolation: isolate; }
+.landing-cahaya::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--color-section-glow) 55%, transparent), transparent);
+  animation: landing-napas 7s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.landing) { scroll-behavior: smooth; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing *, .landing *::before, .landing *::after { animation: none !important; transition: none !important; }
+}
+
 /* — interactive helpers (replacing prototype style-hover) — */
 .nav-item { transition: background 0.12s ease, color 0.12s ease; }
 .nav-item:hover { background: color-mix(in srgb, var(--color-text) 6%, transparent); }

@@ -144,17 +144,15 @@ function Tahap({ warna, label, ket, keadaan }: { warna: string; label: string; k
   const kini = keadaan === "kini";
   return (
     <div
-      style={{
-        display: "flex", alignItems: "center", gap: 12,
-        padding: "10px 12px", borderRadius: 8,
-        background: kini ? "color-mix(in srgb, var(--color-accent-2-500) 12%, transparent)" : "transparent",
-        boxShadow: kini ? "inset 0 0 0 1px color-mix(in srgb, var(--color-accent-2-500) 45%, transparent)" : "none",
-      }}
+      // Sorotan tahap aktif ada di kelas .landing-kini (globals.css) karena dianimasikan.
+      className={kini ? "landing-kini" : undefined}
+      style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 8 }}
     >
       <span
+        className={kini ? "landing-kini-titik" : undefined}
         style={{
           width: 18, height: 18, borderRadius: "50%", flex: "none", display: "grid", placeItems: "center",
-          background: kini ? warna : "transparent", boxShadow: `inset 0 0 0 2px ${warna}`, color: warna,
+          background: kini ? warna : "transparent", boxShadow: kini ? undefined : `inset 0 0 0 2px ${warna}`, color: warna,
         }}
       >
         {!kini && <Check size={10} weight="bold" />}
@@ -173,7 +171,9 @@ function Tahap({ warna, label, ket, keadaan }: { warna: string; label: string; k
 function KartuDokumen() {
   return (
     <div
+      className="landing-muncul"
       style={{
+        animationDelay: "320ms",
         width: "100%", maxWidth: 420, borderRadius: 14, padding: 20,
         background: "var(--color-surface)", boxShadow: "var(--shadow-lg)",
         display: "flex", flexDirection: "column", gap: 16,
@@ -217,15 +217,20 @@ function KartuDokumen() {
         </div>
       </div>
 
+      {/* Datang setelah tahap aktif menyala: urutan sebab-akibat yang sama dengan aplikasi */}
       <div
+        className="landing-muncul"
         style={{
+          animationDelay: "1.5s",
           display: "flex", alignItems: "center", gap: 9,
           padding: "10px 12px", borderRadius: 8, fontSize: 12.5,
           color: "var(--color-accent-2-200)",
           background: "color-mix(in srgb, var(--color-accent-2-500) 10%, transparent)",
         }}
       >
-        <BellRinging size={16} style={{ flex: "none", color: "var(--color-accent-2-400)" }} />
+        <span className="landing-bel" style={{ flex: "none", color: "var(--color-accent-2-400)" }}>
+          <BellRinging size={16} />
+        </span>
         Pengingat H-60 terkirim ke pemilik dokumen
       </div>
     </div>
@@ -237,7 +242,7 @@ function KartuDokumen() {
 export default function LandingPage() {
   return (
     <div
-      className={geist.className}
+      className={`${geist.className} landing`}
       style={{
         // Aturan global h1..h6 memakai var(--font-heading); override di sini
         // agar Geist benar-benar terpakai tanpa mengubah sistem desain aplikasi.
@@ -261,10 +266,10 @@ export default function LandingPage() {
           <MerekIkon />
           <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.02em" }}>ARSIVA</span>
         </div>
-        <nav className="hidden md:flex" style={{ marginLeft: 36, gap: 24, alignItems: "center", fontSize: 14 }}>
-          <a href="#fitur" style={{ color: muted(70), textDecoration: "none" }}>Fitur</a>
-          <a href="#alur" style={{ color: muted(70), textDecoration: "none" }}>Cara kerja</a>
-          <a href="#keamanan" style={{ color: muted(70), textDecoration: "none" }}>Keamanan</a>
+        <nav className="hidden md:flex landing-nav" style={{ marginLeft: 36, gap: 24, alignItems: "center", fontSize: 14 }}>
+          <a href="#fitur">Fitur</a>
+          <a href="#alur">Cara kerja</a>
+          <a href="#keamanan">Keamanan</a>
         </nav>
         <Link href="/login" className="btn btn-primary btn-solid" style={{ marginLeft: "auto", textDecoration: "none", whiteSpace: "nowrap", borderRadius: 8 }}>
           <SignIn size={16} />
@@ -280,13 +285,15 @@ export default function LandingPage() {
             className="lg:col-span-7 px-6 pt-16 pb-12 lg:pt-[88px] lg:pb-[84px]"
             style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}
           >
-            <div style={{ display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: 7, padding: "5px 11px", borderRadius: 999, fontSize: 11.5, letterSpacing: "0.02em", color: "var(--color-accent-100)", background: "var(--color-accent-800)", boxShadow: "inset 0 0 0 1px var(--color-accent-600)", marginBottom: 26 }}>
+            <div className="landing-muncul" style={{ display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: 7, padding: "5px 11px", borderRadius: 999, fontSize: 11.5, letterSpacing: "0.02em", color: "var(--color-accent-100)", background: "var(--color-accent-800)", boxShadow: "inset 0 0 0 1px var(--color-accent-600)", marginBottom: 26 }}>
               <ShieldCheck size={13} />
               Credit Operations Department, RO BRI Pekanbaru
             </div>
 
             <h1
+              className="landing-muncul"
               style={{
+                animationDelay: "80ms",
                 fontSize: "clamp(36px, 4.4vw, 54px)",
                 lineHeight: 1.03,
                 letterSpacing: "-0.035em",
@@ -298,30 +305,27 @@ export default function LandingPage() {
               Arsip legal yang tidak kadaluarsa diam-diam.
             </h1>
 
-            <p style={{ fontSize: 16.5, lineHeight: 1.6, color: muted(66), margin: "0 0 32px", maxWidth: 460 }}>
+            <p className="landing-muncul" style={{ animationDelay: "160ms", fontSize: 16.5, lineHeight: 1.6, color: muted(66), margin: "0 0 32px", maxWidth: 460 }}>
               Simpan, kategorikan, dan pantau masa berlaku dokumen legal bank dalam satu tempat.
             </p>
 
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <div className="landing-muncul" style={{ animationDelay: "240ms", display: "flex", gap: 10, flexWrap: "wrap" }}>
               <Link href="/login" className="btn btn-primary btn-solid" style={{ textDecoration: "none", minHeight: 46, paddingInline: 22, borderRadius: 8, whiteSpace: "nowrap" }}>
                 <SignIn size={17} />
                 Masuk
               </Link>
               <a href="#fitur" className="btn btn-secondary" style={{ textDecoration: "none", minHeight: 46, paddingInline: 22, borderRadius: 8, whiteSpace: "nowrap" }}>
                 Lihat kemampuannya
-                <ArrowRight size={16} />
+                <ArrowRight size={16} className="landing-panah" />
               </a>
             </div>
           </div>
 
           {/* Panel visual - ilustrasi berlabel, bukan pratinjau produk palsu.
-              Cahaya radial, bukan gradien kolom, agar tidak ada tepi keras di batas kontainer. */}
+              Cahaya radial (.landing-cahaya), bukan gradien kolom, agar tidak ada tepi keras di batas kontainer. */}
           <div
-            className="lg:col-span-5 px-6 pt-4 pb-16 lg:px-10 lg:py-12"
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              background: "radial-gradient(closest-side, color-mix(in srgb, var(--color-section-glow) 55%, transparent), transparent)",
-            }}
+            className="lg:col-span-5 px-6 pt-4 pb-16 lg:px-10 lg:py-12 landing-cahaya"
+            style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             <KartuDokumen />
           </div>
@@ -330,7 +334,7 @@ export default function LandingPage() {
 
       {/* KEMAMPUAN - bento asimetris 7/5, 5/7, 6/6. Enam item, enam sel. */}
       <section id="fitur" style={{ maxWidth: 1240, margin: "0 auto", padding: "82px 24px" }}>
-        <h2 style={{ fontSize: "clamp(26px, 3vw, 34px)", fontWeight: 600, letterSpacing: "-0.03em", margin: "0 0 40px", maxWidth: 620 }}>
+        <h2 className="landing-gulir" style={{ fontSize: "clamp(26px, 3vw, 34px)", fontWeight: 600, letterSpacing: "-0.03em", margin: "0 0 40px", maxWidth: 620 }}>
           Semua yang dibutuhkan tim legal, tanpa berpindah aplikasi.
         </h2>
 
@@ -338,19 +342,21 @@ export default function LandingPage() {
           {FITUR.map((f) => (
             <div
               key={f.judul}
-              className={f.kelas}
+              // Tepi kartu ada di .landing-kartu (globals.css) agar bisa menyala saat hover.
+              className={`${f.kelas} landing-kartu landing-gulir`}
               style={{
                 display: "flex", flexDirection: "column", gap: 18,
                 padding: "26px 24px", borderRadius: 12,
                 background: f.sorot
                   ? "linear-gradient(140deg, color-mix(in srgb, var(--color-section) 85%, var(--color-section-glow)) 0%, var(--color-surface) 75%)"
                   : "var(--color-surface)",
-                boxShadow: "inset 0 0 0 1px var(--color-divider)",
                 minHeight: 158,
               }}
             >
               <div>
-                <f.icon size={20} style={{ color: "var(--color-accent-300)" }} />
+                <span className="landing-kartu-ikon">
+                  <f.icon size={20} />
+                </span>
                 <h3 style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.015em", margin: "14px 0 6px" }}>{f.judul}</h3>
                 <p style={{ fontSize: 13.5, lineHeight: 1.6, color: muted(62), margin: 0, maxWidth: "46ch" }}>{f.desk}</p>
               </div>
@@ -371,7 +377,7 @@ export default function LandingPage() {
             {LANGKAH.map((s) => (
               <div
                 key={s.n}
-                className="py-6 border-t first:pt-0 first:border-t-0 sm:py-1 sm:pr-7 sm:pl-7 sm:border-t-0 sm:border-l sm:first:pt-1 sm:first:pl-0 sm:first:border-l-0"
+                className="landing-gulir py-6 border-t first:pt-0 first:border-t-0 sm:py-1 sm:pr-7 sm:pl-7 sm:border-t-0 sm:border-l sm:first:pt-1 sm:first:pl-0 sm:first:border-l-0"
                 style={{ borderColor: "var(--color-divider)" }}
               >
                 <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.04em", color: "var(--color-accent-500)", marginBottom: 14 }}>{s.n}</div>
@@ -386,7 +392,7 @@ export default function LandingPage() {
       {/* KEAMANAN - pita bergambar di kiri, daftar baris di kanan */}
       <section id="keamanan" style={{ maxWidth: 1240, margin: "0 auto", padding: "82px 24px" }}>
         <div className="grid grid-cols-1 lg:grid-cols-12" style={{ gap: 40 }}>
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-5 landing-gulir">
             <div
               style={{
                 position: "relative", overflow: "hidden", borderRadius: 12,
@@ -422,13 +428,14 @@ export default function LandingPage() {
             {KEAMANAN.map((k, i) => (
               <div
                 key={k.judul}
+                className="landing-baris landing-gulir"
                 style={{
                   display: "flex", gap: 16, alignItems: "flex-start",
                   padding: "18px 0",
                   borderTop: i === 0 ? "none" : "1px solid var(--color-divider)",
                 }}
               >
-                <k.icon size={19} style={{ flex: "none", marginTop: 2, color: "var(--color-accent-400)" }} />
+                <k.icon size={19} className="landing-baris-ikon" style={{ flex: "none", marginTop: 2 }} />
                 <div style={{ minWidth: 0 }}>
                   <h3 style={{ fontSize: 15.5, fontWeight: 600, letterSpacing: "-0.015em", margin: "0 0 4px" }}>{k.judul}</h3>
                   <p style={{ fontSize: 13.5, lineHeight: 1.55, color: muted(62), margin: 0 }}>{k.desk}</p>
@@ -442,6 +449,7 @@ export default function LandingPage() {
       {/* PENUTUP - pita penuh, judul kiri dan aksi rapat ke tepi kanan */}
       <section style={{ borderTop: "1px solid var(--color-divider)", background: "linear-gradient(165deg, var(--color-section) 0%, var(--color-bg) 82%)" }}>
         <div
+          className="landing-gulir"
           style={{
             maxWidth: 1240, margin: "0 auto", padding: "92px 24px",
             display: "flex", flexWrap: "wrap", gap: 36,
