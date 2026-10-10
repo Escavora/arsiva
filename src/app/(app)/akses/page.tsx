@@ -182,8 +182,6 @@ export default function AksesPage() {
             <h5 style={{ margin: 0 }}>Keamanan sesi</h5>
             <div style={{ display: "grid", gridTemplateColumns: "1fr auto", rowGap: 11, columnGap: 12, fontSize: 12.5, alignItems: "center" }}>
               <span className="text-muted">Sesi login otomatis berakhir</span><span>30 menit</span>
-              <span className="text-muted">Verifikasi dua langkah</span><span className="tag tag-ok">Aktif</span>
-              <span className="text-muted">Catatan aktivitas (audit log)</span><span className="tag tag-ok">Direkam</span>
             </div>
             <button type="button" className="btn btn-secondary btn-block" onClick={() => router.push("/sandi")}>
               <Key size={15} />

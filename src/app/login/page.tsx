@@ -37,7 +37,7 @@ const pesanMasuk = (err: unknown) => pesanClerk(err, "masuk");
 const JAMINAN = [
   { icon: ShieldCheck, teks: "Wewenang ditegakkan di sisi server, bukan dari sisi klien." },
   { icon: ClockCountdown, teks: "Sesi berakhir otomatis setelah 30 menit tanpa aktivitas." },
-  { icon: FileText, teks: "Setiap aktivitas penting terekam pada audit log." },
+  { icon: FileText, teks: "Berkas hanya terbuka lewat sesi login atau tautan yang sah." },
 ];
 
 export default function LoginPage() {
@@ -285,7 +285,7 @@ function LoginForm() {
               </>
             )}
 
-            <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+            <button type="submit" className="btn btn-primary btn-solid btn-block" disabled={loading}>
               <SignIn size={17} />
               {loading ? "Memproses…" : tahap === "kode" ? "Verifikasi" : "Masuk"}
             </button>

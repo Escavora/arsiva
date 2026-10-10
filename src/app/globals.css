@@ -205,6 +205,10 @@
 .btn-primary { color: var(--color-accent); border-color: var(--color-accent); }
 .btn-primary:hover { background: color-mix(in srgb, var(--color-accent) 12%, transparent); }
 .btn-primary:active { background: color-mix(in srgb, var(--color-accent) 22%, transparent); }
+/* Tombol utama berisi warna — hanya untuk permukaan publik (landing, login). */
+.btn-primary.btn-solid { color: #08131f; background: var(--color-accent-500); border-color: transparent; }
+.btn-primary.btn-solid:hover { color: #08131f; background: var(--color-accent-400); }
+.btn-primary.btn-solid:active { background: var(--color-accent-600); }
 .btn-secondary { border-color: var(--color-divider); }
 .btn-secondary:hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
 .btn-secondary:active { background: color-mix(in srgb, var(--color-text) 14%, transparent); }

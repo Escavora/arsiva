@@ -139,7 +139,7 @@ export function emailHtml(judul: string, paragraf: string[], tombol?: { teks: st
     <h1 style="margin:0 0 16px;font-size:19px;color:#101827">${esc(judul)}</h1>
     ${body}${cta}
     <hr style="border:0;border-top:1px solid #e3e8ef;margin:22px 0 14px">
-    <p style="margin:0;font-size:11.5px;color:#8b90a0">Email otomatis — mohon tidak dibalas. Seluruh aktivitas dicatat pada audit log ARSIVA.</p>
+    <p style="margin:0;font-size:11.5px;color:#8b90a0">Email otomatis — mohon tidak dibalas.</p>
   </div></body></html>`;
 }
 

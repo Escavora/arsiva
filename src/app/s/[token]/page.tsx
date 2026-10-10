@@ -111,7 +111,7 @@ export default async function SharePage({ params }: Props) {
       )}
 
       <div className="text-muted" style={{ fontSize: 11, borderTop: "1px solid var(--color-divider)", paddingTop: 12 }}>
-        Tautan ini bersifat rahasia dan hanya untuk penerima yang dituju. Seluruh akses dicatat pada audit log ARSIVA.
+        Tautan ini bersifat rahasia dan hanya untuk penerima yang dituju. Akses berakhir otomatis saat masa berlaku habis atau dicabut.
       </div>
     </Shell>
   );
