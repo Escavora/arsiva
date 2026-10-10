@@ -342,7 +342,16 @@ perangkat baru), dan form login sudah menyediakan langkah input kodenya.
 - Teruji di browser: login benar/salah, dashboard + semua API, `/sandi` (sandi lama
   salah, konfirmasi beda, terlalu pendek, berhasil). Kata sandi Admin demo kini
   `Arsiva#UjiCoba2026!` (hasil uji ganti sandi).
-- Masih belum teruji: tombol Google + `/sso-callback`, tombol Keluar, timer idle.
+- Juga teruji: timer idle (jam browser dimajukan 31 menit → keluar dalam ≤15 detik ke
+  `/login?reason=idle` dengan banner; sesi Clerk benar-benar dicabut, `/api/me` 401),
+  tombol Keluar (sesi dicabut, `/dashboard` dialihkan), tombol Google (sampai di halaman
+  masuk Google).
+- `/sso-callback` yang dibuka tanpa alur Google sempat menampilkan layar kosong selamanya:
+  `HandleSSOCallback` tidak berpindah halaman bila status sign-in tidak cocok dengan
+  cabangnya. Kini ada teks tunggu dan tautan "Kembali ke halaman masuk" setelah 8 detik
+  (bukan pengalihan otomatis, supaya captcha Clerk tidak terpotong).
+- Belum teruji: menyelesaikan login Google sampai dashboard, dan akun Google yang belum
+  terdaftar (`?reason=tidak-terdaftar`) — butuh akun Google sungguhan.
 
 **Catatan:**
 - Kata sandi awal pengguna baru tetap `arsiva123` bila Admin tidak mengisinya (perilaku
