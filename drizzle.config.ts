@@ -1,29 +1,17 @@
 import { defineConfig } from "drizzle-kit";
 
-const url = process.env.DATABASE_URL ?? "file:./data/arsiva.db";
-const authToken = process.env.DATABASE_AUTH_TOKEN;
+const url = process.env.DATABASE_URL;
+if (!url) throw new Error("DATABASE_URL belum diisi di .env.");
 
-// SQLite lokal (dialect "sqlite") dan Turso jarak jauh (dialect "turso",
-// menerima authToken) memakai bentuk config yang berbeda di drizzle-kit —
-// dipilih otomatis dari skema URL-nya.
-const isRemote = url.startsWith("libsql:") || url.startsWith("https:");
+// Migrasi sebaiknya lewat koneksi langsung, bukan lewat pooler (PgBouncer mode
+// transaksi). Di Neon, host langsung = host pooler tanpa akhiran "-pooler".
+const directUrl = process.env.DATABASE_URL_UNPOOLED ?? url.replace("-pooler.", ".");
 
-export default defineConfig(
-  isRemote
-    ? {
-        schema: "./src/db/schema.ts",
-        out: "./drizzle",
-        dialect: "turso",
-        dbCredentials: { url, authToken },
-        verbose: true,
-        strict: true,
-      }
-    : {
-        schema: "./src/db/schema.ts",
-        out: "./drizzle",
-        dialect: "sqlite",
-        dbCredentials: { url },
-        verbose: true,
-        strict: true,
-      },
-);
+export default defineConfig({
+  schema: "./src/db/schema.ts",
+  out: "./drizzle",
+  dialect: "postgresql",
+  dbCredentials: { url: directUrl },
+  verbose: true,
+  strict: true,
+});

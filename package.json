@@ -16,11 +16,11 @@
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/db/seed.ts",
     "email:test": "tsx scripts/test-email.ts",
-    "db:reset": "node -e \"const fs=require('fs');fs.rmSync('./data',{recursive:true,force:true});fs.mkdirSync('./data',{recursive:true})\" && npm run db:migrate && npm run db:seed"
+    "db:reset": "tsx scripts/reset-db.ts && npm run db:migrate && npm run db:seed"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
-    "@libsql/client": "^0.18.0",
+    "@neondatabase/serverless": "^1.2.0",
     "@opennextjs/cloudflare": "^1.20.10",
     "@phosphor-icons/react": "^2.1.10",
     "@vercel/blob": "^2.8.0",

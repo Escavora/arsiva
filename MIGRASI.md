@@ -234,6 +234,26 @@ Aplikasi yang sekarang (DB Turso, Better Auth) berhasil dibuild dengan
 - `wrangler.jsonc` dan `open-next.config.ts` memakai konfigurasi minimal: tanpa
   cache incremental R2 dan tanpa binding gambar (tidak memakai `next/image`).
 
+### Hasil Langkah 1 (Neon, 2026-10-10)
+
+- Schema dikonversi ke `pg-core` tanpa mengubah nama tabel atau kolom. Tipe data
+  timestamp → `timestamptz`, boolean → `boolean`, dan kedua kolom tanggal →
+  `date` (mode string). Koneksi memakai `neon-http`; `@libsql/client` dihapus.
+- `drizzle/` dibuat ulang (satu migrasi Postgres). `drizzle.config.ts` otomatis
+  memakai host langsung (tanpa `-pooler`) untuk migrasi.
+- `db:reset` sekarang memakai `scripts/reset-db.ts`, yang menghapus schema
+  `public` dan `drizzle` di Neon. **Menghapus semua data.**
+- Better Auth: `drizzleAdapter` memakai `provider: "pg"`.
+- **Terverifikasi di preview Workers + Neon:** login ketiga peran; akun nonaktif →
+  403; Pembaca → 403 untuk operasi tulis; semua endpoint GET 200 dengan tanggal
+  tetap `"YYYY-MM-DD"`; Admin/Team Member bisa membuat dan menghapus kategori dan
+  dokumen. Seed tetap idempoten.
+- Catatan kecil: `onConflictDoUpdate` di seed menghabiskan nomor identity walau
+  barisnya tidak bertambah, jadi id bisa melompat (mis. kategori baru id 15).
+  Tidak berpengaruh ke fungsi.
+- Bundle Worker naik ke **2,60 MB gzip** (batas 3 MB). Pantau terus; membuang
+  Better Auth di Langkah 3 akan mengurangi ukurannya.
+
 ## 6. Bagian yang tidak perlu diubah
 
 - **Logika domain:** `src/lib/arsiva.ts`, `dto.ts`, `master-crud.ts`.

@@ -6,40 +6,41 @@
 // - PRD `users.nama` dipetakan ke kolom `name` milik Better Auth.
 // - Tabel `notifications` adalah tambahan untuk notifikasi in-app (adapter email).
 
-import { sql, relations } from "drizzle-orm";
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import { relations } from "drizzle-orm";
+import { pgTable, text, integer, boolean, timestamp, date, index } from "drizzle-orm/pg-core";
 
-const now = sql`(unixepoch())`;
+/** Timestamp dengan zona waktu; Workers selalu berjalan di UTC. */
+const ts = (name: string) => timestamp(name, { withTimezone: true });
 
 /* ───────────────────────── Better Auth ───────────────────────── */
 
-export const user = sqliteTable("user", {
+export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
+  emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
   // Kolom tambahan ARSIVA (PRD: peran, reminder_threshold_days)
   peran: text("peran", { enum: ["Admin", "Team Member", "Pembaca"] }).notNull().default("Team Member"),
   unit: text("unit").notNull().default("Divisi Legal"),
-  aktif: integer("aktif", { mode: "boolean" }).notNull().default(true),
+  aktif: boolean("aktif").notNull().default(true),
   reminderThresholdDays: integer("reminder_threshold_days").notNull().default(60),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(now),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(now),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
 });
 
-export const session = sqliteTable("session", {
+export const session = pgTable("session", {
   id: text("id").primaryKey(),
-  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  expiresAt: ts("expires_at").notNull(),
   token: text("token").notNull().unique(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(now),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(now),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
 });
 
-export const account = sqliteTable("account", {
+export const account = pgTable("account", {
   id: text("id").primaryKey(),
   // Wajib sejak better-auth 1.7 (penerbit kredensial/OAuth).
   issuer: text("issuer").notNull().default(""),
@@ -49,50 +50,50 @@ export const account = sqliteTable("account", {
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),
-  accessTokenExpiresAt: integer("access_token_expires_at", { mode: "timestamp" }),
-  refreshTokenExpiresAt: integer("refresh_token_expires_at", { mode: "timestamp" }),
+  accessTokenExpiresAt: ts("access_token_expires_at"),
+  refreshTokenExpiresAt: ts("refresh_token_expires_at"),
   scope: text("scope"),
   password: text("password"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(now),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(now),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
 });
 
-export const verification = sqliteTable("verification", {
+export const verification = pgTable("verification", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
-  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(now),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(now),
+  expiresAt: ts("expires_at").notNull(),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
 });
 
 /* ───────────────────────── Master data ───────────────────────── */
 
-export const categories = sqliteTable("categories", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const categories = pgTable("categories", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   nama: text("nama").notNull().unique(),
   deskripsi: text("deskripsi").notNull().default(""),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(now),
+  createdAt: ts("created_at").notNull().defaultNow(),
 });
 
-export const documentTypes = sqliteTable("document_types", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const documentTypes = pgTable("document_types", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   nama: text("nama").notNull().unique(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(now),
+  createdAt: ts("created_at").notNull().defaultNow(),
 });
 
-export const purposes = sqliteTable("purposes", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const purposes = pgTable("purposes", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   nama: text("nama").notNull().unique(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(now),
+  createdAt: ts("created_at").notNull().defaultNow(),
 });
 
 /* ───────────────────────── Dokumen ───────────────────────── */
 
-export const documents = sqliteTable(
+export const documents = pgTable(
   "documents",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     userId: text("user_id").notNull().references(() => user.id),
     categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
     typeId: integer("type_id").references(() => documentTypes.id, { onDelete: "set null" }),
@@ -104,12 +105,12 @@ export const documents = sqliteTable(
     fileName: text("file_name"),
     fileSize: integer("file_size"),
     mimeType: text("mime_type"),
-    // Tanggal disimpan sebagai teks ISO "YYYY-MM-DD" agar mudah dibandingkan
-    tanggalKadaluarsa: text("tanggal_kadaluarsa").notNull(),
+    // Tipe date; mode "string" menjaga nilainya tetap "YYYY-MM-DD" di kode.
+    tanggalKadaluarsa: date("tanggal_kadaluarsa", { mode: "string" }).notNull(),
     // "aktif" | "diproses" — status kadaluarsa/segera diturunkan dari tanggal
     status: text("status", { enum: ["aktif", "diproses"] }).notNull().default("aktif"),
-    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(now),
-    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(now),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
   },
   (t) => [
     index("documents_expiry_idx").on(t.tanggalKadaluarsa),
@@ -117,63 +118,63 @@ export const documents = sqliteTable(
   ],
 );
 
-export const documentReminders = sqliteTable("document_reminders", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const documentReminders = pgTable("document_reminders", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   documentId: integer("document_id").notNull().references(() => documents.id, { onDelete: "cascade" }),
-  notifiedAt: integer("notified_at", { mode: "timestamp" }),
-  processedAt: integer("processed_at", { mode: "timestamp" }),
+  notifiedAt: ts("notified_at"),
+  processedAt: ts("processed_at"),
 });
 
-export const documentShares = sqliteTable(
+export const documentShares = pgTable(
   "document_shares",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     documentId: integer("document_id").notNull().references(() => documents.id, { onDelete: "cascade" }),
     createdBy: text("created_by").references(() => user.id, { onDelete: "set null" }),
     penerimaEmail: text("penerima_email").notNull(),
     penerimaTipe: text("penerima_tipe", { enum: ["Notaris", "Rekanan"] }).notNull(),
     token: text("token").notNull().unique(),
-    expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-    revokedAt: integer("revoked_at", { mode: "timestamp" }),
-    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(now),
+    expiresAt: ts("expires_at").notNull(),
+    revokedAt: ts("revoked_at"),
+    createdAt: ts("created_at").notNull().defaultNow(),
   },
   (t) => [index("shares_token_idx").on(t.token)],
 );
 
 /* ───────────────────────── Notaris ───────────────────────── */
 
-export const notaris = sqliteTable("notaris", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const notaris = pgTable("notaris", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   nama: text("nama").notNull(),
   kantor: text("kantor").notNull().default(""),
   email: text("email").notNull().default(""),
   noTelepon: text("no_telepon").notNull().default(""),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(now),
+  createdAt: ts("created_at").notNull().defaultNow(),
 });
 
-export const schedules = sqliteTable("schedules", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const schedules = pgTable("schedules", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   notarisId: integer("notaris_id").notNull().references(() => notaris.id, { onDelete: "cascade" }),
   agenda: text("agenda").notNull(),
-  tanggal: text("tanggal").notNull(), // "YYYY-MM-DD"
+  tanggal: date("tanggal", { mode: "string" }).notNull(), // "YYYY-MM-DD"
   jam: text("jam").notNull().default("09:00"),
   status: text("status", { enum: ["Direncanakan", "Selesai", "Dibatalkan"] }).notNull().default("Direncanakan"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(now),
+  createdAt: ts("created_at").notNull().defaultNow(),
 });
 
 /* ─────────────────── Notifikasi in-app (adapter email) ─────────────────── */
 
-export const notifications = sqliteTable(
+export const notifications = pgTable(
   "notifications",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
     documentId: integer("document_id").references(() => documents.id, { onDelete: "cascade" }),
     judul: text("judul").notNull(),
     pesan: text("pesan").notNull(),
     tipe: text("tipe", { enum: ["kadaluarsa", "berbagi", "sistem"] }).notNull().default("sistem"),
-    dibacaAt: integer("dibaca_at", { mode: "timestamp" }),
-    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(now),
+    dibacaAt: ts("dibaca_at"),
+    createdAt: ts("created_at").notNull().defaultNow(),
   },
   (t) => [index("notifications_user_idx").on(t.userId)],
 );
