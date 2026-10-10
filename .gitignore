@@ -56,5 +56,9 @@ next-env.d.ts
 
 .claude/
 
+# data lokal plugin oh-my-claudecode
+.omc/
+.omc-workspace
+
 # skill agen pihak ketiga (pasang ulang: npx skills add ...)
 .agents/
