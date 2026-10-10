@@ -32,6 +32,27 @@ export function galatClerk(err: unknown, fallback = "Gagal memproses akun di Cle
   return new HttpError(502, fallback);
 }
 
+/**
+ * clerk_id yang akun Clerk-nya sudah tertaut ke Google (pernah masuk lewat Google).
+ * Satu panggilan untuk semua id. Bila Clerk tidak terjangkau, kembalikan null agar
+ * daftar pengguna tetap bisa tampil tanpa penanda ini.
+ */
+export async function idTertautGoogle(clerkIds: string[]): Promise<Set<string> | null> {
+  if (clerkIds.length === 0) return new Set();
+  try {
+    const clerk = await clerkClient();
+    const { data } = await clerk.users.getUserList({ userId: clerkIds, limit: Math.min(clerkIds.length, 500) });
+    return new Set(
+      data
+        .filter((u) => u.externalAccounts.some((a) => a.provider.includes("google")))
+        .map((u) => u.id),
+    );
+  } catch (err) {
+    console.error("[arsiva:clerk] gagal membaca tautan Google:", err);
+    return null;
+  }
+}
+
 /** true bila error Clerk berarti sumber dayanya sudah tidak ada. */
 export function tidakDitemukan(err: unknown): boolean {
   return isClerkAPIResponseError(err) && err.status === 404;

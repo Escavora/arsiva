@@ -1,6 +1,6 @@
 import { asc } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { buatAkun, hapusAkun } from "@/lib/clerk-users";
+import { buatAkun, hapusAkun, idTertautGoogle } from "@/lib/clerk-users";
 import { handle, requireUser, requireAdmin, HttpError } from "@/lib/guard";
 import { eq } from "drizzle-orm";
 
@@ -11,6 +11,7 @@ export async function GET() {
   return handle(async () => {
     await requireUser();
     const rows = await db.query.user.findMany({ orderBy: [asc(schema.user.createdAt)] });
+    const google = await idTertautGoogle(rows.flatMap((u) => (u.clerkId ? [u.clerkId] : [])));
     return {
       users: rows.map((u) => ({
         id: u.id,
@@ -19,6 +20,8 @@ export async function GET() {
         unit: u.unit,
         peran: u.peran,
         aktif: u.aktif,
+        // null = tidak diketahui (Clerk tidak terjangkau)
+        google: google ? (u.clerkId ? google.has(u.clerkId) : false) : null,
       })),
     };
   });

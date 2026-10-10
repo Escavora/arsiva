@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { LockKey, CheckCircle, Minus, UserPlus, Key, PencilSimple, X, FloppyDisk } from "@phosphor-icons/react";
+import { LockKey, CheckCircle, Minus, UserPlus, Key, PencilSimple, X, FloppyDisk, GoogleLogo } from "@phosphor-icons/react";
 import { useArsiva, type ApiUser } from "@/components/arsiva/store";
 import { useKonfirmasi } from "@/components/arsiva/konfirmasi";
 import type { Role } from "@/lib/arsiva";
@@ -96,7 +96,19 @@ export default function AksesPage() {
                 {state.users.map((u) => (
                   <tr key={u.id}>
                     <td>
-                      <div style={{ fontSize: 13.5, maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.nama}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, maxWidth: 190 }}>
+                        <span style={{ fontSize: 13.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.nama}</span>
+                        {u.google && (
+                          <span
+                            role="img"
+                            aria-label="Tertaut ke akun Google"
+                            title="Tertaut ke akun Google — bisa masuk dengan tombol Google"
+                            style={{ flex: "none", display: "inline-grid", placeItems: "center", width: 18, height: 18, borderRadius: 4, background: "var(--color-accent-900)", color: "var(--color-accent-300)" }}
+                          >
+                            <GoogleLogo size={12} weight="bold" />
+                          </span>
+                        )}
+                      </div>
                       <div style={{ fontSize: 11, maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{u.email}</div>
                     </td>
                     <td style={{ fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.unit}</td>

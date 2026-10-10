@@ -37,7 +37,11 @@ export type ApiShare = {
   tipe: "Notaris" | "Rekanan"; token: string; exp: string; dibuat: string;
   status: "Aktif" | "Dicabut" | "Kadaluarsa"; bisaCabut: boolean;
 };
-export type ApiUser = { id: string; nama: string; email: string; unit: string; peran: Role; aktif: boolean };
+export type ApiUser = {
+  id: string; nama: string; email: string; unit: string; peran: Role; aktif: boolean;
+  /** Akun sudah tertaut ke Google; null bila tidak diketahui. Pengguna baru dari POST belum membawanya. */
+  google?: boolean | null;
+};
 export type ApiNotif = {
   id: number; judul: string; pesan: string; tipe: string;
   documentId: number | null; dibaca: boolean; createdAt: string;
