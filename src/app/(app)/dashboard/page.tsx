@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Folders,
   ShieldCheck,
@@ -87,7 +87,6 @@ function DistCard({ title, subtitle, bars, barColor }: { title: string; subtitle
 }
 
 export default function DashboardPage() {
-  const router = useRouter();
   const { me, counts, stats, allDocs, state, threshold } = useArsiva();
   const th = threshold;
 
@@ -123,10 +122,10 @@ export default function DashboardPage() {
             <FileArrowDown size={16} />
             Unduh Laporan
           </a>
-          <button type="button" className="btn btn-primary" onClick={() => router.push("/unggah")}>
+          <Link className="btn btn-primary" href="/unggah">
             <UploadSimple size={16} />
             Unggah Dokumen
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -193,7 +192,7 @@ export default function DashboardPage() {
               <h5 style={{ margin: "0 0 2px" }}>Proyeksi jatuh tempo dokumen</h5>
               <div className="text-muted" style={{ fontSize: 12 }}>Jumlah dokumen menurut bulan masa berlaku berakhir · ambang pengingat {th} hari</div>
             </div>
-            <button type="button" className="btn btn-ghost" onClick={() => router.push("/pengingat")} style={{ marginLeft: "auto", fontSize: 12, flex: "none" }}>Atur ambang</button>
+            <Link className="btn btn-ghost" href="/pengingat" style={{ marginLeft: "auto", fontSize: 12, flex: "none" }}>Atur ambang</Link>
           </div>
           {/* legend */}
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "center" }}>
@@ -282,10 +281,10 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-          <button type="button" className="btn btn-secondary btn-block" onClick={() => router.push("/pengingat")} style={{ marginTop: "auto" }}>
+          <Link className="btn btn-secondary btn-block" href="/pengingat" style={{ marginTop: "auto" }}>
             <BellRinging size={15} />
             Tindak lanjuti {counts.perluAksi} dokumen
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -301,7 +300,7 @@ export default function DashboardPage() {
         <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
             <h5 style={{ margin: 0 }}>Prioritas tindak lanjut</h5>
-            <button type="button" className="btn btn-ghost" onClick={() => router.push("/pengingat")} style={{ marginLeft: "auto", fontSize: 12 }}>Lihat semua<ArrowRight size={14} /></button>
+            <Link className="btn btn-ghost" href="/pengingat" style={{ marginLeft: "auto", fontSize: 12 }}>Lihat semua<ArrowRight size={14} /></Link>
           </div>
           <div style={{ overflowX: "auto" }}>
             <table className="table">
@@ -314,9 +313,11 @@ export default function DashboardPage() {
               </thead>
               <tbody>
                 {prioritas.map((r) => (
-                  <tr key={r.id} onClick={() => router.push(`/arsip/${r.id}`)} style={{ cursor: "pointer" }}>
+                  <tr key={r.id} className="baris-tautan">
                     <td>
-                      <div style={{ fontSize: 13, maxWidth: 360, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.n}</div>
+                      <div style={{ fontSize: 13, maxWidth: 360, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
+                      </div>
                       <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 45%, transparent)" }}>{r.k}</div>
                     </td>
                     <td style={{ fontSize: 12 }}>
@@ -335,7 +336,7 @@ export default function DashboardPage() {
           <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <h5 style={{ margin: 0 }}>Jadwal notaris terdekat</h5>
-              <button type="button" className="btn btn-ghost" onClick={() => router.push("/notaris")} style={{ marginLeft: "auto", fontSize: 12 }}>Kelola</button>
+              <Link className="btn btn-ghost" href="/notaris" style={{ marginLeft: "auto", fontSize: 12 }}>Kelola</Link>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {jadwalDekat.map((s) => (
@@ -357,10 +358,12 @@ export default function DashboardPage() {
             <h5 style={{ margin: 0 }}>Unggahan terbaru</h5>
             <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
               {terbaru.map((r) => (
-                <div key={r.id} onClick={() => router.push(`/arsip/${r.id}`)} style={{ display: "flex", gap: 9, alignItems: "center", cursor: "pointer" }}>
+                <div key={r.id} className="baris-tautan" style={{ display: "flex", gap: 9, alignItems: "center" }}>
                   <FilePdf size={17} style={{ color: "var(--color-accent-400)", flex: "none" }} />
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.n}</div>
+                    <div style={{ fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
+                    </div>
                     <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 45%, transparent)" }}>{r.o} · {r.upText}</div>
                   </div>
                 </div>

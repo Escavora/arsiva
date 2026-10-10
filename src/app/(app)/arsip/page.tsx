@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   MagnifyingGlass,
@@ -85,10 +86,10 @@ function ArsipInner() {
             {rows.length} dari {allDocs.length} dokumen · diurutkan dari yang terbaru
           </div>
         </div>
-        <button type="button" className="btn btn-primary" onClick={() => router.push("/unggah")} style={{ marginLeft: "auto" }}>
+        <Link className="btn btn-primary" href="/unggah" style={{ marginLeft: "auto" }}>
           <UploadSimple size={16} />
           Unggah Dokumen
-        </button>
+        </Link>
       </div>
 
       <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-4)" }}>
@@ -144,12 +145,14 @@ function ArsipInner() {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.id} onClick={() => router.push(`/arsip/${r.id}`)} style={{ cursor: "pointer" }}>
+                <tr key={r.id} className="baris-tautan">
                   <td>
                     <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
                       <FilePdf size={17} style={{ color: "var(--color-accent-400)", flex: "none" }} />
                       <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: 13.5, maxWidth: 330, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.n}</div>
+                        <div style={{ fontSize: 13.5, maxWidth: 330, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
+                        </div>
                         <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 42%, transparent)" }}>{r.o} · {r.s}</div>
                       </div>
                     </div>

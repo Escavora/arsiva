@@ -3,6 +3,7 @@
 import * as React from "react";
 import { LockKey, PaperPlaneTilt, Copy, ArrowSquareOut, Check, Info, Broom, WarningCircle } from "@phosphor-icons/react";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 import { useArsiva } from "@/components/arsiva/store";
 import { fmtShort } from "@/lib/arsiva";
 
@@ -28,10 +29,21 @@ async function salinTeks(teks: string): Promise<boolean> {
   }
 }
 
+// useSearchParams perlu batas Suspense agar halaman tetap bisa di-prerender.
 export default function BagikanPage() {
-  const { allDocs, state, canWrite, isAdmin, addShare, revokeShare, clearShares, say } = useArsiva();
+  return (
+    <React.Suspense fallback={null}>
+      <BagikanIsi />
+    </React.Suspense>
+  );
+}
 
-  const [docId, setDocId] = React.useState("");
+function BagikanIsi() {
+  const { allDocs, state, canWrite, isAdmin, addShare, revokeShare, clearShares, say } = useArsiva();
+  const params = useSearchParams();
+
+  // ?doc=<id> dari tombol "Bagikan" di halaman detail langsung memilih dokumennya.
+  const [docId, setDocId] = React.useState(() => params.get("doc") ?? "");
   const [tipe, setTipe] = React.useState<"Notaris" | "Rekanan">("Notaris");
   const [email, setEmail] = React.useState("");
   const [hari, setHari] = React.useState("7");
@@ -164,7 +176,7 @@ export default function BagikanPage() {
 
           <div style={{ fontSize: 12, color: "color-mix(in srgb, var(--color-text) 55%, transparent)", display: "flex", gap: 7 }}>
             <LockKey size={15} style={{ flex: "none", marginTop: 1 }} />
-            <span>Tautan memakai token unik, hanya bisa dibuka oleh penerima, dan otomatis mati saat masa berlaku habis.</span>
+            <span>Tautan memakai token acak yang tidak bisa ditebak dan otomatis mati saat masa berlaku habis. Siapa pun yang memegang tautan dapat membukanya, jadi kirim hanya ke penerima yang dituju.</span>
           </div>
 
           <button type="button" className="btn btn-primary btn-block" onClick={() => void submit()} disabled={!canWrite || kirim}>

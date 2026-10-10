@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -15,9 +16,9 @@ import {
   Trash,
   FloppyDisk,
   X,
-  WarningCircle,
 } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
+import { useKonfirmasi } from "@/components/arsiva/konfirmasi";
 import { fmt, fmtShort } from "@/lib/arsiva";
 
 export default function DetailPage() {
@@ -26,11 +27,14 @@ export default function DetailPage() {
   const { allDocs, state, threshold, isAdmin, tandai, updateDoc, removeDoc, say } = useArsiva();
 
   const id = Number(params.id);
-  const cur = allDocs.find((d) => d.id === id) ?? allDocs[0];
+  // Tanpa fallback: id yang tidak ada harus menampilkan "tidak ditemukan", bukan dokumen lain.
+  const cur = allDocs.find((d) => d.id === id);
+  const ext = cur?.fileName?.split(".").pop()?.toLowerCase() ?? "";
+  const jenisBerkas = ext === "pdf" ? "pdf" : ["jpg", "jpeg", "png"].includes(ext) ? "gambar" : null;
 
   const [editOpen, setEditOpen] = React.useState(false);
-  const [hapusOpen, setHapusOpen] = React.useState(false);
   const [sedang, setSedang] = React.useState(false);
+  const { minta, dialog: dialogKonfirmasi } = useKonfirmasi();
   const [form, setForm] = React.useState({ nama: "", ket: "", exp: "", categoryId: "", typeId: "", purposeId: "" });
 
   const bukaEdit = () => {
@@ -64,46 +68,47 @@ export default function DetailPage() {
     if (ok) setEditOpen(false);
   };
 
-  const konfirmHapus = async () => {
-    if (!cur) return;
-    setSedang(true);
-    const ok = await removeDoc(cur.id);
-    setSedang(false);
-    if (ok) router.push("/arsip");
-  };
+  // Tanpa useMemo manual: React Compiler sudah memoisasi, dan hitungannya ringan.
+  const curShares = !cur
+    ? []
+    : state.shares
+        .filter((x) => x.documentId === cur.id)
+        .map((x) => ({
+          ...x,
+          expText: fmtShort(x.exp.slice(0, 10)),
+          tag:
+            x.status === "Aktif" ? "tag-ok" : x.status === "Dicabut" ? "tag-danger" : "tag-neutral",
+        }));
 
-  const curShares = React.useMemo(() => {
+  // Ringkasan dari data yang memang tersimpan (bukan catatan aktivitas: audit log belum ada).
+  const ringkasan = (() => {
     if (!cur) return [];
-    return state.shares
-      .filter((x) => x.documentId === cur.id)
-      .map((x) => ({
-        ...x,
-        expText: fmtShort(x.exp.slice(0, 10)),
-        tag:
-          x.status === "Aktif" ? "tag-ok" : x.status === "Dicabut" ? "tag-danger" : "tag-neutral",
-      }));
-  }, [state.shares, cur]);
+    const terakhirDibagi = curShares.reduce<string | null>((m, x) => (!m || x.dibuat > m ? x.dibuat : m), null);
+    const ambang = new Date(cur.e + "T00:00:00");
+    ambang.setDate(ambang.getDate() - threshold);
+    const tglAmbang = `${ambang.getFullYear()}-${String(ambang.getMonth() + 1).padStart(2, "0")}-${String(ambang.getDate()).padStart(2, "0")}`;
 
-  const riwayat = React.useMemo(() => {
-    if (!cur) return [];
+    const status =
+      cur.status === "Diproses"
+        ? { teks: "Ditandai sudah diproses", waktu: "Status saat ini", dot: "var(--color-ok)" }
+        : cur.dl < 0
+        ? { teks: "Masa berlaku sudah habis", waktu: `Sejak ${cur.expText}`, dot: "var(--color-danger)" }
+        : {
+            teks: `Ambang pengingat ${threshold} hari`,
+            waktu: cur.dl <= threshold ? `Terlewati sejak ${fmt(tglAmbang)}` : `Mulai ${fmt(tglAmbang)}`,
+            dot: "var(--color-accent-2)",
+          };
+
     return [
-      { teks: `Dokumen diunggah ke arsip oleh ${cur.o}`, waktu: fmt(cur.u), dot: "var(--color-accent)" },
-      { teks: "Informasi kategori dan masa berlaku dilengkapi", waktu: fmt(cur.u), dot: "var(--color-neutral-600)" },
+      { teks: `Diunggah oleh ${cur.o}`, waktu: fmt(cur.u), dot: "var(--color-accent)" },
       {
-        teks: curShares.length ? `Tautan berbagi dibuat untuk ${curShares.length} penerima` : "Belum pernah dibagikan ke pihak eksternal",
-        waktu: curShares.length ? fmtShort(curShares[0].dibuat.slice(0, 10)) : "—",
+        teks: curShares.length ? `Dibagikan ke ${curShares.length} penerima` : "Belum pernah dibagikan ke pihak eksternal",
+        waktu: terakhirDibagi ? `Terakhir ${fmtShort(terakhirDibagi.slice(0, 10))}` : "—",
         dot: "var(--color-neutral-600)",
       },
-      {
-        teks:
-          cur.status === "Diproses"
-            ? "Ditandai sudah diproses oleh tim legal"
-            : `Pengingat kadaluarsa aktif pada ambang ${threshold} hari`,
-        waktu: cur.status === "Diproses" ? "Sudah ditindaklanjuti" : "Terjadwal",
-        dot: cur.status === "Diproses" ? "var(--color-ok)" : "var(--color-accent-2)",
-      },
+      status,
     ];
-  }, [cur, curShares, threshold]);
+  })();
 
   // Data belum termuat (mis. akses langsung via URL/refresh) atau id tak ditemukan.
   if (!cur) {
@@ -140,20 +145,36 @@ export default function DetailPage() {
         </div>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8, flex: "none" }}>
           {isAdmin && (
-            <button type="button" className="btn btn-secondary" onClick={() => setHapusOpen(true)} style={{ color: "var(--color-danger)" }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => minta({
+                judul: "Hapus dokumen ini?",
+                isi: <><strong style={{ color: "var(--color-text)" }}>{cur.n}</strong> beserta berkas hasil scannya akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.</>,
+                tombol: "Hapus Permanen",
+                aksi: async () => { if (await removeDoc(cur.id)) router.push("/arsip"); },
+              })}
+              style={{ color: "var(--color-danger-text)" }}
+            >
               <Trash size={16} />
               Hapus
             </button>
           )}
-          <button type="button" className="btn btn-secondary" onClick={() => router.push("/bagikan")}>
+          <Link className="btn btn-secondary" href={`/bagikan?doc=${cur.id}`}>
             <ShareNetwork size={16} />
             Bagikan
-          </button>
-          <a className="btn btn-primary" href={cur.hasFile ? `/api/documents/${cur.id}/file?unduh=1` : undefined}
-            onClick={(e) => { if (!cur.hasFile) { e.preventDefault(); say("Belum ada berkas scan untuk dokumen ini."); } }}>
-            <DownloadSimple size={16} />
-            Unduh Scan
-          </a>
+          </Link>
+          {cur.hasFile ? (
+            <a className="btn btn-primary" href={`/api/documents/${cur.id}/file?unduh=1`}>
+              <DownloadSimple size={16} />
+              Unduh Scan
+            </a>
+          ) : (
+            <button type="button" className="btn btn-primary" disabled title="Belum ada berkas scan untuk dokumen ini">
+              <DownloadSimple size={16} />
+              Unduh Scan
+            </button>
+          )}
         </div>
       </div>
 
@@ -162,26 +183,54 @@ export default function DetailPage() {
         <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
             <h5 style={{ margin: 0 }}>Pratinjau hasil scan</h5>
-            <span className="text-muted" style={{ marginLeft: "auto", fontSize: 11.5 }}>{cur.s} · PDF</span>
+            <span className="text-muted" style={{ marginLeft: "auto", fontSize: 12 }}>
+              {cur.hasFile ? `${cur.s}${ext ? ` · ${ext.toUpperCase()}` : ""}` : "Belum ada berkas"}
+            </span>
           </div>
-          <div style={{ borderRadius: "var(--radius-md)", background: "var(--color-surface-2)", boxShadow: "inset 0 0 0 1px var(--color-divider)", height: 352, display: "grid", placeItems: "center", textAlign: "center", padding: 20 }}>
-            <div>
-              <FileText size={38} style={{ color: "var(--color-neutral-600)", margin: "0 auto" }} />
-              <div style={{ fontSize: 13, marginTop: 10 }}>{cur.file}</div>
-              <div className="text-muted" style={{ fontSize: 11.5, maxWidth: 280, margin: "4px auto 0" }}>Berkas hasil scan tersimpan di penyimpanan dokumen; pratinjau ditampilkan pada halaman ini.</div>
-            </div>
+          <div style={{ borderRadius: "var(--radius-md)", background: "var(--color-surface-2)", boxShadow: "inset 0 0 0 1px var(--color-divider)", height: cur.hasFile && jenisBerkas ? 480 : 352, overflow: "hidden", display: "grid", placeItems: "center", textAlign: "center" }}>
+            {cur.hasFile && jenisBerkas === "pdf" ? (
+              <iframe
+                src={`/api/documents/${cur.id}/file#view=FitH`}
+                title={`Pratinjau ${cur.fileName ?? cur.n}`}
+                style={{ width: "100%", height: "100%", border: 0, background: "#fff" }}
+              />
+            ) : cur.hasFile && jenisBerkas === "gambar" ? (
+              // Berkas privat lewat endpoint bersesi; next/image tidak bisa mengoptimasinya.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={`/api/documents/${cur.id}/file`}
+                alt={`Hasil scan ${cur.n}`}
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            ) : (
+              <div style={{ padding: 20 }}>
+                <FileText size={38} style={{ color: "var(--color-neutral-600)", margin: "0 auto" }} />
+                <div style={{ fontSize: 13, marginTop: 10 }}>{cur.hasFile ? cur.fileName : "Belum ada berkas hasil scan"}</div>
+                <div className="text-muted" style={{ fontSize: 12, maxWidth: 300, margin: "4px auto 0" }}>
+                  {cur.hasFile
+                    ? "Pratinjau tidak tersedia untuk jenis berkas ini. Buka di tab baru untuk melihatnya."
+                    : "Dokumen ini tercatat tanpa berkas hasil scan."}
+                </div>
+              </div>
+            )}
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <a className="btn btn-secondary" href={cur.hasFile ? `/api/documents/${cur.id}/file` : undefined} target="_blank" rel="noreferrer"
-              onClick={(e) => { if (!cur.hasFile) { e.preventDefault(); say("Belum ada berkas scan untuk dokumen ini."); } }} style={{ flex: 1 }}>
-              <ArrowsOut size={15} />
-              Buka layar penuh
-            </a>
+            {cur.hasFile ? (
+              <a className="btn btn-secondary" href={`/api/documents/${cur.id}/file`} target="_blank" rel="noreferrer" style={{ flex: 1 }}>
+                <ArrowsOut size={15} />
+                Buka di tab baru
+              </a>
+            ) : (
+              <button type="button" className="btn btn-secondary" disabled style={{ flex: 1 }}>
+                <ArrowsOut size={15} />
+                Buka di tab baru
+              </button>
+            )}
             <button
               type="button"
               className="btn btn-secondary"
+              disabled={!cur.hasFile}
               onClick={() => {
-                if (!cur.hasFile) return say("Belum ada berkas scan untuk dokumen ini.");
                 // Buka berkas di tab baru lalu coba panggil dialog cetak. Bila
                 // browser memblokir print() otomatis pada penampil PDF-nya,
                 // berkasnya tetap terbuka dan bisa dicetak manual (Ctrl+P).
@@ -225,7 +274,7 @@ export default function DetailPage() {
           <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <h5 style={{ margin: 0 }}>Tautan berbagi aktif</h5>
-              <button type="button" className="btn btn-ghost" onClick={() => router.push("/bagikan")} style={{ marginLeft: "auto", fontSize: 12 }}>Buat tautan</button>
+              <Link className="btn btn-ghost" href={`/bagikan?doc=${cur.id}`} style={{ marginLeft: "auto", fontSize: 12 }}>Buat tautan</Link>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {curShares.map((s) => (
@@ -245,9 +294,9 @@ export default function DetailPage() {
           </div>
 
           <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
-            <h5 style={{ margin: 0 }}>Riwayat dokumen</h5>
+            <h5 style={{ margin: 0 }}>Ringkasan status</h5>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {riwayat.map((h, i) => (
+              {ringkasan.map((h, i) => (
                 <div key={i} style={{ display: "flex", gap: 10 }}>
                   <div style={{ flex: "none", width: 8, height: 8, marginTop: 6, borderRadius: "50%", background: h.dot }} />
                   <div>
@@ -319,31 +368,7 @@ export default function DetailPage() {
         </div>
       )}
 
-      {/* Dialog: konfirmasi hapus */}
-      {hapusOpen && cur && (
-        <div className="dialog-backdrop" onClick={() => !sedang && setHapusOpen(false)}>
-          <div className="dialog" style={{ width: "min(420px, 100%)" }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-              <div style={{ width: 36, height: 36, flex: "none", borderRadius: "var(--radius-md)", background: "var(--color-danger-800)", color: "var(--color-danger-100)", display: "grid", placeItems: "center" }}>
-                <WarningCircle size={19} />
-              </div>
-              <div style={{ minWidth: 0 }}>
-                <h5 style={{ margin: "0 0 4px" }}>Hapus dokumen ini?</h5>
-                <div className="text-muted" style={{ fontSize: 12.5 }}>
-                  <strong style={{ color: "var(--color-text)" }}>{cur.n}</strong> beserta berkas hasil scannya akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
-                </div>
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 2 }}>
-              <button type="button" className="btn btn-secondary" onClick={() => setHapusOpen(false)} disabled={sedang}>Batal</button>
-              <button type="button" className="btn btn-primary" onClick={() => void konfirmHapus()} disabled={sedang} style={{ color: "var(--color-danger)", borderColor: "var(--color-danger)" }}>
-                <Trash size={15} />
-                {sedang ? "Menghapus…" : "Hapus Permanen"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {dialogKonfirmasi}
     </div>
   );
 }

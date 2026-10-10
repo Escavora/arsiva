@@ -1,12 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { CheckCircle } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
 
 export default function PengingatPage() {
-  const router = useRouter();
   const { allDocs, counts, threshold, setThreshold, tandai } = useArsiva();
   const th = threshold;
 
@@ -70,9 +69,11 @@ export default function PengingatPage() {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.id}>
-                  <td onClick={() => router.push(`/arsip/${r.id}`)} style={{ cursor: "pointer" }}>
-                    <div style={{ fontSize: 13.5, maxWidth: 340, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.n}</div>
+                <tr key={r.id} className="baris-tautan">
+                  <td>
+                    <div style={{ fontSize: 13.5, maxWidth: 340, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
+                    </div>
                     <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 42%, transparent)" }}>{r.j} · {r.o}</div>
                   </td>
                   <td style={{ fontSize: 12.5 }}>{r.k}</td>

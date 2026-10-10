@@ -67,11 +67,21 @@ type Me = { nama: string; panggilan: string; peran: Role; peranText: string; ini
 
 /* ───────────────────────── Pemanggil API ───────────────────────── */
 
+/** Batas tunggu satu permintaan; tanpa ini koneksi database yang tersendat bisa menggantung selamanya. */
+const BATAS_TUNGGU_MS = 20_000;
+
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    ...init,
-    headers: init?.body instanceof FormData ? init?.headers : { "Content-Type": "application/json", ...init?.headers },
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      ...init,
+      signal: init?.signal ?? AbortSignal.timeout(BATAS_TUNGGU_MS),
+      headers: init?.body instanceof FormData ? init?.headers : { "Content-Type": "application/json", ...init?.headers },
+    });
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "TimeoutError") throw new Error("Server terlalu lama merespons. Coba lagi.");
+    throw new Error("Tidak dapat terhubung ke server. Periksa koneksi Anda.");
+  }
   const data = await res.json().catch(() => ({}));
   if (res.status === 401) window.dispatchEvent(new Event(EVENT_SESI_BERAKHIR));
   if (!res.ok) throw new Error(data?.error ?? "Permintaan gagal.");
@@ -203,33 +213,37 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   /* ── memuat seluruh data ── */
+  // Tiap bagian dimuat terpisah: satu endpoint yang gagal tidak mengosongkan seluruh aplikasi.
+  // Bagian yang gagal mempertahankan data sebelumnya (undefined = pakai nilai lama).
   const refresh = React.useCallback(async () => {
-    try {
-      const [d, c, t, p, n, s, sh, u, nt] = await Promise.all([
-        api<{ docs: ApiDoc[] }>("/api/documents"),
-        api<{ cats: ApiCat[] }>("/api/categories"),
-        api<{ types: ApiNamed[] }>("/api/types"),
-        api<{ purposes: ApiNamed[] }>("/api/purposes"),
-        api<{ notaris: ApiNotaris[] }>("/api/notaris"),
-        api<{ schedules: ApiSchedule[] }>("/api/schedules"),
-        api<{ shares: ApiShare[] }>("/api/shares"),
-        api<{ users: ApiUser[] }>("/api/users"),
-        api<{ notifications: ApiNotif[] }>("/api/notifications"),
-      ]);
-      setState((prev) => ({
-        docs: d.docs, cats: c.cats, types: t.types, purposes: p.purposes,
-        notaris: n.notaris, schedules: s.schedules, shares: sh.shares,
-        users: u.users, notifications: nt.notifications,
+    const gagal: unknown[] = [];
+    const ambil = <T,>(p: Promise<T>) => p.catch((e) => { gagal.push(e); return undefined; });
+    const [d, c, t, p, n, s, sh, u, nt] = await Promise.all([
+      ambil(api<{ docs: ApiDoc[] }>("/api/documents")),
+      ambil(api<{ cats: ApiCat[] }>("/api/categories")),
+      ambil(api<{ types: ApiNamed[] }>("/api/types")),
+      ambil(api<{ purposes: ApiNamed[] }>("/api/purposes")),
+      ambil(api<{ notaris: ApiNotaris[] }>("/api/notaris")),
+      ambil(api<{ schedules: ApiSchedule[] }>("/api/schedules")),
+      ambil(api<{ shares: ApiShare[] }>("/api/shares")),
+      ambil(api<{ users: ApiUser[] }>("/api/users")),
+      ambil(api<{ notifications: ApiNotif[] }>("/api/notifications")),
+    ]);
+    setState((prev) => {
+      const notaris = n?.notaris ?? prev.notaris;
+      return {
+        docs: d?.docs ?? prev.docs, cats: c?.cats ?? prev.cats, types: t?.types ?? prev.types,
+        purposes: p?.purposes ?? prev.purposes, notaris, schedules: s?.schedules ?? prev.schedules,
+        shares: sh?.shares ?? prev.shares, users: u?.users ?? prev.users,
+        notifications: nt?.notifications ?? prev.notifications,
         notarisAktif:
-          prev.notarisAktif && n.notaris.some((x) => x.id === prev.notarisAktif)
+          prev.notarisAktif && notaris.some((x) => x.id === prev.notarisAktif)
             ? prev.notarisAktif
-            : (n.notaris[0]?.id ?? null),
+            : (notaris[0]?.id ?? null),
         loading: false,
-      }));
-    } catch (e) {
-      setState((prev) => ({ ...prev, loading: false }));
-      fail(e);
-    }
+      };
+    });
+    if (gagal.length) fail(gagal[0]);
   }, [fail]);
 
   React.useEffect(() => {

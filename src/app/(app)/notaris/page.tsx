@@ -3,20 +3,31 @@
 import * as React from "react";
 import { CalendarCheck, Phone, Trash, CalendarPlus, UserPlus } from "@phosphor-icons/react";
 import { useArsiva, type ApiSchedule } from "@/components/arsiva/store";
-import { fmt, initials } from "@/lib/arsiva";
+import { useKonfirmasi } from "@/components/arsiva/konfirmasi";
+import { fmt, initials, todayISO } from "@/lib/arsiva";
 
-function schedView(x: ApiSchedule) {
+function schedView(x: ApiSchedule, hariIni: string) {
+  // Jadwal "Direncanakan" yang tanggalnya sudah lewat belum diperbarui siapa pun: tandai agar terlihat.
+  const terlewat = x.st === "Direncanakan" && x.tgl < hariIni;
   return {
     ...x,
     tglText: fmt(x.tgl),
-    tag: x.st === "Selesai" ? "tag-ok" : x.st === "Dibatalkan" ? "tag-danger" : "tag-accent",
-    status: x.st,
+    tag: terlewat ? "tag-warn" : x.st === "Selesai" ? "tag-ok" : x.st === "Dibatalkan" ? "tag-danger" : "tag-accent",
+    status: terlewat ? "Terlewat" : x.st,
+    akanDatang: x.st === "Direncanakan" && !terlewat,
     bisaBatal: x.st === "Direncanakan",
   };
 }
 
+/** Jadwal mendatang lebih dulu (terdekat di atas), lalu sisanya dari yang terbaru. */
+function urutJadwal(a: { tgl: string; akanDatang: boolean }, b: { tgl: string; akanDatang: boolean }) {
+  if (a.akanDatang !== b.akanDatang) return a.akanDatang ? -1 : 1;
+  return a.akanDatang ? a.tgl.localeCompare(b.tgl) : b.tgl.localeCompare(a.tgl);
+}
+
 export default function NotarisPage() {
   const { state, isAdmin, canWrite, setNotarisAktif, addNotaris, removeNotaris, addSchedule, cancelSchedule } = useArsiva();
+  const { minta, dialog: dialogKonfirmasi } = useKonfirmasi();
   const aktif = state.notarisAktif;
 
   const [sc, setSc] = React.useState({ notarisId: "", agenda: "", tanggal: "", jam: "10:00" });
@@ -35,10 +46,11 @@ export default function NotarisPage() {
 
   const notarisAktif = state.notaris.find((n) => n.id === aktif) ?? state.notaris[0];
 
-  const schedAll = state.schedules.map(schedView);
+  const hariIni = todayISO();
+  const schedAll = state.schedules.map((x) => schedView(x, hariIni));
   const jadwalRows = schedAll
     .filter((x) => x.notarisId === notarisAktif?.id)
-    .sort((a, b) => (a.tgl < b.tgl ? 1 : -1));
+    .sort(urutJadwal);
   const riwayatJadwal = schedAll
     .filter((x) => x.st !== "Direncanakan")
     .sort((a, b) => (a.tgl < b.tgl ? 1 : -1))
@@ -93,8 +105,21 @@ export default function NotarisPage() {
                 <button
                   type="button"
                   className="btn btn-ghost"
-                  onClick={(e) => { e.stopPropagation(); void removeNotaris(n.id); }}
-                  style={{ marginLeft: "auto", flex: "none", fontSize: 11.5, color: "var(--color-danger)" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    minta({
+                      judul: "Hapus mitra notaris ini?",
+                      isi: (
+                        <>
+                          <strong style={{ color: "var(--color-text)" }}>{n.nama}</strong>
+                          {n.jumlahJadwal > 0 ? ` beserta ${n.jumlahJadwal} jadwal kerja samanya` : ""} akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
+                        </>
+                      ),
+                      tombol: "Hapus Mitra",
+                      aksi: () => removeNotaris(n.id),
+                    });
+                  }}
+                  style={{ marginLeft: "auto", flex: "none", fontSize: 11.5, color: "var(--color-danger-text)" }}
                   title="Hapus mitra notaris"
                 >
                   <Trash size={13} />
@@ -134,7 +159,23 @@ export default function NotarisPage() {
                     <td><span className={`tag ${s.tag}`}>{s.status}</span></td>
                     <td style={{ textAlign: "right" }}>
                       {s.bisaBatal && (
-                        <button type="button" className="btn btn-ghost" onClick={() => void cancelSchedule(s.id)} style={{ fontSize: 12, color: "var(--color-danger)" }}>Batalkan</button>
+                        <button
+                          type="button"
+                          className="btn btn-ghost"
+                          onClick={() => minta({
+                            judul: "Batalkan jadwal ini?",
+                            isi: (
+                              <>
+                                <strong style={{ color: "var(--color-text)" }}>{s.agenda}</strong> pada {s.tglText} pukul {s.jam} akan ditandai Dibatalkan dan tidak bisa diaktifkan kembali.
+                              </>
+                            ),
+                            tombol: "Batalkan Jadwal",
+                            aksi: () => cancelSchedule(s.id),
+                          })}
+                          style={{ fontSize: 12, color: "var(--color-danger-text)" }}
+                        >
+                          Batalkan
+                        </button>
                       )}
                     </td>
                   </tr>
@@ -199,6 +240,8 @@ export default function NotarisPage() {
           </div>
         </div>
       </div>
+
+      {dialogKonfirmasi}
     </div>
   );
 }

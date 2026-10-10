@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { LockKey, CheckCircle, Minus, UserPlus, Key, PencilSimple, X, FloppyDisk } from "@phosphor-icons/react";
 import { useArsiva, type ApiUser } from "@/components/arsiva/store";
+import { useKonfirmasi } from "@/components/arsiva/konfirmasi";
 import type { Role } from "@/lib/arsiva";
 
 type Perm = { nama: string; a: boolean; s: boolean; p: boolean };
@@ -25,6 +26,7 @@ function PermIcon({ on }: { on: boolean }) {
 export default function AksesPage() {
   const router = useRouter();
   const { state, isAdmin, setUserPeran, toggleUser, removeUser, addUser, updateUser, say } = useArsiva();
+  const { minta, dialog: dialogKonfirmasi } = useKonfirmasi();
   const isStaf = !isAdmin;
 
   const [nu, setNu] = React.useState<{ nama: string; email: string; unit: string; peran: Role }>({ nama: "", email: "", unit: "", peran: "Team Member" });
@@ -119,7 +121,23 @@ export default function AksesPage() {
                             <PencilSimple size={13} />
                           </button>
                           <button type="button" className="btn btn-ghost" onClick={() => void toggleUser(u.id, !u.aktif)} style={{ fontSize: 11.5 }}>{u.aktif ? "Nonaktifkan" : "Aktifkan"}</button>
-                          <button type="button" className="btn btn-ghost" onClick={() => void removeUser(u.id)} style={{ fontSize: 11.5, color: "var(--color-danger)" }}>Hapus</button>
+                          <button
+                            type="button"
+                            className="btn btn-ghost"
+                            onClick={() => minta({
+                              judul: "Hapus pengguna ini?",
+                              isi: (
+                                <>
+                                  Akun <strong style={{ color: "var(--color-text)" }}>{u.nama}</strong> beserta akun login Clerk-nya akan dihapus, sehingga ia tidak bisa masuk lagi. Tindakan ini tidak dapat dibatalkan. Untuk menghentikan akses sementara, gunakan Nonaktifkan.
+                                </>
+                              ),
+                              tombol: "Hapus Pengguna",
+                              aksi: () => removeUser(u.id),
+                            })}
+                            style={{ fontSize: 11.5, color: "var(--color-danger-text)" }}
+                          >
+                            Hapus
+                          </button>
                         </div>
                       )}
                     </td>
@@ -232,6 +250,8 @@ export default function AksesPage() {
           </div>
         </div>
       )}
+
+      {dialogKonfirmasi}
     </div>
   );
 }

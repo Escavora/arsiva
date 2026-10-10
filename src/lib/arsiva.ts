@@ -178,7 +178,6 @@ export type ViewDoc = Doc & {
   upText: string;
   sisaC: string;
   kode: string;
-  file: string;
 };
 
 /**
@@ -216,8 +215,8 @@ export function viewDoc<T extends Doc & { id: number }>(d: T, th: number): T & V
         : dl <= th
         ? "var(--color-accent-2-400)"
         : "inherit",
-    kode: `ARS-${2026 - (i % 3)}-${1180 + i * 7}`,
-    file: `scan-${1180 + i * 7}.pdf`,
+    // Nomor arsip turunan: tahun unggah + id dokumen (stabil, tidak bergantung urutan daftar).
+    kode: `ARS-${d.u.slice(0, 4)}-${String(i).padStart(4, "0")}`,
   };
 }
 

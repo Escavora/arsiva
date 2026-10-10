@@ -3,9 +3,11 @@
 import * as React from "react";
 import { Info, Plus, X, FloppyDisk } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
+import { useKonfirmasi } from "@/components/arsiva/konfirmasi";
 
 export default function KategoriPage() {
   const { state, isAdmin, addCategory, removeCategory, updateCategory, addType, removeType, addPurpose, removePurpose, say } = useArsiva();
+  const { minta, dialog: dialogKonfirmasi } = useKonfirmasi();
   const isStaf = !isAdmin;
 
   const [nc, setNc] = React.useState({ nama: "", desk: "" });
@@ -77,7 +79,24 @@ export default function KategoriPage() {
                       {isAdmin && (
                         <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
                           <button type="button" className="btn btn-ghost" onClick={() => setEditKat({ id: c.id, nama: c.nama, desk: c.desk })} style={{ fontSize: 12 }}>Ubah</button>
-                          <button type="button" className="btn btn-ghost" onClick={() => void removeCategory(c.id)} style={{ fontSize: 12, color: "var(--color-danger)" }}>Hapus</button>
+                          <button
+                            type="button"
+                            className="btn btn-ghost"
+                            onClick={() => minta({
+                              judul: "Hapus kategori ini?",
+                              isi: (
+                                <>
+                                  Kategori <strong style={{ color: "var(--color-text)" }}>{c.nama}</strong> akan dihapus.
+                                  {c.jumlah > 0 ? ` ${c.jumlah} dokumen yang memakainya tidak ikut terhapus, tetapi akan menjadi tanpa kategori.` : ""}
+                                </>
+                              ),
+                              tombol: "Hapus Kategori",
+                              aksi: () => removeCategory(c.id),
+                            })}
+                            style={{ fontSize: 12, color: "var(--color-danger-text)" }}
+                          >
+                            Hapus
+                          </button>
                         </div>
                       )}
                     </td>
@@ -105,7 +124,20 @@ export default function KategoriPage() {
                 <span key={t.id} className="tag tag-neutral" style={{ gap: 7, padding: "5px 10px", fontSize: 12 }}>
                   {t.nama}
                   {isAdmin && (
-                    <X size={12} role="button" tabIndex={0} onClick={() => void removeType(t.id)} style={{ cursor: "pointer", opacity: 0.6 }} />
+                    <button
+                      type="button"
+                      className="chip-hapus"
+                      aria-label={`Hapus jenis ${t.nama}`}
+                      title={`Hapus jenis ${t.nama}`}
+                      onClick={() => minta({
+                        judul: "Hapus jenis dokumen ini?",
+                        isi: <>Jenis <strong style={{ color: "var(--color-text)" }}>{t.nama}</strong> akan dihapus. Dokumen yang memakainya tidak ikut terhapus, tetapi akan menjadi tanpa jenis.</>,
+                        tombol: "Hapus Jenis",
+                        aksi: () => removeType(t.id),
+                      })}
+                    >
+                      <X size={12} />
+                    </button>
                   )}
                 </span>
               ))}
@@ -122,7 +154,20 @@ export default function KategoriPage() {
                 <span key={t.id} className="tag tag-neutral" style={{ gap: 7, padding: "5px 10px", fontSize: 12 }}>
                   {t.nama}
                   {isAdmin && (
-                    <X size={12} role="button" tabIndex={0} onClick={() => void removePurpose(t.id)} style={{ cursor: "pointer", opacity: 0.6 }} />
+                    <button
+                      type="button"
+                      className="chip-hapus"
+                      aria-label={`Hapus tujuan ${t.nama}`}
+                      title={`Hapus tujuan ${t.nama}`}
+                      onClick={() => minta({
+                        judul: "Hapus tujuan dokumen ini?",
+                        isi: <>Tujuan <strong style={{ color: "var(--color-text)" }}>{t.nama}</strong> akan dihapus. Dokumen yang memakainya tidak ikut terhapus, tetapi akan menjadi tanpa tujuan.</>,
+                        tombol: "Hapus Tujuan",
+                        aksi: () => removePurpose(t.id),
+                      })}
+                    >
+                      <X size={12} />
+                    </button>
                   )}
                 </span>
               ))}
@@ -178,6 +223,8 @@ export default function KategoriPage() {
           </div>
         </div>
       )}
+
+      {dialogKonfirmasi}
     </div>
   );
 }
