@@ -8,6 +8,7 @@ import "../../scripts/load-env";
 import { eq } from "drizzle-orm";
 import { db, schema } from "./index";
 import { createClerkClient } from "@clerk/backend";
+import { frasaSandi } from "../../scripts/frasa-sandi";
 import {
   seedCats,
   seedDocs,
@@ -19,8 +20,6 @@ import {
   seedUsers,
 } from "../lib/arsiva";
 
-const PASSWORD = "arsiva123";
-
 async function main() {
   console.log("→ Menyemai database ARSIVA…");
 
@@ -30,6 +29,8 @@ async function main() {
   const clerk = createClerkClient({ secretKey });
 
   const userIdByName = new Map<string, string>();
+  // Kata sandi akun yang BARU dibuat; dicetak sekali di akhir, tidak disimpan.
+  const sandiBaru: { peran: string; email: string; sandi: string }[] = [];
   for (const u of seedUsers) {
     const email = u.email.toLowerCase();
     const [firstName, ...sisa] = u.nama.split(" ");
@@ -44,14 +45,11 @@ async function main() {
       clerkId = data[0]?.id;
     }
     if (!clerkId) {
-      const baru = await clerk.users.createUser({
-        emailAddress: [email],
-        password: PASSWORD,
-        firstName,
-        lastName,
-        skipPasswordChecks: true, // kata sandi demo sengaja sederhana
-      });
+      // Frasa sandi acak per akun; harus lolos pemeriksaan Clerk (tanpa skipPasswordChecks).
+      const sandi = frasaSandi();
+      const baru = await clerk.users.createUser({ emailAddress: [email], password: sandi, firstName, lastName });
       clerkId = baru.id;
+      sandiBaru.push({ peran: u.peran, email, sandi });
     }
 
     // Akun nonaktif diblokir juga di Clerk (selain dicek lokal di guard.ts).
@@ -67,7 +65,7 @@ async function main() {
     }
     userIdByName.set(u.nama, id);
   }
-  console.log(`  ✓ ${seedUsers.length} pengguna (kata sandi awal akun baru: "${PASSWORD}")`);
+  console.log(`  ✓ ${seedUsers.length} pengguna (${sandiBaru.length} akun baru di Clerk)`);
 
   /* 2. Master data */
   const catId = new Map<string, number>();
@@ -184,11 +182,13 @@ async function main() {
     console.log(`  • tautan berbagi sudah ada — dilewati`);
   }
 
-  // Kata sandi hanya diatur saat akun Clerk dibuat; akun yang sudah ada tidak diubah.
-  console.log("\n✅ Selesai. Akun demo (kata sandi lihat README):");
-  console.log("   Admin       : admin.cop@bri.co.id");
-  console.log("   Team Member : teammember.cop@bri.co.id");
-  console.log("   Pembaca     : agus.nugroho@bank.co.id");
+  console.log("\n✅ Selesai.");
+  if (sandiBaru.length) {
+    console.log("\n   Kata sandi akun baru (catat sekarang; tidak disimpan di mana pun):");
+    for (const a of sandiBaru) console.log(`   ${a.peran.padEnd(12)} ${a.email.padEnd(28)} ${a.sandi}`);
+  } else {
+    console.log("   Semua akun sudah ada; kata sandinya tidak diubah. Untuk mengganti: npm run sandi:demo");
+  }
 }
 
 main()

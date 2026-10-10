@@ -28,16 +28,18 @@ Buka http://localhost:3000 → diarahkan ke `/login`.
 
 **Akun demo:**
 
-| Peran | Email | Kata sandi |
-| --- | --- | --- |
-| Admin | `admin.cop@bri.co.id` | `Arsiva#UjiCoba2026!` |
-| Team Member | `teammember.cop@bri.co.id` | `arsiva123` |
-| Pembaca | `agus.nugroho@bank.co.id` | `arsiva123` |
+| Peran | Email |
+| --- | --- |
+| Admin | `admin.cop@bri.co.id` |
+| Team Member | `sari.melati@bank.co.id` |
+| Pembaca | `agus.nugroho@bank.co.id` |
 
-Kata sandi disimpan di Clerk, bukan di database. `db:seed` hanya mengaturnya
-(`arsiva123`) saat akun Clerk **baru dibuat**; akun yang sudah ada tidak diubah.
-Jadi pada instance Clerk baru, Admin juga memakai `arsiva123` sampai diganti
-lewat halaman Kata Sandi. Batas panjang kata sandi Clerk: minimal 8 karakter.
+Kata sandi **tidak** dicantumkan di repo. Minta kepada pengembang, atau buat yang
+baru dengan `npm run sandi:demo`: perintah ini memberi frasa sandi acak ke akun demo
+bawaan seed yang masih ada, mengeluarkan sesi lamanya, lalu mencetak sandi barunya
+**sekali** di terminal (tidak disimpan di berkas mana pun). `npm run db:seed` juga
+membuat frasa sandi acak untuk akun yang baru dibuat. Kata sandi disimpan di Clerk,
+bukan di database; batas panjangnya minimal 8 karakter.
 
 ## Tech Stack
 

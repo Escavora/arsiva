@@ -340,8 +340,8 @@ perangkat baru), dan form login sudah menyediakan langkah input kodenya.
   kode yang tidak dikenal jatuh ke pesan umum berbahasa Indonesia.
 - Panjang minimum kata sandi di Clerk diturunkan dari 15 ke 8, sama dengan teks `/sandi`.
 - Teruji di browser: login benar/salah, dashboard + semua API, `/sandi` (sandi lama
-  salah, konfirmasi beda, terlalu pendek, berhasil). Kata sandi Admin demo kini
-  `Arsiva#UjiCoba2026!` (hasil uji ganti sandi).
+  salah, konfirmasi beda, terlalu pendek, berhasil). Kata sandi demo kemudian diganti frasa
+  sandi acak lewat `npm run sandi:demo` dan tidak lagi dicantumkan di repo.
 - Juga teruji: timer idle (jam browser dimajukan 31 menit → keluar dalam ≤15 detik ke
   `/login?reason=idle` dengan banner; sesi Clerk benar-benar dicabut, `/api/me` 401),
   tombol Keluar (sesi dicabut, `/dashboard` dialihkan), tombol Google (sampai di halaman
