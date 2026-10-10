@@ -1,59 +1,51 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { getSessionCookie } from "better-auth/cookies";
+import { NextResponse } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 /**
- * Penjaga rute di tepi (Next.js 16 menyebutnya "proxy", dahulu "middleware").
+ * Penjaga rute di tepi. Sengaja memakai nama `middleware` (runtime edge), bukan
+ * `proxy` (runtime Node): proxy Node masih eksperimental di Cloudflare dan
+ * membuat bundle Worker melewati batas 3 MB paket gratis.
  *
- * Ini hanya pemeriksaan cepat "ada cookie sesi atau tidak" untuk mengarahkan
- * pengunjung yang belum masuk ke /login. Ini BUKAN pengganti otorisasi:
- * validasi sesi dan pengecekan peran yang sebenarnya tetap dilakukan di setiap
- * API route lewat requireUser/requireAdmin (src/lib/guard.ts).
+ * Ini hanya mengarahkan pengunjung yang belum masuk ke /login. Ini BUKAN
+ * pengganti otorisasi: peran, status aktif, dan batas idle 30 menit ditegakkan
+ * di setiap API route lewat requireUser/requireAdmin (src/lib/guard.ts).
  */
-const RUTE_TERLINDUNGI = [
-  "/dashboard",
-  "/arsip",
-  "/unggah",
-  "/pengingat",
-  "/bagikan",
-  "/notaris",
-  "/kategori",
-  "/akses",
-  "/sandi",
-];
+const rutePrivat = createRouteMatcher([
+  "/dashboard(.*)",
+  "/arsip(.*)",
+  "/unggah(.*)",
+  "/pengingat(.*)",
+  "/bagikan(.*)",
+  "/notaris(.*)",
+  "/kategori(.*)",
+  "/akses(.*)",
+  "/sandi(.*)",
+]);
+const ruteLogin = createRouteMatcher(["/login(.*)"]);
 
-export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  const punyaSesi = !!getSessionCookie(req);
+export default clerkMiddleware(async (auth, req) => {
+  const { userId } = await auth();
 
-  const terlindungi = RUTE_TERLINDUNGI.some(
-    (r) => pathname === r || pathname.startsWith(`${r}/`),
-  );
-
-  if (terlindungi && !punyaSesi) {
+  if (rutePrivat(req) && !userId) {
     const url = new URL("/login", req.url);
-    url.searchParams.set("next", pathname);
+    url.searchParams.set("next", req.nextUrl.pathname);
     return NextResponse.redirect(url);
   }
 
-  // Sudah masuk tapi membuka /login → langsung ke dashboard.
-  if (pathname === "/login" && punyaSesi) {
+  // Sudah masuk tapi membuka /login → langsung ke dashboard. Halaman /login
+  // yang membawa ?reason (mis. sesi idle berakhir) dibiarkan tampil.
+  if (ruteLogin(req) && userId && !req.nextUrl.searchParams.has("reason")) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/arsip/:path*",
-    "/unggah/:path*",
-    "/pengingat/:path*",
-    "/bagikan/:path*",
-    "/notaris/:path*",
-    "/kategori/:path*",
-    "/akses/:path*",
-    "/sandi/:path*",
-    "/login",
+    // Semua rute kecuali berkas statis dan internal Next.js.
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // API wajib ikut dicakup agar auth() dapat dipakai di route handler.
+    "/(api|trpc)(.*)",
   ],
 };

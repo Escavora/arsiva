@@ -11,14 +11,41 @@ import {
   ClockCountdown,
   FileText,
   ArrowLeft,
+  GoogleLogo,
 } from "@phosphor-icons/react";
-import { signIn } from "@/lib/auth-client";
+import { useSignIn } from "@clerk/nextjs";
 
 // Display face untuk headline panel brand, menyatu dengan landing page.
 // Form tetap memakai font aplikasi (Inter) - ini permukaan produk, bukan marketing.
 const geist = Geist({ subsets: ["latin"], weight: ["500", "600"] });
 
 const muted = (pct: number) => `color-mix(in srgb, var(--color-text) ${pct}%, transparent)`;
+
+/** Kunci sessionStorage untuk mengingat tujuan setelah kembali dari Google (sama dengan src/app/sso-callback/page.tsx). */
+const KUNCI_TUJUAN = "arsiva:tujuan-setelah-masuk";
+
+const INFO_ALASAN: Record<string, string> = {
+  idle: "Sesi berakhir karena tidak ada aktivitas selama 30 menit. Silakan masuk kembali.",
+  "tidak-terdaftar": "Akun Google ini belum terdaftar di ARSIVA. Hubungi Admin untuk didaftarkan.",
+  verifikasi: "Verifikasi tambahan diperlukan. Masuk dengan email dan kata sandi Anda.",
+};
+
+type GalatClerk = { code?: string; message?: string; longMessage?: string };
+
+function pesanMasuk(err: GalatClerk): string {
+  switch (err.code) {
+    // Sengaja tidak membedakan "email tidak ada" dan "sandi salah".
+    case "form_password_incorrect":
+    case "form_identifier_not_found":
+    case "strategy_for_user_invalid":
+      return "Email atau kata sandi salah.";
+    case "form_code_incorrect":
+    case "verification_failed":
+      return "Kode verifikasi salah. Periksa kembali.";
+    default:
+      return err.longMessage ?? err.message ?? "Gagal masuk. Coba lagi.";
+  }
+}
 
 // Jaminan keamanan yang benar-benar berlaku di aplikasi - bukan angka karangan.
 const JAMINAN = [
@@ -38,31 +65,79 @@ export default function LoginPage() {
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
+  const { signIn } = useSignIn();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [kode, setKode] = React.useState("");
+  // "kode": Clerk meminta kode email (perangkat baru / verifikasi tambahan).
+  const [tahap, setTahap] = React.useState<"kredensial" | "kode">("kredensial");
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
+
+  const alasan = params.get("reason");
+  const info = alasan ? (INFO_ALASAN[alasan] ?? null) : null;
+  const next = params.get("next");
+  const tujuan = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+
+  /** Selesaikan sign-in yang sudah lengkap: buat sesi lalu pindah ke tujuan. */
+  const selesaikan = async () => {
+    const { error: err } = await signIn.finalize({
+      navigate: ({ decorateUrl }) => {
+        const url = decorateUrl(tujuan);
+        if (url.startsWith("http")) window.location.href = url;
+        else router.push(url);
+      },
+    });
+    if (err) throw err;
+  };
 
   const doLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
+    try {
+      if (tahap === "kode") {
+        const { error: err } = await signIn.mfa.verifyEmailCode({ code: kode.trim() });
+        if (err) return setError(pesanMasuk(err));
+        return await selesaikan();
+      }
 
-    const { error: err } = await signIn.email({ email: email.trim(), password });
+      const { error: err } = await signIn.password({ identifier: email.trim(), password });
+      if (err) return setError(pesanMasuk(err));
 
+      if (signIn.status === "complete") return await selesaikan();
+
+      if (signIn.status === "needs_client_trust" || signIn.status === "needs_second_factor") {
+        const { error: kirimErr } = await signIn.mfa.sendEmailCode();
+        if (kirimErr) return setError(pesanMasuk(kirimErr));
+        setTahap("kode");
+        return;
+      }
+      setError("Langkah verifikasi tambahan ini belum didukung. Hubungi Admin.");
+    } catch (err) {
+      setError(pesanMasuk(err as GalatClerk));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const masukDenganGoogle = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      window.sessionStorage.setItem(KUNCI_TUJUAN, tujuan);
+    } catch {
+      // sessionStorage tidak tersedia — setelah Google tetap diarahkan ke dashboard.
+    }
+    const { error: err } = await signIn.sso({
+      strategy: "oauth_google",
+      redirectUrl: tujuan,
+      redirectCallbackUrl: "/sso-callback",
+    });
     if (err) {
       setLoading(false);
-      setError(
-        err.status === 401 || err.status === 403
-          ? "Email atau kata sandi salah."
-          : (err.message ?? "Gagal masuk. Coba lagi."),
-      );
-      return;
+      setError(pesanMasuk(err));
     }
-
-    const next = params.get("next");
-    router.push(next && next.startsWith("/") ? next : "/dashboard");
-    router.refresh();
   };
 
   return (
@@ -147,10 +222,27 @@ function LoginForm() {
         <form className="login-form" onSubmit={doLogin} style={{ width: "min(432px, 100%)" }}>
           <h4 style={{ margin: "0 0 7px", fontSize: 26, letterSpacing: "-0.025em" }}>Masuk ke akun pegawai</h4>
           <p className="text-muted" style={{ fontSize: 14.5, marginBottom: 30 }}>
-            Gunakan email korporat dan kata sandi internal Anda.
+            {tahap === "kode"
+              ? `Kami mengirim kode verifikasi ke ${email.trim()}. Masukkan kodenya di bawah.`
+              : "Gunakan email korporat dan kata sandi internal Anda."}
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
+            {info && !error && (
+              <div
+                role="status"
+                style={{
+                  display: "flex", gap: 8, alignItems: "center", fontSize: 12.5,
+                  padding: "10px 12px", borderRadius: "var(--radius-md)",
+                  background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
+                  boxShadow: "inset 0 0 0 1px var(--color-accent-700)",
+                  color: "var(--color-accent-100)",
+                }}
+              >
+                <ClockCountdown size={16} style={{ flex: "none" }} />
+                {info}
+              </div>
+            )}
             {error && (
               <div
                 role="alert"
@@ -167,37 +259,67 @@ function LoginForm() {
               </div>
             )}
 
-            <div className="field">
-              <label htmlFor="email">Email korporat</label>
-              <input
-                id="email" className="input" type="email" autoComplete="username" required
-                placeholder="nama@bank.co.id" value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="password">Kata sandi</label>
-              <input
-                id="password" className="input" type="password" autoComplete="current-password" required
-                placeholder="••••••••" value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <label className="radio">
-                <input type="checkbox" />
-                <span className="dot" />
-                Ingat perangkat ini
-              </label>
-              <a href="#" onClick={(e) => e.preventDefault()} style={{ marginLeft: "auto", fontSize: 12.5 }}>
-                Lupa kata sandi?
-              </a>
-            </div>
+            {tahap === "kode" ? (
+              <div className="field">
+                <label htmlFor="kode">Kode verifikasi</label>
+                <input
+                  id="kode" className="input" inputMode="numeric" autoComplete="one-time-code" required
+                  placeholder="123456" value={kode} autoFocus
+                  onChange={(e) => setKode(e.target.value)}
+                />
+              </div>
+            ) : (
+              <>
+                <div className="field">
+                  <label htmlFor="email">Email korporat</label>
+                  <input
+                    id="email" className="input" type="email" autoComplete="username" required
+                    placeholder="nama@bank.co.id" value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="password">Kata sandi</label>
+                  <input
+                    id="password" className="input" type="password" autoComplete="current-password" required
+                    placeholder="••••••••" value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <label className="radio">
+                    <input type="checkbox" />
+                    <span className="dot" />
+                    Ingat perangkat ini
+                  </label>
+                  <a href="#" onClick={(e) => e.preventDefault()} style={{ marginLeft: "auto", fontSize: 12.5 }}>
+                    Lupa kata sandi?
+                  </a>
+                </div>
+              </>
+            )}
 
             <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
               <SignIn size={17} />
-              {loading ? "Memproses…" : "Masuk"}
+              {loading ? "Memproses…" : tahap === "kode" ? "Verifikasi" : "Masuk"}
             </button>
+
+            {tahap === "kredensial" && (
+              <>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 12, color: muted(46) }}>
+                  <span style={{ flex: 1, height: 1, background: "var(--color-divider)" }} />
+                  atau
+                  <span style={{ flex: 1, height: 1, background: "var(--color-divider)" }} />
+                </div>
+                <button
+                  type="button" className="btn btn-secondary btn-block" disabled={loading}
+                  onClick={() => void masukDenganGoogle()}
+                >
+                  <GoogleLogo size={17} weight="bold" />
+                  Masuk dengan Google
+                </button>
+              </>
+            )}
 
             <div style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12.5, lineHeight: 1.5, color: muted(52), marginTop: 2 }}>
               <ShieldCheck size={16} style={{ flex: "none", marginTop: 1 }} />

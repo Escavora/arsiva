@@ -7,7 +7,7 @@
 import "../../scripts/load-env";
 import { eq } from "drizzle-orm";
 import { db, schema } from "./index";
-import { auth } from "../lib/auth";
+import { createClerkClient } from "@clerk/backend";
 import {
   seedCats,
   seedDocs,
@@ -24,22 +24,47 @@ const PASSWORD = "arsiva123";
 async function main() {
   console.log("→ Menyemai database ARSIVA…");
 
-  /* 1. Pengguna (lewat Better Auth agar kata sandi ter-hash) */
+  /* 1. Pengguna: akun di Clerk (menyimpan kata sandi) + profil lokal yang ditautkan lewat clerk_id */
+  const secretKey = process.env.CLERK_SECRET_KEY;
+  if (!secretKey) throw new Error("CLERK_SECRET_KEY belum diisi di .env.");
+  const clerk = createClerkClient({ secretKey });
+
   const userIdByName = new Map<string, string>();
   for (const u of seedUsers) {
-    const existing = await db.query.user.findFirst({ where: eq(schema.user.email, u.email) });
-    let id = existing?.id;
-    if (!id) {
-      const res = await auth.api.signUpEmail({
-        body: { email: u.email, password: PASSWORD, name: u.nama },
-      });
-      id = res.user.id;
+    const email = u.email.toLowerCase();
+    const [firstName, ...sisa] = u.nama.split(" ");
+    const lastName = sisa.join(" ") || undefined;
+
+    const lokal = await db.query.user.findFirst({ where: eq(schema.user.email, email) });
+
+    // Akun Clerk: pakai yang sudah ditautkan, lalu cari lewat email, baru buat.
+    let clerkId = lokal?.clerkId ?? undefined;
+    if (!clerkId) {
+      const { data } = await clerk.users.getUserList({ emailAddress: [email] });
+      clerkId = data[0]?.id;
     }
-    // peran/unit/aktif bertanda input:false, jadi diset langsung di sini.
-    await db
-      .update(schema.user)
-      .set({ peran: u.peran, unit: u.unit, aktif: u.aktif, name: u.nama })
-      .where(eq(schema.user.id, id));
+    if (!clerkId) {
+      const baru = await clerk.users.createUser({
+        emailAddress: [email],
+        password: PASSWORD,
+        firstName,
+        lastName,
+        skipPasswordChecks: true, // kata sandi demo sengaja sederhana
+      });
+      clerkId = baru.id;
+    }
+
+    // Akun nonaktif diblokir juga di Clerk (selain dicek lokal di guard.ts).
+    if (!u.aktif) await clerk.users.banUser(clerkId);
+
+    const nilai = { clerkId, name: u.nama, email, unit: u.unit, peran: u.peran, aktif: u.aktif };
+    let id = lokal?.id;
+    if (id) {
+      await db.update(schema.user).set(nilai).where(eq(schema.user.id, id));
+    } else {
+      const [row] = await db.insert(schema.user).values(nilai).returning();
+      id = row.id;
+    }
     userIdByName.set(u.nama, id);
   }
   console.log(`  ✓ ${seedUsers.length} pengguna (kata sandi semua: "${PASSWORD}")`);

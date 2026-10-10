@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { handle, requireAdmin, HttpError } from "@/lib/guard";
+import { hapusAkun, setAktif, ubahEmail, ubahNama } from "@/lib/clerk-users";
 
 type Ctx = { params: Promise<{ id: string }> };
 const PERAN = ["Admin", "Team Member", "Pembaca"] as const;
@@ -32,11 +33,15 @@ export async function PATCH(req: Request, { params }: Ctx) {
         throw new HttpError(400, "Anda tidak dapat menonaktifkan akun Anda sendiri.");
       }
       patch.aktif = !!body.aktif;
+      if (target.clerkId && patch.aktif !== target.aktif) await setAktif(target.clerkId, patch.aktif as boolean);
     }
 
     if (typeof body.unit === "string" && body.unit.trim()) patch.unit = body.unit.trim();
 
-    if (typeof body.nama === "string" && body.nama.trim()) patch.name = body.nama.trim();
+    if (typeof body.nama === "string" && body.nama.trim()) {
+      patch.name = body.nama.trim();
+      if (target.clerkId && patch.name !== target.name) await ubahNama(target.clerkId, patch.name as string);
+    }
 
     if (typeof body.email === "string" && body.email.trim()) {
       const email = body.email.trim().toLowerCase();
@@ -44,6 +49,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
       if (email !== target.email) {
         const dipakai = await db.query.user.findFirst({ where: eq(schema.user.email, email) });
         if (dipakai) throw new HttpError(409, "Email sudah dipakai pengguna lain.");
+        if (target.clerkId) await ubahEmail(target.clerkId, email);
         patch.email = email;
       }
     }
@@ -78,6 +84,9 @@ export async function DELETE(_req: Request, { params }: Ctx) {
       );
     }
 
+    // Akun Clerk dihapus lebih dulu: bila baris lokal gagal dihapus, mengulang
+    // penghapusan tetap aman (Clerk 404 diabaikan).
+    if (target.clerkId) await hapusAkun(target.clerkId);
     await db.delete(schema.user).where(eq(schema.user.id, id));
     return { ok: true, nama: target.name };
   });

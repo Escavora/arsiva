@@ -22,6 +22,9 @@ export function todayISO(): string {
 
 export type Role = "Admin" | "Team Member" | "Pembaca";
 
+/** PRD: sesi berakhir otomatis setelah 30 menit tanpa aktivitas (server dan browser memakai nilai yang sama). */
+export const BATAS_IDLE_MS = 30 * 60 * 1000;
+
 export type Category = { nama: string; desk: string };
 
 export type Doc = {

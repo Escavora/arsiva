@@ -1,9 +1,13 @@
-// ARSIVA — Drizzle schema (Tahap 2).
+// ARSIVA — Drizzle schema.
 //
 // Mengikuti PRD §6 "Database Schema". Catatan pemetaan:
-// - PRD `users.password_hash` tidak disimpan di tabel `user`, melainkan di
-//   `account.password` — Better Auth yang mengelola hashing & verifikasinya.
-// - PRD `users.nama` dipetakan ke kolom `name` milik Better Auth.
+// - Identitas & kata sandi dikelola Clerk. Tabel `user` hanya profil lokal
+//   ARSIVA: `clerk_id` menautkannya ke akun Clerk, sedangkan primary key lokal
+//   tetap supaya foreign key dokumen/notifikasi/tautan berbagi tidak terikat ke
+//   penyedia login. PRD `users.password_hash` tidak ada di sini.
+// - PRD `users.nama` dipetakan ke kolom `name`.
+// - Peran, unit, dan status aktif disimpan di sini (sumber kebenaran), bukan
+//   di Clerk.
 // - Tabel `notifications` adalah tambahan untuk notifikasi in-app (adapter email).
 
 import { relations } from "drizzle-orm";
@@ -12,57 +16,23 @@ import { pgTable, text, integer, boolean, timestamp, date, index } from "drizzle
 /** Timestamp dengan zona waktu; Workers selalu berjalan di UTC. */
 const ts = (name: string) => timestamp(name, { withTimezone: true });
 
-/* ───────────────────────── Better Auth ───────────────────────── */
+/* ───────────────────────── Pengguna ───────────────────────── */
 
 export const user = pgTable("user", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  // ID pengguna di Clerk (user_xxx). Null = belum ditautkan ke akun Clerk.
+  clerkId: text("clerk_id").unique(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  emailVerified: boolean("email_verified").notNull().default(false),
-  image: text("image"),
   // Kolom tambahan ARSIVA (PRD: peran, reminder_threshold_days)
   peran: text("peran", { enum: ["Admin", "Team Member", "Pembaca"] }).notNull().default("Team Member"),
   unit: text("unit").notNull().default("Divisi Legal"),
   aktif: boolean("aktif").notNull().default(true),
   reminderThresholdDays: integer("reminder_threshold_days").notNull().default(60),
-  createdAt: ts("created_at").notNull().defaultNow(),
-  updatedAt: ts("updated_at").notNull().defaultNow(),
-});
-
-export const session = pgTable("session", {
-  id: text("id").primaryKey(),
-  expiresAt: ts("expires_at").notNull(),
-  token: text("token").notNull().unique(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-  createdAt: ts("created_at").notNull().defaultNow(),
-  updatedAt: ts("updated_at").notNull().defaultNow(),
-});
-
-export const account = pgTable("account", {
-  id: text("id").primaryKey(),
-  // Wajib sejak better-auth 1.7 (penerbit kredensial/OAuth).
-  issuer: text("issuer").notNull().default(""),
-  accountId: text("account_id").notNull(),
-  providerId: text("provider_id").notNull(),
-  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  idToken: text("id_token"),
-  accessTokenExpiresAt: ts("access_token_expires_at"),
-  refreshTokenExpiresAt: ts("refresh_token_expires_at"),
-  scope: text("scope"),
-  password: text("password"),
-  createdAt: ts("created_at").notNull().defaultNow(),
-  updatedAt: ts("updated_at").notNull().defaultNow(),
-});
-
-export const verification = pgTable("verification", {
-  id: text("id").primaryKey(),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: ts("expires_at").notNull(),
+  // Batas sesi 30 menit tanpa aktivitas (PRD) — Clerk gratis tidak punya
+  // inactivity timeout, jadi ditegakkan sendiri di src/lib/guard.ts.
+  lastActiveAt: ts("last_active_at"),
+  lastSessionId: text("last_session_id"),
   createdAt: ts("created_at").notNull().defaultNow(),
   updatedAt: ts("updated_at").notNull().defaultNow(),
 });

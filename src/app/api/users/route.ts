@@ -1,6 +1,6 @@
 import { asc } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { auth } from "@/lib/auth";
+import { buatAkun, hapusAkun } from "@/lib/clerk-users";
 import { handle, requireUser, requireAdmin, HttpError } from "@/lib/guard";
 import { eq } from "drizzle-orm";
 
@@ -42,17 +42,23 @@ export async function POST(req: Request) {
     const pass = String(password ?? "").trim() || "arsiva123";
     if (pass.length < 8) throw new HttpError(400, "Kata sandi minimal 8 karakter.");
 
-    // Dibuat lewat Better Auth agar kata sandi ter-hash dengan benar.
-    const res = await auth.api.signUpEmail({ body: { email: mail, password: pass, name: n } });
+    const unitKerja = String(unit ?? "").trim() || "Divisi Legal";
 
-    await db
-      .update(schema.user)
-      .set({ peran, unit: String(unit ?? "").trim() || "Divisi Legal", aktif: true })
-      .where(eq(schema.user.id, res.user.id));
-
-    return {
-      user: { id: res.user.id, nama: n, email: mail, unit: String(unit ?? "").trim() || "Divisi Legal", peran, aktif: true },
-      passwordAwal: pass,
-    };
+    // Akun dibuat di Clerk (yang menyimpan kata sandi), lalu profilnya di sini.
+    const clerkId = await buatAkun({ nama: n, email: mail, password: pass });
+    try {
+      const [row] = await db
+        .insert(schema.user)
+        .values({ clerkId, name: n, email: mail, unit: unitKerja, peran, aktif: true })
+        .returning();
+      return {
+        user: { id: row.id, nama: n, email: mail, unit: unitKerja, peran, aktif: true },
+        passwordAwal: pass,
+      };
+    } catch (err) {
+      // Jangan tinggalkan akun Clerk yatim bila profil lokal gagal dibuat.
+      await hapusAkun(clerkId).catch((e) => console.error("[arsiva:clerk] gagal membatalkan akun:", e));
+      throw err;
+    }
   });
 }

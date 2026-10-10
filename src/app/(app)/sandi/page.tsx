@@ -4,12 +4,13 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Key, WarningCircle, ShieldCheck } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import { changePassword } from "@/lib/auth-client";
+import { useUser } from "@clerk/nextjs";
 
 const MIN = 8;
 
 export default function SandiPage() {
   const router = useRouter();
+  const { isLoaded, user } = useUser();
 
   const [lama, setLama] = React.useState("");
   const [baru, setBaru] = React.useState("");
@@ -28,22 +29,25 @@ export default function SandiPage() {
     if (baru !== ulang) return setError("Konfirmasi kata sandi tidak cocok dengan kata sandi baru.");
     if (baru === lama) return setError("Kata sandi baru harus berbeda dari kata sandi saat ini.");
 
-    setMenyimpan(true);
-    const { error: err } = await changePassword({
-      currentPassword: lama,
-      newPassword: baru,
-      revokeOtherSessions: keluarkanLain,
-    });
-    setMenyimpan(false);
+    if (!user) return setError("Sesi belum siap. Muat ulang halaman ini.");
 
-    if (err) {
-      // Better Auth membalas 400/401 bila kata sandi saat ini salah.
+    setMenyimpan(true);
+    try {
+      await user.updatePassword({
+        currentPassword: lama,
+        newPassword: baru,
+        signOutOfOtherSessions: keluarkanLain,
+      });
+    } catch (err) {
+      const e = (err as { errors?: { code?: string; longMessage?: string; message?: string }[] }).errors?.[0];
       setError(
-        err.status === 400 || err.status === 401
+        e?.code === "form_password_incorrect"
           ? "Kata sandi saat ini salah."
-          : (err.message ?? "Gagal mengubah kata sandi. Coba lagi."),
+          : (e?.longMessage ?? e?.message ?? "Gagal mengubah kata sandi. Coba lagi."),
       );
       return;
+    } finally {
+      setMenyimpan(false);
     }
 
     toast.success("Kata sandi berhasil diperbarui.");
@@ -71,6 +75,12 @@ export default function SandiPage() {
           >
             <WarningCircle size={16} style={{ flex: "none" }} />
             {error}
+          </div>
+        )}
+
+        {isLoaded && user && !user.passwordEnabled && (
+          <div className="text-muted" style={{ fontSize: 12.5, lineHeight: 1.5 }}>
+            Akun Anda masuk lewat Google dan tidak memiliki kata sandi ARSIVA, sehingga tidak ada yang perlu diubah di sini.
           </div>
         )}
 
@@ -116,7 +126,7 @@ export default function SandiPage() {
           <button type="button" className="btn btn-secondary" onClick={() => router.push("/dashboard")} disabled={menyimpan}>
             Batal
           </button>
-          <button type="submit" className="btn btn-primary" disabled={menyimpan}>
+          <button type="submit" className="btn btn-primary" disabled={menyimpan || !isLoaded || user?.passwordEnabled === false}>
             <Key size={15} />
             {menyimpan ? "Menyimpan…" : "Simpan Kata Sandi"}
           </button>

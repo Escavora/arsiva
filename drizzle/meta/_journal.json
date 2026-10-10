@@ -8,6 +8,20 @@
       "when": 1791635121124,
       "tag": "0000_flat_whistler",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791637867814,
+      "tag": "0001_far_smasher",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791637876135,
+      "tag": "0002_wakeful_thor_girl",
+      "breakpoints": true
     }
   ]
 }

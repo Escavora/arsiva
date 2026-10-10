@@ -279,6 +279,68 @@ Aplikasi yang sekarang (DB Turso, Better Auth) berhasil dibuild dengan
   menampilkan persentase progres.
 - Sebelum deploy: buat bucket sungguhan dengan `npx wrangler r2 bucket create arsiva-files`.
 
+### Hasil Langkah 3 (Clerk, 2026-10-10)
+
+**Desain akhir** (menyimpang sedikit dari rencana awal, lihat alasannya):
+
+- Better Auth dihapus total (`auth.ts`, `auth-client.ts`, route `/api/auth/*`, tabel
+  `session`/`account`/`verification`, kolom `email_verified`/`image`). Dua migrasi baru:
+  `0001` (tambah `clerk_id`, `last_active_at`, `last_session_id`; hapus tabel auth) dan
+  `0002` (hapus dua kolom lama). Dipecah karena `drizzle-kit` bertanya "rename atau
+  bukan?" secara interaktif bila kolom ditambah dan dihapus sekaligus.
+- **Peran, unit, dan status aktif tetap di tabel lokal `user`** dan dibaca server di setiap
+  request (`guard.ts`); tidak disalin ke Clerk `publicMetadata` (dibatalkan: tidak ada
+  manfaatnya, dan menambah risiko dua sumber kebenaran yang tidak sinkron).
+- PK lokal dipertahankan; `clerk_id` menautkan ke Clerk. Profil tanpa `clerk_id` ditautkan
+  otomatis lewat email **yang sudah terverifikasi** di Clerk.
+- **Tanpa webhook.** Akun hanya dibuat Admin (`POST /api/users`) atau seed; keduanya
+  membuat akun Clerk dan baris lokal sekaligus. Bila baris lokal gagal dibuat, akun Clerk
+  dibatalkan. Akun Clerk tanpa profil lokal → 403 "belum terdaftar".
+- `src/lib/clerk-users.ts`: buat akun, ubah nama, ubah email (tambah alamat baru
+  terverifikasi lalu hapus yang lama), ban/unban, hapus. `PATCH`/`DELETE` pengguna
+  mengubah Clerk lebih dulu, baru database.
+- `src/middleware.ts` memakai `clerkMiddleware` (edge). Matcher mencakup `/api/*` karena
+  `auth()` di route handler mensyaratkannya.
+- **Batas idle 30 menit** (Clerk gratis: *Maximum lifetime* dan *Inactivity timeout* berlabel
+  Pro). Ditegakkan di server (`guard.ts`): `last_active_at` dicatat paling sering sekali per
+  menit; bila sesi yang sama diam >30 menit, sesi Clerk dicabut dan request dijawab 401.
+  `last_session_id` mencegah login baru dianggap idle karena aktivitas kemarin. Di browser,
+  `use-idle-timeout.ts` mengeluarkan pengguna dan mengirim "denyut" ke `/api/me` tiap 4
+  menit selama pengguna aktif, supaya orang yang hanya membaca tidak dianggap idle server.
+- Login memakai *custom flow* Clerk (`useSignIn`) sehingga desain halaman login tetap.
+  Tambahan: tombol "Masuk dengan Google" + `/sso-callback`, langkah input kode email
+  (untuk Client Trust), dan banner alasan keluar (`?reason=idle`).
+- `/sandi` memakai `user.updatePassword`; akun Google-saja (tanpa kata sandi) diberi
+  penjelasan. Bundle Worker: **2,29 MB gzip**.
+
+**Terverifikasi** (preview Workers + Neon + instance Clerk development, 42 pengecekan
+otomatis): sesi per peran, semua endpoint GET, 403 untuk peran yang tidak berwenang, 401
+untuk token sampah/tanpa token, idle >30 menit → 401 + sesi dicabut, sesi baru tidak
+dianggap idle, 29 menit masih diterima, penautan otomatis lewat email, akun asing → 403,
+dan seluruh siklus Admin kelola pengguna (buat, nama, email, ban/unban, peran, hapus) yang
+tercermin di Clerk. Akun nonaktif (ban) tidak bisa membuat sesi sama sekali.
+
+**Belum teruji** (butuh browser, tidak tersedia di sesi pengembangan): klik form login,
+tombol Google dan `/sso-callback`, timer idle di browser, halaman `/sandi`, tombol
+Keluar. Sudah dipastikan hanya: lolos typecheck, ter-build, dan kodenya ada di bundle klien.
+
+**Temuan: Client Trust Clerk aktif.** Login dengan kata sandi benar tetap berstatus
+`needs_client_trust` (kode email di perangkat baru). Email akun demo (`@bri.co.id`)
+fiktif, sehingga kode tidak pernah sampai dan akun demo **tidak bisa masuk** selama fitur
+ini aktif. Matikan di dashboard Clerk untuk development, atau pakai email nyata. Untuk
+production dengan email kantor sungguhan, fitur ini layak dibiarkan menyala (verifikasi
+perangkat baru), dan form login sudah menyediakan langkah input kodenya.
+
+**Catatan:**
+- Kata sandi awal pengguna baru tetap `arsiva123` bila Admin tidak mengisinya (perilaku
+  lama, tertulis di pesan UI). Dibuat dengan `skipPasswordChecks` karena Clerk menolaknya
+  sebagai kata sandi lemah/bocor. Pertimbangkan kata sandi acak per pengguna.
+- "Lupa kata sandi?" dan "Ingat perangkat ini" di halaman login masih tombol kosong
+  (sudah begitu sebelum migrasi).
+- Domain `.test` ditolak Clerk sebagai email; pakai `example.com` untuk akun uji.
+- Waktu development pakai kredensial Google bersama milik Clerk; production butuh OAuth
+  client sendiri di Google Cloud Console.
+
 ## 6. Bagian yang tidak perlu diubah
 
 - **Logika domain:** `src/lib/arsiva.ts`, `dto.ts`, `master-crud.ts`.

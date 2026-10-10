@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import {
   analytics,
   computeCounts,
@@ -11,7 +10,8 @@ import {
   type Role,
   type ViewDoc,
 } from "@/lib/arsiva";
-import { useSession } from "@/lib/auth-client";
+import { useAuth, useClerk } from "@clerk/nextjs";
+import { useIdleTimeout } from "@/lib/use-idle-timeout";
 
 /** Status pengiriman email dari API (cerminan HasilKirim di src/lib/notify.ts). */
 export type HasilKirim = { terkirim: boolean; driver: string; error?: string };
@@ -73,9 +73,16 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
     headers: init?.body instanceof FormData ? init?.headers : { "Content-Type": "application/json", ...init?.headers },
   });
   const data = await res.json().catch(() => ({}));
+  if (res.status === 401) window.dispatchEvent(new Event(EVENT_SESI_BERAKHIR));
   if (!res.ok) throw new Error(data?.error ?? "Permintaan gagal.");
   return data as T;
 }
+
+/** Dipicu api() saat server menjawab 401 (sesi habis/dicabut), agar provider mengeluarkan pengguna. */
+const EVENT_SESI_BERAKHIR = "arsiva:sesi-berakhir";
+
+/** Profil pengguna dari GET /api/me — peran & unit dibaca server dari database, bukan dari token. */
+type ApiMe = { id: string; nama: string; email: string; unit: string; peran: Role; threshold: number };
 
 type Ctx = {
   state: State;
@@ -132,13 +139,63 @@ type Ctx = {
 const ArsivaContext = React.createContext<Ctx | null>(null);
 
 export function ArsivaProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const { data: session, isPending } = useSession();
+  const { isLoaded, isSignedIn } = useAuth();
+  const { signOut } = useClerk();
   const [state, setState] = React.useState<State>(EMPTY);
+  const [profil, setProfil] = React.useState<ApiMe | null>(null);
+  const [akunError, setAkunError] = React.useState<string | null>(null);
 
-  const sessionUser = session?.user;
-  const peran = (sessionUser?.peran as Role) ?? "Pembaca";
-  const threshold = (sessionUser?.reminderThresholdDays as number) ?? 60;
+  const sessionUser = React.useMemo(
+    () =>
+      profil && {
+        name: profil.nama,
+        email: profil.email,
+        unit: profil.unit,
+        peran: profil.peran,
+        reminderThresholdDays: profil.threshold,
+      },
+    [profil],
+  );
+  const peran: Role = sessionUser?.peran ?? "Pembaca";
+  const threshold = sessionUser?.reminderThresholdDays ?? 60;
+  const isPending = !isLoaded || (isSignedIn === true && !profil && !akunError);
+
+  /* ── profil pengguna (peran & unit dari server) ── */
+  React.useEffect(() => {
+    if (!isLoaded || !isSignedIn) return;
+    let batal = false;
+    api<{ me: ApiMe }>("/api/me")
+      .then((r) => { if (!batal) setProfil(r.me); })
+      .catch((e) => { if (!batal) setAkunError(e instanceof Error ? e.message : "Gagal memuat akun."); });
+    return () => { batal = true; };
+  }, [isLoaded, isSignedIn]);
+
+  /* ── keluar: manual, sesi habis, atau idle 30 menit ── */
+  const keluar = React.useCallback(
+    async (alasan?: "idle") => {
+      const tujuan = alasan ? `/login?reason=${alasan}` : "/login";
+      try {
+        await signOut({ redirectUrl: tujuan });
+      } catch {
+        // Sesi mungkin sudah dicabut server — tetap arahkan ke halaman masuk.
+        window.location.href = tujuan;
+      }
+    },
+    [signOut],
+  );
+
+  React.useEffect(() => {
+    const saatBerakhir = () => void keluar("idle");
+    window.addEventListener(EVENT_SESI_BERAKHIR, saatBerakhir);
+    return () => window.removeEventListener(EVENT_SESI_BERAKHIR, saatBerakhir);
+  }, [keluar]);
+
+  useIdleTimeout({
+    aktif: isLoaded && isSignedIn === true && !!profil,
+    onIdle: () => void keluar("idle"),
+    // Denyut: server hanya tahu aktivitas lewat request, jadi lapor berkala.
+    onDenyut: () => void api("/api/me").catch(() => {}),
+  });
 
   const say = React.useCallback((msg: string) => toast(msg), []);
   const fail = React.useCallback((e: unknown) => {
@@ -220,14 +277,12 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
     async (t: number) => {
       try {
         await api("/api/me", { method: "PATCH", body: JSON.stringify({ threshold: t }) });
-        // Perbarui sesi agar reminderThresholdDays yang baru terbaca.
-        router.refresh();
-        window.location.reload();
+        setProfil((p) => (p ? { ...p, threshold: t } : p));
       } catch (e) {
         fail(e);
       }
     },
-    [fail, router],
+    [fail],
   );
 
   const tandai = React.useCallback(
@@ -394,11 +449,7 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
     [run],
   );
 
-  const logout = React.useCallback(async () => {
-    const { signOut } = await import("@/lib/auth-client");
-    await signOut();
-    router.push("/login");
-  }, [router]);
+  const logout = React.useCallback(() => keluar(), [keluar]);
 
   const value: Ctx = {
     state, me, threshold,
@@ -414,6 +465,19 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
     setUserPeran, toggleUser, removeUser, addUser, updateUser,
     markNotificationsRead, logout, say,
   };
+
+  // Akun Clerk valid tetapi ditolak ARSIVA (nonaktif / belum terdaftar).
+  if (akunError) {
+    return (
+      <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, color: "var(--color-text)" }}>
+        <div className="card elev-sm" style={{ maxWidth: 420, padding: "var(--space-6)", display: "grid", gap: 16 }}>
+          <h4 style={{ margin: 0 }}>Akses ditolak</h4>
+          <div className="text-muted" style={{ fontSize: 13.5, lineHeight: 1.6 }}>{akunError}</div>
+          <button type="button" className="btn btn-secondary" onClick={() => void keluar()}>Keluar</button>
+        </div>
+      </div>
+    );
+  }
 
   // Selama sesi masih diperiksa, jangan render isi aplikasi (mencegah kedipan).
   if (isPending) {
