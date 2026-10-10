@@ -67,7 +67,7 @@ async function main() {
     }
     userIdByName.set(u.nama, id);
   }
-  console.log(`  ✓ ${seedUsers.length} pengguna (kata sandi semua: "${PASSWORD}")`);
+  console.log(`  ✓ ${seedUsers.length} pengguna (kata sandi awal akun baru: "${PASSWORD}")`);
 
   /* 2. Master data */
   const catId = new Map<string, number>();
@@ -184,10 +184,11 @@ async function main() {
     console.log(`  • tautan berbagi sudah ada — dilewati`);
   }
 
-  console.log("\n✅ Selesai. Masuk dengan:");
-  console.log(`   Admin       : admin.cop@bri.co.id / ${PASSWORD}`);
-  console.log(`   Team Member : teammember.cop@bri.co.id / ${PASSWORD}`);
-  console.log(`   Pembaca     : agus.nugroho@bank.co.id / ${PASSWORD}`);
+  // Kata sandi hanya diatur saat akun Clerk dibuat; akun yang sudah ada tidak diubah.
+  console.log("\n✅ Selesai. Akun demo (kata sandi lihat README):");
+  console.log("   Admin       : admin.cop@bri.co.id");
+  console.log("   Team Member : teammember.cop@bri.co.id");
+  console.log("   Pembaca     : agus.nugroho@bank.co.id");
 }
 
 main()

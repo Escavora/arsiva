@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Key, WarningCircle, ShieldCheck } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
+import { pesanClerk } from "@/lib/pesan-clerk";
 
 const MIN = 8;
 
@@ -39,12 +40,7 @@ export default function SandiPage() {
         signOutOfOtherSessions: keluarkanLain,
       });
     } catch (err) {
-      const e = (err as { errors?: { code?: string; longMessage?: string; message?: string }[] }).errors?.[0];
-      setError(
-        e?.code === "form_password_incorrect"
-          ? "Kata sandi saat ini salah."
-          : (e?.longMessage ?? e?.message ?? "Gagal mengubah kata sandi. Coba lagi."),
-      );
+      setError(pesanClerk(err, "sandi"));
       return;
     } finally {
       setMenyimpan(false);

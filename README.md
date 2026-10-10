@@ -26,13 +26,18 @@ npm run dev
 
 Buka http://localhost:3000 → diarahkan ke `/login`.
 
-**Akun demo** (kata sandi semua: `arsiva123`):
+**Akun demo:**
 
-| Peran | Email |
-| --- | --- |
-| Admin | `admin.cop@bri.co.id` |
-| Team Member | `teammember.cop@bri.co.id` |
-| Pembaca | `agus.nugroho@bank.co.id` |
+| Peran | Email | Kata sandi |
+| --- | --- | --- |
+| Admin | `admin.cop@bri.co.id` | `Arsiva#UjiCoba2026!` |
+| Team Member | `teammember.cop@bri.co.id` | `arsiva123` |
+| Pembaca | `agus.nugroho@bank.co.id` | `arsiva123` |
+
+Kata sandi disimpan di Clerk, bukan di database. `db:seed` hanya mengaturnya
+(`arsiva123`) saat akun Clerk **baru dibuat**; akun yang sudah ada tidak diubah.
+Jadi pada instance Clerk baru, Admin juga memakai `arsiva123` sampai diganti
+lewat halaman Kata Sandi. Batas panjang kata sandi Clerk: minimal 8 karakter.
 
 ## Tech Stack
 

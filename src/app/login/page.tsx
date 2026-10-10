@@ -14,6 +14,7 @@ import {
   GoogleLogo,
 } from "@phosphor-icons/react";
 import { useSignIn } from "@clerk/nextjs";
+import { pesanClerk } from "@/lib/pesan-clerk";
 
 // Display face untuk headline panel brand, menyatu dengan landing page.
 // Form tetap memakai font aplikasi (Inter) - ini permukaan produk, bukan marketing.
@@ -30,22 +31,7 @@ const INFO_ALASAN: Record<string, string> = {
   verifikasi: "Verifikasi tambahan diperlukan. Masuk dengan email dan kata sandi Anda.",
 };
 
-type GalatClerk = { code?: string; message?: string; longMessage?: string };
-
-function pesanMasuk(err: GalatClerk): string {
-  switch (err.code) {
-    // Sengaja tidak membedakan "email tidak ada" dan "sandi salah".
-    case "form_password_incorrect":
-    case "form_identifier_not_found":
-    case "strategy_for_user_invalid":
-      return "Email atau kata sandi salah.";
-    case "form_code_incorrect":
-    case "verification_failed":
-      return "Kode verifikasi salah. Periksa kembali.";
-    default:
-      return err.longMessage ?? err.message ?? "Gagal masuk. Coba lagi.";
-  }
-}
+const pesanMasuk = (err: unknown) => pesanClerk(err, "masuk");
 
 // Jaminan keamanan yang benar-benar berlaku di aplikasi - bukan angka karangan.
 const JAMINAN = [
@@ -115,7 +101,7 @@ function LoginForm() {
       }
       setError("Langkah verifikasi tambahan ini belum didukung. Hubungi Admin.");
     } catch (err) {
-      setError(pesanMasuk(err as GalatClerk));
+      setError(pesanMasuk(err));
     } finally {
       setLoading(false);
     }

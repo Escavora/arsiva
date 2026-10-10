@@ -6,6 +6,7 @@
 import { clerkClient } from "@clerk/nextjs/server";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { HttpError } from "@/lib/guard";
+import { kodeClerk, pesanClerk } from "@/lib/pesan-clerk";
 
 /** "Rina Astuti" → { firstName: "Rina", lastName: "Astuti" } */
 export function pisahNama(nama: string): { firstName: string; lastName?: string } {
@@ -18,14 +19,14 @@ export function pisahNama(nama: string): { firstName: string; lastName?: string 
 /** Terjemahkan error Clerk menjadi HttpError dengan pesan yang bisa dibaca Admin. */
 export function galatClerk(err: unknown, fallback = "Gagal memproses akun di Clerk."): HttpError {
   if (isClerkAPIResponseError(err)) {
-    const e = err.errors[0];
-    if (e?.code === "form_identifier_exists") {
-      return new HttpError(409, "Email sudah terdaftar di Clerk.");
+    const kode = kodeClerk(err);
+    if (kode?.startsWith("form_identifier_exists")) {
+      return new HttpError(409, pesanClerk(err, "akun"));
     }
-    if (e?.code?.startsWith("form_password")) {
-      return new HttpError(400, e.longMessage ?? "Kata sandi tidak memenuhi syarat.");
+    if (kode?.startsWith("form_password")) {
+      return new HttpError(400, pesanClerk(err, "akun", "Kata sandi tidak memenuhi syarat."));
     }
-    return new HttpError(err.status >= 400 && err.status < 500 ? err.status : 502, e?.longMessage ?? e?.message ?? fallback);
+    return new HttpError(err.status >= 400 && err.status < 500 ? err.status : 502, pesanClerk(err, "akun", fallback));
   }
   console.error("[arsiva:clerk]", err);
   return new HttpError(502, fallback);

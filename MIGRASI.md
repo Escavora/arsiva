@@ -331,6 +331,19 @@ ini aktif. Matikan di dashboard Clerk untuk development, atau pakai email nyata.
 production dengan email kantor sungguhan, fitur ini layak dibiarkan menyala (verifikasi
 perangkat baru), dan form login sudah menyediakan langkah input kodenya.
 
+**Tindak lanjut (uji browser, 2026-10-10):**
+- *Device Trust* (nama baru Client Trust; Protect → Protections) dimatikan untuk
+  development. Login akun demo berhasil di browser.
+- Pesan error Clerk sempat tampil berbahasa Inggris: kode aslinya ada di
+  `errors[0].code`, bukan `code` (yang selalu `api_response_error`). Sekarang semua
+  diterjemahkan lewat `src/lib/pesan-clerk.ts` (login, `/sandi`, `clerk-users.ts`);
+  kode yang tidak dikenal jatuh ke pesan umum berbahasa Indonesia.
+- Panjang minimum kata sandi di Clerk diturunkan dari 15 ke 8, sama dengan teks `/sandi`.
+- Teruji di browser: login benar/salah, dashboard + semua API, `/sandi` (sandi lama
+  salah, konfirmasi beda, terlalu pendek, berhasil). Kata sandi Admin demo kini
+  `Arsiva#UjiCoba2026!` (hasil uji ganti sandi).
+- Masih belum teruji: tombol Google + `/sso-callback`, tombol Keluar, timer idle.
+
 **Catatan:**
 - Kata sandi awal pengguna baru tetap `arsiva123` bila Admin tidak mengisinya (perilaku
   lama, tertulis di pesan UI). Dibuat dengan `skipPasswordChecks` karena Clerk menolaknya
