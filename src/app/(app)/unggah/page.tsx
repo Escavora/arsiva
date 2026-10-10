@@ -75,7 +75,7 @@ export default function UnggahPage() {
       <div className="card elev-sm" style={{ padding: "var(--space-6)", gap: "var(--space-6)" }}>
         {/* langkah 1 */}
         <div>
-          <div style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 45%, transparent)", marginBottom: 9 }}>
+          <div style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", marginBottom: 9 }}>
             1 · Berkas hasil scan
           </div>
           <label className="upload-drop" style={{ display: "flex", gap: 14, alignItems: "center", padding: 18, borderRadius: "var(--radius-md)", border: "1px dashed var(--color-neutral-700)", cursor: "pointer", background: "var(--color-surface-2)" }}>
@@ -99,45 +99,45 @@ export default function UnggahPage() {
 
         {/* langkah 2 */}
         <div>
-          <div style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 45%, transparent)", marginBottom: 9 }}>
+          <div style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", marginBottom: 9 }}>
             2 · Informasi dokumen
           </div>
           <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
             <div className="field" style={{ gridColumn: "1 / -1" }}>
-              <label>Nama dokumen</label>
-              <input
+              <label htmlFor="unggah-nama-dokumen">Nama dokumen</label>
+              <input id="unggah-nama-dokumen"
                 className="input" placeholder="mis. Perjanjian Kerja Sama Layanan Notaris — Wardhani & Rekan"
                 value={up.nama} onChange={(e) => setUp((v) => ({ ...v, nama: e.target.value }))}
               />
             </div>
             <div className="field">
-              <label>Jenis dokumen</label>
-              <select className="input" value={up.typeId} onChange={(e) => setUp((v) => ({ ...v, typeId: e.target.value }))}>
+              <label htmlFor="unggah-jenis-dokumen">Jenis dokumen</label>
+              <select id="unggah-jenis-dokumen" className="input" value={up.typeId} onChange={(e) => setUp((v) => ({ ...v, typeId: e.target.value }))}>
                 <option value="">Pilih jenis…</option>
                 {state.types.map((t) => <option key={t.id} value={String(t.id)}>{t.nama}</option>)}
               </select>
             </div>
             <div className="field">
-              <label>Tujuan dokumen</label>
-              <select className="input" value={up.purposeId} onChange={(e) => setUp((v) => ({ ...v, purposeId: e.target.value }))}>
+              <label htmlFor="unggah-tujuan-dokumen">Tujuan dokumen</label>
+              <select id="unggah-tujuan-dokumen" className="input" value={up.purposeId} onChange={(e) => setUp((v) => ({ ...v, purposeId: e.target.value }))}>
                 <option value="">Pilih tujuan…</option>
                 {state.purposes.map((t) => <option key={t.id} value={String(t.id)}>{t.nama}</option>)}
               </select>
             </div>
             <div className="field">
-              <label>Kategori / label</label>
-              <select className="input" value={up.categoryId} onChange={(e) => setUp((v) => ({ ...v, categoryId: e.target.value }))}>
+              <label htmlFor="unggah-kategori-label">Kategori / label</label>
+              <select id="unggah-kategori-label" className="input" value={up.categoryId} onChange={(e) => setUp((v) => ({ ...v, categoryId: e.target.value }))}>
                 <option value="">Pilih kategori…</option>
                 {state.cats.map((c) => <option key={c.id} value={String(c.id)}>{c.nama}</option>)}
               </select>
             </div>
             <div className="field">
-              <label>Tanggal kadaluarsa</label>
-              <input className="input" type="date" value={up.exp} onChange={(e) => setUp((v) => ({ ...v, exp: e.target.value }))} />
+              <label htmlFor="unggah-tanggal-kadaluarsa">Tanggal kadaluarsa</label>
+              <input id="unggah-tanggal-kadaluarsa" className="input" type="date" value={up.exp} onChange={(e) => setUp((v) => ({ ...v, exp: e.target.value }))} />
             </div>
             <div className="field" style={{ gridColumn: "1 / -1" }}>
-              <label>Keterangan tambahan (opsional)</label>
-              <textarea
+              <label htmlFor="unggah-keterangan-tambahan-opsional">Keterangan tambahan (opsional)</label>
+              <textarea id="unggah-keterangan-tambahan-opsional"
                 className="input" placeholder="Catatan singkat, nomor perjanjian, atau unit pemilik dokumen."
                 value={up.ket} onChange={(e) => setUp((v) => ({ ...v, ket: e.target.value }))}
                 style={{ minHeight: 74 }}

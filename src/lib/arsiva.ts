@@ -166,7 +166,7 @@ export function days(iso: string | undefined): number {
   return Math.round((d.getTime() - today().getTime()) / 86400000);
 }
 
-export type DocStatus = "Aktif" | "Segera Kadaluarsa" | "Kadaluarsa" | "Diproses";
+export type DocStatus = "Aman" | "Segera kadaluarsa" | "Kadaluarsa" | "Diproses";
 
 export type ViewDoc = Doc & {
   id: number;
@@ -187,7 +187,7 @@ export type ViewDoc = Doc & {
 export function viewDoc<T extends Doc & { id: number }>(d: T, th: number): T & ViewDoc {
   const i = d.id;
   const dl = days(d.e);
-  let status: DocStatus = "Aktif";
+  let status: DocStatus = "Aman";
   let tag = "tag-accent";
   if (d.p) {
     status = "Diproses";
@@ -196,7 +196,7 @@ export function viewDoc<T extends Doc & { id: number }>(d: T, th: number): T & V
     status = "Kadaluarsa";
     tag = "tag-danger";
   } else if (dl <= th) {
-    status = "Segera Kadaluarsa";
+    status = "Segera kadaluarsa";
     tag = "tag-warn";
   }
   const sisa = dl < 0 ? `lewat ${Math.abs(dl)} hari` : `${dl} hari lagi`;
@@ -211,7 +211,7 @@ export function viewDoc<T extends Doc & { id: number }>(d: T, th: number): T & V
     upText: fmt(d.u),
     sisaC:
       dl < 0
-        ? "var(--color-danger)"
+        ? "var(--color-danger-text)"
         : dl <= th
         ? "var(--color-accent-2-400)"
         : "inherit",
@@ -230,8 +230,8 @@ export type Counts = {
 };
 
 export function computeCounts(all: ViewDoc[]): Counts {
-  const aktif = all.filter((r) => r.status === "Aktif").length;
-  const segera = all.filter((r) => r.status === "Segera Kadaluarsa").length;
+  const aktif = all.filter((r) => r.status === "Aman").length;
+  const segera = all.filter((r) => r.status === "Segera kadaluarsa").length;
   const kadaluarsa = all.filter((r) => r.status === "Kadaluarsa").length;
   const diproses = all.filter((r) => r.status === "Diproses").length;
   return {
@@ -307,7 +307,7 @@ export function analytics(all: ViewDoc[], th: number, counts: Counts): Analytics
     const key =
       r.status === "Diproses" ? "proses"
       : r.status === "Kadaluarsa" ? "kadal"
-      : r.status === "Segera Kadaluarsa" ? "segera"
+      : r.status === "Segera kadaluarsa" ? "segera"
       : "aman";
     buckets[bi][key]++;
   });
@@ -330,7 +330,7 @@ export function analytics(all: ViewDoc[], th: number, counts: Counts): Analytics
       totalText: total ? String(total) : "·",
       h: Math.round((total / niceMax) * COL_H) + "px",
       segs,
-      labelC: i === 1 ? "var(--color-accent-200)" : "color-mix(in srgb, var(--color-text) 50%, transparent)",
+      labelC: i === 1 ? "var(--color-accent-200)" : "color-mix(in srgb, var(--color-text) 62%, transparent)",
       markC: i === 1 ? "var(--color-accent)" : "transparent",
     };
   });

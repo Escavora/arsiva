@@ -38,8 +38,8 @@ export default function PengingatPage() {
 
       <div className="grid gap-3 mb-4 grid-cols-1 md:grid-cols-3">
         <div className="card elev-sm" style={{ gap: 4, boxShadow: "inset 0 0 0 1px var(--color-danger-800), var(--shadow-sm)" }}>
-          <div className="card-kicker" style={{ color: "var(--color-danger)" }}>Terlewat</div>
-          <div style={{ fontFamily: "var(--font-heading)", fontSize: 26, lineHeight: 1.1, color: "var(--color-danger)" }}>{counts.kadaluarsa} dokumen</div>
+          <div className="card-kicker" style={{ color: "var(--color-danger-text)" }}>Terlewat</div>
+          <div style={{ fontFamily: "var(--font-heading)", fontSize: 26, lineHeight: 1.1, color: "var(--color-danger-text)" }}>{counts.kadaluarsa} dokumen</div>
           <div className="card-body">Masa berlaku sudah habis dan belum diperbarui.</div>
         </div>
         <div className="card elev-sm" style={{ gap: 4, boxShadow: "inset 0 0 0 1px var(--color-accent-2-800), var(--shadow-sm)" }}>
@@ -60,10 +60,10 @@ export default function PengingatPage() {
             <thead>
               <tr>
                 <th>Dokumen</th>
-                <th style={{ width: 150 }}>Kategori</th>
-                <th style={{ width: 120 }}>Kadaluarsa</th>
+                <th className="hidden md:table-cell" style={{ width: 150 }}>Kategori</th>
+                <th className="hidden sm:table-cell" style={{ width: 120 }}>Kadaluarsa</th>
                 <th style={{ width: 110 }}>Sisa waktu</th>
-                <th style={{ width: 132 }}>Status</th>
+                <th className="hidden sm:table-cell" style={{ width: 132 }}>Status</th>
                 <th style={{ width: 150 }}>Tindakan</th>
               </tr>
             </thead>
@@ -71,15 +71,15 @@ export default function PengingatPage() {
               {rows.map((r) => (
                 <tr key={r.id} className="baris-tautan">
                   <td>
-                    <div style={{ fontSize: 13.5, maxWidth: 340, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <div style={{ fontSize: 13.5, maxWidth: "min(340px, 46vw)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
                     </div>
-                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 42%, transparent)" }}>{r.j} · {r.o}</div>
+                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{r.j} · {r.o}</div>
                   </td>
-                  <td style={{ fontSize: 12.5 }}>{r.k}</td>
-                  <td style={{ fontSize: 12.5 }}>{r.expText}</td>
+                  <td className="hidden md:table-cell" style={{ fontSize: 12.5 }}>{r.k}</td>
+                  <td className="hidden sm:table-cell" style={{ fontSize: 12.5 }}>{r.expText}</td>
                   <td style={{ fontSize: 12.5, color: r.sisaC }}>{r.sisa}</td>
-                  <td><span className={`tag ${r.tag}`}>{r.status}</span></td>
+                  <td className="hidden sm:table-cell"><span className={`tag ${r.tag}`}>{r.status}</span></td>
                   <td>
                     <button type="button" className="btn btn-ghost" onClick={() => void tandai(r.id, !r.p)} style={{ fontSize: 12 }}>
                       {r.p ? "Batalkan tanda" : "Tandai diproses"}

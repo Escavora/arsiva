@@ -84,7 +84,12 @@ export default function NotarisPage() {
             key={n.id}
             role="button"
             tabIndex={0}
+            aria-pressed={n.id === aktif}
             onClick={() => setNotarisAktif(n.id)}
+            onKeyDown={(e) => {
+              if (e.target !== e.currentTarget) return; // jangan bajak Enter pada tombol Hapus di dalamnya
+              if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setNotarisAktif(n.id); }
+            }}
             className="card"
             style={{ gap: 7, cursor: "pointer", boxShadow: n.id === aktif ? "inset 0 0 0 1px var(--color-accent)" : "var(--shadow-sm)" }}
           >
@@ -92,7 +97,7 @@ export default function NotarisPage() {
               <div style={{ width: 32, height: 32, flex: "none", borderRadius: "50%", background: "var(--color-accent-900)", color: "var(--color-accent-200)", display: "grid", placeItems: "center", fontSize: 12, fontFamily: "var(--font-heading)" }}>{n.inisial}</div>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 13.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.nama}</div>
-                <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 45%, transparent)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.kantor}</div>
+                <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.kantor}</div>
               </div>
             </div>
             <div className="card-meta" style={{ gap: 10 }}>
@@ -100,7 +105,7 @@ export default function NotarisPage() {
               <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Phone size={13} />{n.tel}</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: "var(--space-2)", borderTop: "1px solid var(--color-divider)" }}>
-              <span style={{ fontSize: 11, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "color-mix(in srgb, var(--color-text) 48%, transparent)" }}>{n.email}</span>
+              <span style={{ fontSize: 11, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{n.email}</span>
               {isAdmin && (
                 <button
                   type="button"
@@ -153,7 +158,7 @@ export default function NotarisPage() {
                   <tr key={s.id}>
                     <td style={{ fontSize: 12.5 }}>
                       {s.tglText}
-                      <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 42%, transparent)" }}>{s.jam}</div>
+                      <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{s.jam}</div>
                     </td>
                     <td style={{ fontSize: 13 }}>{s.agenda}</td>
                     <td><span className={`tag ${s.tag}`}>{s.status}</span></td>
@@ -192,18 +197,18 @@ export default function NotarisPage() {
         <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-4)" }}>
           <h5 style={{ margin: 0 }}>Tambah jadwal</h5>
           <div className="field">
-            <label>Mitra notaris</label>
-            <select className="input" value={sc.notarisId} onChange={(e) => setSc((v) => ({ ...v, notarisId: e.target.value }))}>
+            <label htmlFor="notaris-mitra-notaris">Mitra notaris</label>
+            <select id="notaris-mitra-notaris" className="input" value={sc.notarisId} onChange={(e) => setSc((v) => ({ ...v, notarisId: e.target.value }))}>
               {state.notaris.map((n) => <option key={n.id} value={String(n.id)}>{n.nama}</option>)}
             </select>
           </div>
           <div className="field">
-            <label>Agenda kerja sama</label>
-            <input className="input" placeholder="mis. Penandatanganan akta fidusia" value={sc.agenda} onChange={(e) => setSc((v) => ({ ...v, agenda: e.target.value }))} />
+            <label htmlFor="notaris-agenda-kerja-sama">Agenda kerja sama</label>
+            <input id="notaris-agenda-kerja-sama" className="input" placeholder="mis. Penandatanganan akta fidusia" value={sc.agenda} onChange={(e) => setSc((v) => ({ ...v, agenda: e.target.value }))} />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 108px", gap: "var(--space-3)" }}>
-            <div className="field"><label>Tanggal</label><input className="input" type="date" value={sc.tanggal} onChange={(e) => setSc((v) => ({ ...v, tanggal: e.target.value }))} /></div>
-            <div className="field"><label>Waktu</label><input className="input" type="time" value={sc.jam} onChange={(e) => setSc((v) => ({ ...v, jam: e.target.value }))} /></div>
+            <div className="field"><label htmlFor="notaris-tanggal">Tanggal</label><input id="notaris-tanggal" className="input" type="date" value={sc.tanggal} onChange={(e) => setSc((v) => ({ ...v, tanggal: e.target.value }))} /></div>
+            <div className="field"><label htmlFor="notaris-waktu">Waktu</label><input id="notaris-waktu" className="input" type="time" value={sc.jam} onChange={(e) => setSc((v) => ({ ...v, jam: e.target.value }))} /></div>
           </div>
           <button type="button" className="btn btn-primary btn-block" onClick={() => void simpanJadwal()} disabled={!canWrite}>
             <CalendarPlus size={16} />
@@ -215,11 +220,11 @@ export default function NotarisPage() {
               <h5 style={{ margin: "0 0 2px" }}>Tambah mitra notaris</h5>
               <div className="text-muted" style={{ fontSize: 12 }}>Daftarkan rekanan baru agar bisa dijadwalkan.</div>
             </div>
-            <div className="field" style={{ margin: 0 }}><label>Nama notaris</label><input className="input" placeholder="mis. Farid Hakim, S.H., M.Kn." value={nn.nama} onChange={(e) => setNn((v) => ({ ...v, nama: e.target.value }))} /></div>
-            <div className="field" style={{ margin: 0 }}><label>Kantor / wilayah</label><input className="input" placeholder="mis. Hakim & Rekan · Pekanbaru" value={nn.kantor} onChange={(e) => setNn((v) => ({ ...v, kantor: e.target.value }))} /></div>
+            <div className="field" style={{ margin: 0 }}><label htmlFor="notaris-nama-notaris">Nama notaris</label><input id="notaris-nama-notaris" className="input" placeholder="mis. Farid Hakim, S.H., M.Kn." value={nn.nama} onChange={(e) => setNn((v) => ({ ...v, nama: e.target.value }))} /></div>
+            <div className="field" style={{ margin: 0 }}><label htmlFor="notaris-kantor-wilayah">Kantor / wilayah</label><input id="notaris-kantor-wilayah" className="input" placeholder="mis. Hakim & Rekan · Pekanbaru" value={nn.kantor} onChange={(e) => setNn((v) => ({ ...v, kantor: e.target.value }))} /></div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" }}>
-              <div className="field" style={{ margin: 0 }}><label>Email</label><input className="input" placeholder="nama@kantor.co.id" value={nn.email} onChange={(e) => setNn((v) => ({ ...v, email: e.target.value }))} /></div>
-              <div className="field" style={{ margin: 0 }}><label>No. telepon</label><input className="input" placeholder="0761-xxx-xxx" value={nn.tel} onChange={(e) => setNn((v) => ({ ...v, tel: e.target.value }))} /></div>
+              <div className="field" style={{ margin: 0 }}><label htmlFor="notaris-email">Email</label><input id="notaris-email" className="input" placeholder="nama@kantor.co.id" value={nn.email} onChange={(e) => setNn((v) => ({ ...v, email: e.target.value }))} /></div>
+              <div className="field" style={{ margin: 0 }}><label htmlFor="notaris-no-telepon">No. telepon</label><input id="notaris-no-telepon" className="input" placeholder="0761-xxx-xxx" value={nn.tel} onChange={(e) => setNn((v) => ({ ...v, tel: e.target.value }))} /></div>
             </div>
             <button type="button" className="btn btn-secondary btn-block" onClick={() => void simpanNotaris()} disabled={!isAdmin} style={{ margin: 0 }}>
               <UserPlus size={16} />
@@ -228,11 +233,11 @@ export default function NotarisPage() {
           </div>
 
           <div style={{ paddingTop: "var(--space-3)", borderTop: "1px solid var(--color-divider)" }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 45%, transparent)", marginBottom: 8 }}>Riwayat kerja sama</div>
+            <div style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", marginBottom: 8 }}>Riwayat kerja sama</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {riwayatJadwal.map((h) => (
                 <div key={h.id} style={{ display: "flex", gap: 8, fontSize: 12, alignItems: "baseline" }}>
-                  <span style={{ color: "color-mix(in srgb, var(--color-text) 45%, transparent)", flex: "none", width: 74 }}>{h.tglText}</span>
+                  <span style={{ color: "color-mix(in srgb, var(--color-text) 62%, transparent)", flex: "none", width: 74 }}>{h.tglText}</span>
                   <span style={{ minWidth: 0 }}>{h.agenda}</span>
                 </div>
               ))}

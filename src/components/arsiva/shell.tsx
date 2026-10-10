@@ -147,7 +147,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
               fontSize: 10,
               letterSpacing: "0.09em",
               textTransform: "uppercase",
-              color: "color-mix(in srgb, var(--color-text) 45%, transparent)",
+              color: "color-mix(in srgb, var(--color-text) 62%, transparent)",
             }}
           >
             Arsip Dokumen Legal
@@ -169,7 +169,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             fontSize: 10,
             letterSpacing: "0.1em",
             textTransform: "uppercase",
-            color: "color-mix(in srgb, var(--color-text) 38%, transparent)",
+            color: "color-mix(in srgb, var(--color-text) 62%, transparent)",
             padding: "10px 12px 6px",
           }}
         >
@@ -181,7 +181,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             fontSize: 10,
             letterSpacing: "0.1em",
             textTransform: "uppercase",
-            color: "color-mix(in srgb, var(--color-text) 38%, transparent)",
+            color: "color-mix(in srgb, var(--color-text) 62%, transparent)",
             padding: "16px 12px 6px",
           }}
         >
@@ -231,7 +231,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             <div
               style={{
                 fontSize: 11,
-                color: "color-mix(in srgb, var(--color-text) 45%, transparent)",
+                color: "color-mix(in srgb, var(--color-text) 62%, transparent)",
               }}
             >
               {me.peranText}
@@ -427,7 +427,7 @@ function LoncengNotifikasi() {
                   >
                     {n.pesan}
                   </div>
-                  <div style={{ fontSize: 10.5, marginTop: 4, color: "color-mix(in srgb, var(--color-text) 40%, transparent)" }}>
+                  <div style={{ fontSize: 10.5, marginTop: 4, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
                     {waktuRelatif(n.createdAt)}
                   </div>
                 </div>
@@ -489,7 +489,7 @@ function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
           fontSize: 11,
           letterSpacing: "0.09em",
           textTransform: "uppercase",
-          color: "color-mix(in srgb, var(--color-text) 48%, transparent)",
+          color: "color-mix(in srgb, var(--color-text) 62%, transparent)",
         }}
       >
         CREDIT OPERATIONS DEPARTMENT - RO BRI PEKANBARU
@@ -512,12 +512,13 @@ function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
               position: "absolute",
               left: 10,
               top: 10,
-              color: "color-mix(in srgb, var(--color-text) 45%, transparent)",
+              color: "color-mix(in srgb, var(--color-text) 62%, transparent)",
             }}
           />
           <input
             className="input"
             placeholder="Cari nama, jenis, atau tujuan…"
+            aria-label="Cari dokumen"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => {

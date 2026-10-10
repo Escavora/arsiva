@@ -282,7 +282,7 @@ export default function DetailPage() {
                   <LinkSimple size={16} style={{ color: "var(--color-accent-400)", flex: "none" }} />
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ fontSize: 12.5 }}>{s.email}</div>
-                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 45%, transparent)" }}>{s.tipe} · berlaku s.d. {s.expText}</div>
+                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{s.tipe} · berlaku s.d. {s.expText}</div>
                   </div>
                   <span className={`tag ${s.tag}`}>{s.status}</span>
                 </div>
@@ -301,7 +301,7 @@ export default function DetailPage() {
                   <div style={{ flex: "none", width: 8, height: 8, marginTop: 6, borderRadius: "50%", background: h.dot }} />
                   <div>
                     <div style={{ fontSize: 12.5 }}>{h.teks}</div>
-                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 45%, transparent)" }}>{h.waktu}</div>
+                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{h.waktu}</div>
                   </div>
                 </div>
               ))}
@@ -322,39 +322,39 @@ export default function DetailPage() {
             </div>
 
             <div className="field">
-              <label>Nama dokumen</label>
-              <input className="input" value={form.nama} onChange={(e) => setForm((v) => ({ ...v, nama: e.target.value }))} />
+              <label htmlFor="id-nama-dokumen">Nama dokumen</label>
+              <input id="id-nama-dokumen" className="input" value={form.nama} onChange={(e) => setForm((v) => ({ ...v, nama: e.target.value }))} />
             </div>
             <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
               <div className="field">
-                <label>Jenis dokumen</label>
-                <select className="input" value={form.typeId} onChange={(e) => setForm((v) => ({ ...v, typeId: e.target.value }))}>
+                <label htmlFor="id-jenis-dokumen">Jenis dokumen</label>
+                <select id="id-jenis-dokumen" className="input" value={form.typeId} onChange={(e) => setForm((v) => ({ ...v, typeId: e.target.value }))}>
                   <option value="">Pilih jenis…</option>
                   {state.types.map((t) => <option key={t.id} value={String(t.id)}>{t.nama}</option>)}
                 </select>
               </div>
               <div className="field">
-                <label>Tujuan dokumen</label>
-                <select className="input" value={form.purposeId} onChange={(e) => setForm((v) => ({ ...v, purposeId: e.target.value }))}>
+                <label htmlFor="id-tujuan-dokumen">Tujuan dokumen</label>
+                <select id="id-tujuan-dokumen" className="input" value={form.purposeId} onChange={(e) => setForm((v) => ({ ...v, purposeId: e.target.value }))}>
                   <option value="">Pilih tujuan…</option>
                   {state.purposes.map((t) => <option key={t.id} value={String(t.id)}>{t.nama}</option>)}
                 </select>
               </div>
               <div className="field">
-                <label>Kategori / label</label>
-                <select className="input" value={form.categoryId} onChange={(e) => setForm((v) => ({ ...v, categoryId: e.target.value }))}>
+                <label htmlFor="id-kategori-label">Kategori / label</label>
+                <select id="id-kategori-label" className="input" value={form.categoryId} onChange={(e) => setForm((v) => ({ ...v, categoryId: e.target.value }))}>
                   <option value="">Pilih kategori…</option>
                   {state.cats.map((c) => <option key={c.id} value={String(c.id)}>{c.nama}</option>)}
                 </select>
               </div>
               <div className="field">
-                <label>Tanggal kadaluarsa</label>
-                <input className="input" type="date" value={form.exp} onChange={(e) => setForm((v) => ({ ...v, exp: e.target.value }))} />
+                <label htmlFor="id-tanggal-kadaluarsa">Tanggal kadaluarsa</label>
+                <input id="id-tanggal-kadaluarsa" className="input" type="date" value={form.exp} onChange={(e) => setForm((v) => ({ ...v, exp: e.target.value }))} />
               </div>
             </div>
             <div className="field">
-              <label>Keterangan tambahan (opsional)</label>
-              <textarea className="input" value={form.ket} onChange={(e) => setForm((v) => ({ ...v, ket: e.target.value }))} style={{ minHeight: 64 }} />
+              <label htmlFor="id-keterangan-tambahan-opsional">Keterangan tambahan (opsional)</label>
+              <textarea id="id-keterangan-tambahan-opsional" className="input" value={form.ket} onChange={(e) => setForm((v) => ({ ...v, ket: e.target.value }))} style={{ minHeight: 64 }} />
             </div>
 
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 2 }}>

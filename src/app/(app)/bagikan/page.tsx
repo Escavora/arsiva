@@ -131,8 +131,8 @@ function BagikanIsi() {
           <h5 style={{ margin: 0 }}>Buat tautan baru</h5>
 
           <div className="field">
-            <label>Dokumen</label>
-            <select className="input" value={docId} onChange={(e) => setDocId(e.target.value)} disabled={!canWrite}>
+            <label htmlFor="bagikan-dokumen">Dokumen</label>
+            <select id="bagikan-dokumen" className="input" value={docId} onChange={(e) => setDocId(e.target.value)} disabled={!canWrite}>
               <option value="">Pilih dokumen…</option>
               {allDocs.map((d) => (
                 <option key={d.id} value={String(d.id)}>{d.n}</option>
@@ -141,8 +141,8 @@ function BagikanIsi() {
           </div>
 
           <div className="field">
-            <label>Tipe penerima</label>
-            <div style={{ display: "flex", gap: 16, paddingTop: 2 }}>
+            <label id="bagikan-tipe-penerima">Tipe penerima</label>
+            <div role="radiogroup" aria-labelledby="bagikan-tipe-penerima" style={{ display: "flex", gap: 16, paddingTop: 2 }}>
               <label className="radio">
                 <input type="radio" name="tipe" checked={tipe === "Notaris"} onChange={() => setTipe("Notaris")} />
                 <span className="dot" />
@@ -157,16 +157,16 @@ function BagikanIsi() {
           </div>
 
           <div className="field">
-            <label>Email penerima</label>
-            <input
+            <label htmlFor="bagikan-email-penerima">Email penerima</label>
+            <input id="bagikan-email-penerima"
               className="input" type="email" placeholder="nama@kantornotaris.co.id"
               value={email} onChange={(e) => setEmail(e.target.value)} disabled={!canWrite}
             />
           </div>
 
           <div className="field">
-            <label>Masa berlaku tautan</label>
-            <select className="input" value={hari} onChange={(e) => setHari(e.target.value)} disabled={!canWrite}>
+            <label htmlFor="bagikan-masa-berlaku-tautan">Masa berlaku tautan</label>
+            <select id="bagikan-masa-berlaku-tautan" className="input" value={hari} onChange={(e) => setHari(e.target.value)} disabled={!canWrite}>
               <option value="3">3 hari</option>
               <option value="7">7 hari</option>
               <option value="14">14 hari</option>
@@ -174,7 +174,7 @@ function BagikanIsi() {
             </select>
           </div>
 
-          <div style={{ fontSize: 12, color: "color-mix(in srgb, var(--color-text) 55%, transparent)", display: "flex", gap: 7 }}>
+          <div style={{ fontSize: 12, color: "color-mix(in srgb, var(--color-text) 62%, transparent)", display: "flex", gap: 7 }}>
             <LockKey size={15} style={{ flex: "none", marginTop: 1 }} />
             <span>Tautan memakai token acak yang tidak bisa ditebak dan otomatis mati saat masa berlaku habis. Siapa pun yang memegang tautan dapat membukanya, jadi kirim hanya ke penerima yang dituju.</span>
           </div>
@@ -278,7 +278,7 @@ function BagikanIsi() {
                   <tr key={s.id}>
                     <td>
                       <div style={{ fontSize: 13 }}>{s.email}</div>
-                      <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 42%, transparent)" }}>
+                      <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
                         {s.tipe} · dibuat {s.dibuatText}
                       </div>
                     </td>
@@ -302,7 +302,7 @@ function BagikanIsi() {
                             <button
                               type="button" className="btn btn-ghost"
                               onClick={() => void revokeShare(s.id)}
-                              style={{ fontSize: 12, color: "var(--color-danger)" }}
+                              style={{ fontSize: 12, color: "var(--color-danger-text)" }}
                             >
                               Cabut
                             </button>
@@ -340,7 +340,7 @@ function BagikanIsi() {
             </div>
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 2 }}>
               <button type="button" className="btn btn-secondary" onClick={() => setBersihOpen(false)} disabled={membersihkan}>Batal</button>
-              <button type="button" className="btn btn-primary" onClick={() => void bersihkan()} disabled={membersihkan} style={{ color: "var(--color-danger)", borderColor: "var(--color-danger)" }}>
+              <button type="button" className="btn btn-danger" onClick={() => void bersihkan()} disabled={membersihkan}>
                 <Broom size={15} />
                 {membersihkan ? "Membersihkan…" : "Bersihkan"}
               </button>

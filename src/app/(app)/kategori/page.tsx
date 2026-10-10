@@ -43,9 +43,9 @@ export default function KategoriPage() {
 
   return (
     <div>
-      <h3 style={{ margin: "0 0 4px" }}>Kategori &amp; Jenis/Tujuan</h3>
+      <h3 style={{ margin: "0 0 4px" }}>Kategori &amp; Jenis</h3>
       <div className="text-muted" style={{ fontSize: 13, marginBottom: 20 }}>
-        Master data pengelompokan dokumen yang muncul pada form unggah.
+        Master data kategori, jenis, dan tujuan dokumen yang muncul pada form unggah.
       </div>
 
       {isStaf && (
@@ -106,8 +106,8 @@ export default function KategoriPage() {
             </table>
           </div>
           <div className="grid gap-3 items-end" style={{ gridTemplateColumns: "1fr 1.2fr auto", paddingTop: "var(--space-3)", borderTop: "1px solid var(--color-divider)" }}>
-            <div className="field" style={{ margin: 0 }}><label>Kategori baru</label><input className="input" placeholder="mis. Perjanjian Sewa" value={nc.nama} onChange={(e) => setNc((v) => ({ ...v, nama: e.target.value }))} /></div>
-            <div className="field" style={{ margin: 0 }}><label>Keterangan</label><input className="input" placeholder="Keterangan singkat" value={nc.desk} onChange={(e) => setNc((v) => ({ ...v, desk: e.target.value }))} /></div>
+            <div className="field" style={{ margin: 0 }}><label htmlFor="kategori-kategori-baru">Kategori baru</label><input id="kategori-kategori-baru" className="input" placeholder="mis. Perjanjian Sewa" value={nc.nama} onChange={(e) => setNc((v) => ({ ...v, nama: e.target.value }))} /></div>
+            <div className="field" style={{ margin: 0 }}><label htmlFor="kategori-keterangan">Keterangan</label><input id="kategori-keterangan" className="input" placeholder="Keterangan singkat" value={nc.desk} onChange={(e) => setNc((v) => ({ ...v, desk: e.target.value }))} /></div>
             <button type="button" className="btn btn-primary" onClick={() => void tambahKategori()} disabled={!isAdmin}>
               <Plus size={15} />
               Tambah
@@ -143,8 +143,8 @@ export default function KategoriPage() {
               ))}
             </div>
             <div style={{ display: "flex", gap: 8 }}>
-              <input className="input" placeholder="Tambah jenis…" value={newType} onChange={(e) => setNewType(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void tambahType(); }} />
-              <button type="button" className="btn btn-secondary" onClick={() => void tambahType()} disabled={!isAdmin} style={{ flex: "none" }}><Plus size={15} /></button>
+              <input className="input" aria-label="Nama jenis dokumen baru" placeholder="Tambah jenis…" value={newType} onChange={(e) => setNewType(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void tambahType(); }} />
+              <button type="button" className="btn btn-secondary" onClick={() => void tambahType()} disabled={!isAdmin} style={{ flex: "none" }} aria-label="Tambah jenis dokumen" title="Tambah jenis dokumen"><Plus size={15} /></button>
             </div>
           </div>
           <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
@@ -173,8 +173,8 @@ export default function KategoriPage() {
               ))}
             </div>
             <div style={{ display: "flex", gap: 8 }}>
-              <input className="input" placeholder="Tambah tujuan…" value={newPurpose} onChange={(e) => setNewPurpose(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void tambahPurpose(); }} />
-              <button type="button" className="btn btn-secondary" onClick={() => void tambahPurpose()} disabled={!isAdmin} style={{ flex: "none" }}><Plus size={15} /></button>
+              <input className="input" aria-label="Nama tujuan dokumen baru" placeholder="Tambah tujuan…" value={newPurpose} onChange={(e) => setNewPurpose(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void tambahPurpose(); }} />
+              <button type="button" className="btn btn-secondary" onClick={() => void tambahPurpose()} disabled={!isAdmin} style={{ flex: "none" }} aria-label="Tambah tujuan dokumen" title="Tambah tujuan dokumen"><Plus size={15} /></button>
             </div>
           </div>
         </div>
@@ -192,16 +192,16 @@ export default function KategoriPage() {
             </div>
 
             <div className="field">
-              <label>Nama kategori</label>
-              <input
+              <label htmlFor="kategori-nama-kategori">Nama kategori</label>
+              <input id="kategori-nama-kategori"
                 className="input"
                 value={editKat.nama}
                 onChange={(e) => setEditKat((v) => (v ? { ...v, nama: e.target.value } : v))}
               />
             </div>
             <div className="field">
-              <label>Keterangan</label>
-              <input
+              <label htmlFor="kategori-keterangan-2">Keterangan</label>
+              <input id="kategori-keterangan-2"
                 className="input"
                 placeholder="Keterangan singkat"
                 value={editKat.desk}

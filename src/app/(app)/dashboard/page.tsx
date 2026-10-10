@@ -47,7 +47,7 @@ function StatCard({
     <div className="card elev-sm" style={{ gap: 9, padding: "var(--space-4)", background: "linear-gradient(160deg, var(--color-surface-2) 0%, var(--color-surface) 62%)", ...cardStyle }}>
       <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 10, letterSpacing: "0.09em", textTransform: "uppercase", color: labelColor ?? "color-mix(in srgb, var(--color-text) 45%, transparent)" }}>{label}</div>
+          <div style={{ fontSize: 10, letterSpacing: "0.09em", textTransform: "uppercase", color: labelColor ?? "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{label}</div>
           <div style={{ fontFamily: "var(--font-heading)", fontSize: 32, lineHeight: 1.1, letterSpacing: "-0.02em", color: valueColor }}>{value}</div>
         </div>
         <div style={{ marginLeft: "auto", width: 32, height: 32, flex: "none", borderRadius: "var(--radius-sm)", display: "grid", placeItems: "center", background: iconBg, color: iconColor, boxShadow: `inset 0 0 0 1px ${iconRing}` }}>
@@ -114,7 +114,7 @@ export default function DashboardPage() {
     <div>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 16, marginBottom: 20, flexWrap: "wrap" }}>
         <div>
-          <h3 style={{ margin: "0 0 4px" }}>Selamat pagi, {me.panggilan}</h3>
+          <h3 style={{ margin: "0 0 4px" }}>Halo, {me.panggilan}</h3>
           <div className="text-muted" style={{ fontSize: 13 }}>Ringkasan dan analitik arsip dokumen legal per {fmt(todayISO())}</div>
         </div>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8, flex: "none" }}>
@@ -156,7 +156,7 @@ export default function DashboardPage() {
           meta={stats.kpi.aktifText}
         />
         <StatCard
-          label="Segera Kadaluarsa"
+          label="Segera kadaluarsa"
           value={counts.segera}
           labelColor="var(--color-accent-2-400)"
           valueColor="var(--color-accent-2-300)"
@@ -172,8 +172,8 @@ export default function DashboardPage() {
         <StatCard
           label="Sudah Kadaluarsa"
           value={counts.kadaluarsa}
-          labelColor="var(--color-danger)"
-          valueColor="var(--color-danger)"
+          labelColor="var(--color-danger-text)"
+          valueColor="var(--color-danger-text)"
           icon={<WarningCircle size={17} />}
           iconBg="var(--color-danger-800)"
           iconColor="var(--color-danger-100)"
@@ -210,7 +210,7 @@ export default function DashboardPage() {
               <div key={"line" + g.b} style={{ position: "absolute", left: 26, right: 0, bottom: g.b, height: 1, background: "linear-gradient(to right, transparent, var(--color-divider) 44px, var(--color-divider) calc(100% - 44px), transparent)" }} />
             ))}
             {stats.bulan.grid.map((g) => (
-              <div key={"lbl" + g.lb} style={{ position: "absolute", left: 0, width: 22, textAlign: "right", bottom: g.lb, fontSize: 10, color: "color-mix(in srgb, var(--color-text) 38%, transparent)" }}>{g.label}</div>
+              <div key={"lbl" + g.lb} style={{ position: "absolute", left: 0, width: 22, textAlign: "right", bottom: g.lb, fontSize: 10, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{g.label}</div>
             ))}
             <div style={{ position: "absolute", left: 26, right: 0, bottom: 0, height: 158, display: "flex", alignItems: "flex-end", gap: 10 }}>
               {stats.bulan.cols.map((c, i) => (
@@ -235,15 +235,15 @@ export default function DashboardPage() {
           </div>
           <div style={{ display: "flex", gap: 26, flexWrap: "wrap", paddingTop: "var(--space-3)", borderTop: "1px solid var(--color-divider)" }}>
             <div>
-              <div style={{ fontSize: 10, letterSpacing: "0.09em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 40%, transparent)" }}>Puncak jatuh tempo</div>
+              <div style={{ fontSize: 10, letterSpacing: "0.09em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>Puncak jatuh tempo</div>
               <div style={{ fontSize: 13, fontFamily: "var(--font-heading)", marginTop: 2 }}>{stats.bulan.puncakText}</div>
             </div>
             <div>
-              <div style={{ fontSize: 10, letterSpacing: "0.09em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 40%, transparent)" }}>Rata-rata sisa masa berlaku</div>
+              <div style={{ fontSize: 10, letterSpacing: "0.09em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>Rata-rata sisa masa berlaku</div>
               <div style={{ fontSize: 13, fontFamily: "var(--font-heading)", marginTop: 2 }}>{stats.bulan.avgText}</div>
             </div>
             <div>
-              <div style={{ fontSize: 10, letterSpacing: "0.09em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 40%, transparent)" }}>Perlu tindak lanjut</div>
+              <div style={{ fontSize: 10, letterSpacing: "0.09em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>Perlu tindak lanjut</div>
               <div style={{ fontSize: 13, fontFamily: "var(--font-heading)", marginTop: 2, color: "var(--color-accent-2-400)" }}>{counts.perluAksi} dokumen</div>
             </div>
           </div>
@@ -261,7 +261,7 @@ export default function DashboardPage() {
               <div style={{ position: "absolute", inset: 23, borderRadius: "50%", background: "var(--color-surface)", boxShadow: "inset 0 0 0 1px var(--color-divider)", display: "grid", placeItems: "center", textAlign: "center" }}>
                 <div>
                   <div style={{ fontFamily: "var(--font-heading)", fontSize: 34, lineHeight: 1, letterSpacing: "-0.02em" }}>{stats.donut.pct}</div>
-                  <div style={{ fontSize: 9, letterSpacing: "0.12em", marginTop: 5, color: "color-mix(in srgb, var(--color-text) 45%, transparent)" }}>TERKENDALI</div>
+                  <div style={{ fontSize: 9, letterSpacing: "0.12em", marginTop: 5, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>TERKENDALI</div>
                 </div>
               </div>
             </div>
@@ -273,7 +273,7 @@ export default function DashboardPage() {
                   <span style={{ width: 8, height: 8, borderRadius: "50%", flex: "none", background: l.fill }} />
                   <span style={{ minWidth: 0, flex: 1, color: "color-mix(in srgb, var(--color-text) 70%, transparent)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.nama}</span>
                   <span style={{ fontFamily: "var(--font-heading)", flex: "none" }}>{l.v}</span>
-                  <span style={{ flex: "none", width: 34, textAlign: "right", color: "color-mix(in srgb, var(--color-text) 45%, transparent)" }}>{l.pctText}</span>
+                  <span style={{ flex: "none", width: 34, textAlign: "right", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{l.pctText}</span>
                 </div>
                 <div style={{ height: 3, borderRadius: 2, background: "var(--color-neutral-800)" }}>
                   <div style={{ height: 3, borderRadius: 2, background: l.fill, width: l.w }} />
@@ -315,14 +315,14 @@ export default function DashboardPage() {
                 {prioritas.map((r) => (
                   <tr key={r.id} className="baris-tautan">
                     <td>
-                      <div style={{ fontSize: 13, maxWidth: 360, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <div style={{ fontSize: 13, maxWidth: "min(360px, 46vw)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
                       </div>
-                      <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 45%, transparent)" }}>{r.k}</div>
+                      <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{r.k}</div>
                     </td>
                     <td style={{ fontSize: 12 }}>
                       {r.expText}
-                      <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 45%, transparent)" }}>{r.sisa}</div>
+                      <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{r.sisa}</div>
                     </td>
                     <td><span className={`tag ${r.tag}`}>{r.status}</span></td>
                   </tr>
@@ -343,11 +343,11 @@ export default function DashboardPage() {
                 <div key={s.id} style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
                   <div style={{ flex: "none", width: 44, textAlign: "center", padding: "5px 0", borderRadius: "var(--radius-sm)", background: "var(--color-surface-2)", boxShadow: "inset 0 0 0 1px var(--color-divider)" }}>
                     <div style={{ fontFamily: "var(--font-heading)", fontSize: 15, lineHeight: 1 }}>{s.hari}</div>
-                    <div style={{ fontSize: 10, textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 50%, transparent)" }}>{s.bulan}</div>
+                    <div style={{ fontSize: 10, textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{s.bulan}</div>
                   </div>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 13 }}>{s.agenda}</div>
-                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 48%, transparent)" }}>{s.notaris} · {s.jam}</div>
+                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{s.notaris} · {s.jam}</div>
                   </div>
                 </div>
               ))}
@@ -364,7 +364,7 @@ export default function DashboardPage() {
                     <div style={{ fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
                     </div>
-                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 45%, transparent)" }}>{r.o} · {r.upText}</div>
+                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{r.o} · {r.upText}</div>
                   </div>
                 </div>
               ))}

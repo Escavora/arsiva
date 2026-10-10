@@ -21,7 +21,7 @@ function chipStyle(active: boolean): React.CSSProperties {
 
 const STATUS_CHIPS: [string, string][] = [
   ["Semua", "Semua"],
-  ["Aktif", "Aman"],
+  ["Aman", "Aman"],
   ["Segera", "Segera kadaluarsa"],
   ["Kadaluarsa", "Kadaluarsa"],
   ["Diproses", "Diproses"],
@@ -67,8 +67,8 @@ function ArsipInner() {
       if (cat !== "Semua" && r.k !== cat) return false;
       if (jenisF !== "Semua jenis" && r.j !== jenisF) return false;
       if (tujuanF !== "Semua tujuan" && r.t !== tujuanF) return false;
-      if (status === "Aktif" && r.status !== "Aktif") return false;
-      if (status === "Segera" && r.status !== "Segera Kadaluarsa") return false;
+      if (status === "Aman" && r.status !== "Aman") return false;
+      if (status === "Segera" && r.status !== "Segera kadaluarsa") return false;
       if (status === "Kadaluarsa" && r.status !== "Kadaluarsa") return false;
       if (status === "Diproses" && r.status !== "Diproses") return false;
       return true;
@@ -96,14 +96,14 @@ function ArsipInner() {
         {/* search + selects */}
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ position: "relative", flex: 1, minWidth: 240 }}>
-            <MagnifyingGlass size={15} style={{ position: "absolute", left: 10, top: 10, color: "color-mix(in srgb, var(--color-text) 45%, transparent)" }} />
-            <input className="input" placeholder="Cari nama dokumen, jenis, atau tujuan…" value={q} onChange={(e) => setQ(e.target.value)} style={{ paddingLeft: 31 }} />
+            <MagnifyingGlass size={15} style={{ position: "absolute", left: 10, top: 10, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }} />
+            <input className="input" aria-label="Cari dokumen" placeholder="Cari nama dokumen, jenis, atau tujuan…" value={q} onChange={(e) => setQ(e.target.value)} style={{ paddingLeft: 31 }} />
           </div>
-          <select className="input" value={jenisF} onChange={(e) => setJenisF(e.target.value)} style={{ width: 186 }}>
+          <select className="input" aria-label="Filter jenis dokumen" value={jenisF} onChange={(e) => setJenisF(e.target.value)} style={{ width: 186 }}>
             <option>Semua jenis</option>
             {state.types.map((t) => <option key={t.id}>{t.nama}</option>)}
           </select>
-          <select className="input" value={tujuanF} onChange={(e) => setTujuanF(e.target.value)} style={{ width: 170 }}>
+          <select className="input" aria-label="Filter tujuan dokumen" value={tujuanF} onChange={(e) => setTujuanF(e.target.value)} style={{ width: 170 }}>
             <option>Semua tujuan</option>
             {state.purposes.map((t) => <option key={t.id}>{t.nama}</option>)}
           </select>
@@ -116,13 +116,13 @@ function ArsipInner() {
         {/* chips */}
         <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 42%, transparent)", marginRight: 2 }}>Kategori</span>
+            <span style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", marginRight: 2 }}>Kategori</span>
             {catChips.map((c) => (
               <button key={c} type="button" onClick={() => setCat(c)} style={{ fontSize: 12, padding: "4px 11px", borderRadius: 999, cursor: "pointer", border: "none", ...chipStyle(cat === c) }}>{c}</button>
             ))}
           </div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", marginLeft: "auto" }}>
-            <span style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 42%, transparent)", marginRight: 2 }}>Kondisi</span>
+            <span style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", marginRight: 2 }}>Status</span>
             {STATUS_CHIPS.map(([v, nama]) => (
               <button key={v} type="button" onClick={() => setStatus(v)} style={{ fontSize: 12, padding: "4px 11px", borderRadius: 999, cursor: "pointer", border: "none", ...chipStyle(status === v) }}>{nama}</button>
             ))}
@@ -135,12 +135,12 @@ function ArsipInner() {
             <thead>
               <tr>
                 <th>Nama Dokumen</th>
-                <th style={{ width: 150 }}>Kategori</th>
-                <th style={{ width: 130 }}>Jenis</th>
-                <th style={{ width: 112 }}>Tujuan</th>
-                <th style={{ width: 118 }}>Kadaluarsa</th>
+                <th className="hidden sm:table-cell" style={{ width: 150 }}>Kategori</th>
+                <th className="hidden md:table-cell" style={{ width: 130 }}>Jenis</th>
+                <th className="hidden md:table-cell" style={{ width: 112 }}>Tujuan</th>
+                <th className="hidden sm:table-cell" style={{ width: 118 }}>Kadaluarsa</th>
                 <th style={{ width: 132 }}>Status</th>
-                <th style={{ width: 76 }} />
+                <th className="hidden sm:table-cell" style={{ width: 76 }} />
               </tr>
             </thead>
             <tbody>
@@ -150,22 +150,22 @@ function ArsipInner() {
                     <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
                       <FilePdf size={17} style={{ color: "var(--color-accent-400)", flex: "none" }} />
                       <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: 13.5, maxWidth: 330, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <div style={{ fontSize: 13.5, maxWidth: "min(330px, 40vw)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
                         </div>
-                        <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 42%, transparent)" }}>{r.o} · {r.s}</div>
+                        <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{r.o} · {r.s}</div>
                       </div>
                     </div>
                   </td>
-                  <td style={{ fontSize: 12.5 }}>{r.k}</td>
-                  <td style={{ fontSize: 12.5 }}>{r.j}</td>
-                  <td style={{ fontSize: 12.5 }}>{r.t}</td>
-                  <td style={{ fontSize: 12.5 }}>
+                  <td className="hidden sm:table-cell" style={{ fontSize: 12.5 }}>{r.k}</td>
+                  <td className="hidden md:table-cell" style={{ fontSize: 12.5 }}>{r.j}</td>
+                  <td className="hidden md:table-cell" style={{ fontSize: 12.5 }}>{r.t}</td>
+                  <td className="hidden sm:table-cell" style={{ fontSize: 12.5 }}>
                     {r.expText}
-                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 42%, transparent)" }}>{r.sisa}</div>
+                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{r.sisa}</div>
                   </td>
                   <td><span className={`tag ${r.tag}`}>{r.status}</span></td>
-                  <td style={{ textAlign: "right" }}><CaretRight size={15} style={{ color: "color-mix(in srgb, var(--color-text) 40%, transparent)" }} /></td>
+                  <td className="hidden sm:table-cell" style={{ textAlign: "right" }}><CaretRight size={15} style={{ color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }} /></td>
                 </tr>
               ))}
             </tbody>

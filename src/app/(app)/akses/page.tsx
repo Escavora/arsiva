@@ -97,16 +97,17 @@ export default function AksesPage() {
                   <tr key={u.id}>
                     <td>
                       <div style={{ fontSize: 13.5, maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.nama}</div>
-                      <div style={{ fontSize: 11, maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "color-mix(in srgb, var(--color-text) 42%, transparent)" }}>{u.email}</div>
+                      <div style={{ fontSize: 11, maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{u.email}</div>
                     </td>
                     <td style={{ fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.unit}</td>
                     <td>
                       <select
                         className="input"
+                        aria-label={`Peran ${u.nama}`}
                         value={u.peran}
                         onChange={(e) => void setUserPeran(u.id, e.target.value as Role)}
                         disabled={isStaf}
-                        style={{ minHeight: 30, minWidth: 122, fontSize: 12.5, padding: "3px 8px" }}
+                        style={{ minHeight: "var(--tinggi-ringkas)", minWidth: 122, fontSize: 12.5, padding: "3px 8px" }}
                       >
                         <option>Admin</option>
                         <option>Team Member</option>
@@ -148,14 +149,14 @@ export default function AksesPage() {
           </div>
 
           <div style={{ paddingTop: "var(--space-3)", borderTop: "1px solid var(--color-divider)" }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 45%, transparent)", marginBottom: 10 }}>Tambah pengguna baru</div>
+            <div style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", marginBottom: 10 }}>Tambah pengguna baru</div>
             <div className="grid gap-3 items-end grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.1fr_1.3fr_1fr_118px_auto]">
-              <div className="field" style={{ margin: 0 }}><label>Nama</label><input className="input" placeholder="Nama pegawai" value={nu.nama} onChange={(e) => setNu((v) => ({ ...v, nama: e.target.value }))} /></div>
-              <div className="field" style={{ margin: 0 }}><label>Email korporat</label><input className="input" placeholder="nama@bank.co.id" value={nu.email} onChange={(e) => setNu((v) => ({ ...v, email: e.target.value }))} /></div>
-              <div className="field" style={{ margin: 0 }}><label>Unit kerja</label><input className="input" placeholder="mis. Legal Kredit" value={nu.unit} onChange={(e) => setNu((v) => ({ ...v, unit: e.target.value }))} /></div>
+              <div className="field" style={{ margin: 0 }}><label htmlFor="akses-nama">Nama</label><input id="akses-nama" className="input" placeholder="Nama pegawai" value={nu.nama} onChange={(e) => setNu((v) => ({ ...v, nama: e.target.value }))} /></div>
+              <div className="field" style={{ margin: 0 }}><label htmlFor="akses-email-korporat">Email korporat</label><input id="akses-email-korporat" className="input" placeholder="nama@bank.co.id" value={nu.email} onChange={(e) => setNu((v) => ({ ...v, email: e.target.value }))} /></div>
+              <div className="field" style={{ margin: 0 }}><label htmlFor="akses-unit-kerja">Unit kerja</label><input id="akses-unit-kerja" className="input" placeholder="mis. Legal Kredit" value={nu.unit} onChange={(e) => setNu((v) => ({ ...v, unit: e.target.value }))} /></div>
               <div className="field" style={{ margin: 0 }}>
-                <label>Peran</label>
-                <select className="input" value={nu.peran} onChange={(e) => setNu((v) => ({ ...v, peran: e.target.value as Role }))}>
+                <label htmlFor="akses-peran">Peran</label>
+                <select id="akses-peran" className="input" value={nu.peran} onChange={(e) => setNu((v) => ({ ...v, peran: e.target.value as Role }))}>
                   <option>Admin</option>
                   <option>Team Member</option>
                   <option>Pembaca</option>
@@ -221,20 +222,20 @@ export default function AksesPage() {
             </div>
 
             <div className="field">
-              <label>Nama</label>
-              <input className="input" value={editForm.nama} onChange={(e) => setEditForm((v) => ({ ...v, nama: e.target.value }))} />
+              <label htmlFor="akses-nama-2">Nama</label>
+              <input id="akses-nama-2" className="input" value={editForm.nama} onChange={(e) => setEditForm((v) => ({ ...v, nama: e.target.value }))} />
             </div>
             <div className="field">
-              <label>Email korporat</label>
-              <input className="input" type="email" value={editForm.email} onChange={(e) => setEditForm((v) => ({ ...v, email: e.target.value }))} />
+              <label htmlFor="akses-email-korporat-2">Email korporat</label>
+              <input id="akses-email-korporat-2" className="input" type="email" value={editForm.email} onChange={(e) => setEditForm((v) => ({ ...v, email: e.target.value }))} />
             </div>
             <div className="field">
-              <label>Unit kerja</label>
-              <input className="input" value={editForm.unit} onChange={(e) => setEditForm((v) => ({ ...v, unit: e.target.value }))} />
+              <label htmlFor="akses-unit-kerja-2">Unit kerja</label>
+              <input id="akses-unit-kerja-2" className="input" value={editForm.unit} onChange={(e) => setEditForm((v) => ({ ...v, unit: e.target.value }))} />
             </div>
 
             {editForm.email.trim().toLowerCase() !== editUser.email && (
-              <div style={{ fontSize: 11.5, color: "color-mix(in srgb, var(--color-text) 55%, transparent)", display: "flex", gap: 7 }}>
+              <div style={{ fontSize: 11.5, color: "color-mix(in srgb, var(--color-text) 62%, transparent)", display: "flex", gap: 7 }}>
                 <LockKey size={14} style={{ flex: "none", marginTop: 1 }} />
                 <span>Mengubah email berarti pengguna ini akan masuk memakai alamat baru mulai sekarang.</span>
               </div>

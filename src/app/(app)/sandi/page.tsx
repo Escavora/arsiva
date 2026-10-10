@@ -113,7 +113,7 @@ export default function SandiPage() {
           </span>
         </label>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 11.5, color: "color-mix(in srgb, var(--color-text) 50%, transparent)" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 11.5, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
           <ShieldCheck size={15} style={{ flex: "none", marginTop: 1 }} />
           <span>Kata sandi disimpan dalam bentuk terenkripsi dan tidak pernah ditampilkan kembali.</span>
         </div>
