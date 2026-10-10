@@ -12,9 +12,10 @@ import {
   FileText,
   ArrowLeft,
   GoogleLogo,
+  ProhibitInset,
 } from "@phosphor-icons/react";
 import { useSignIn } from "@clerk/nextjs";
-import { pesanClerk } from "@/lib/pesan-clerk";
+import { akunNonaktif, pesanClerk } from "@/lib/pesan-clerk";
 
 // Display face untuk headline panel brand, menyatu dengan landing page.
 // Form tetap memakai font aplikasi (Inter) - ini permukaan produk, bukan marketing.
@@ -61,6 +62,10 @@ function LoginForm() {
   const [loading, setLoading] = React.useState(false);
 
   const alasan = params.get("reason");
+  // Pop-up khusus akun yang dinonaktifkan Admin: dari error Clerk saat masuk, atau dari ?reason=nonaktif
+  // ketika aplikasi mengeluarkan pengguna yang sedang aktif.
+  const [nonaktifOpen, setNonaktifOpen] = React.useState(alasan === "nonaktif");
+  const gagal = (err: unknown) => (akunNonaktif(err) ? setNonaktifOpen(true) : setError(pesanMasuk(err)));
   const info = alasan ? (INFO_ALASAN[alasan] ?? null) : null;
   const next = params.get("next");
   const tujuan = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
@@ -84,24 +89,24 @@ function LoginForm() {
     try {
       if (tahap === "kode") {
         const { error: err } = await signIn.mfa.verifyEmailCode({ code: kode.trim() });
-        if (err) return setError(pesanMasuk(err));
+        if (err) return gagal(err);
         return await selesaikan();
       }
 
       const { error: err } = await signIn.password({ identifier: email.trim(), password });
-      if (err) return setError(pesanMasuk(err));
+      if (err) return gagal(err);
 
       if (signIn.status === "complete") return await selesaikan();
 
       if (signIn.status === "needs_client_trust" || signIn.status === "needs_second_factor") {
         const { error: kirimErr } = await signIn.mfa.sendEmailCode();
-        if (kirimErr) return setError(pesanMasuk(kirimErr));
+        if (kirimErr) return gagal(kirimErr);
         setTahap("kode");
         return;
       }
       setError("Langkah verifikasi tambahan ini belum didukung. Hubungi Admin.");
     } catch (err) {
-      setError(pesanMasuk(err));
+      gagal(err);
     } finally {
       setLoading(false);
     }
@@ -122,7 +127,7 @@ function LoginForm() {
     });
     if (err) {
       setLoading(false);
-      setError(pesanMasuk(err));
+      gagal(err);
     }
   };
 
@@ -316,6 +321,34 @@ function LoginForm() {
           </div>
         </form>
       </div>
+
+      {nonaktifOpen && (
+        <div className="dialog-backdrop" onClick={() => setNonaktifOpen(false)}>
+          <div
+            className="dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="judul-nonaktif"
+            style={{ width: "min(420px, 100%)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <div style={{ width: 36, height: 36, flex: "none", borderRadius: "var(--radius-md)", background: "var(--color-danger-800)", color: "var(--color-danger-100)", display: "grid", placeItems: "center" }}>
+                <ProhibitInset size={19} />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <h5 id="judul-nonaktif" style={{ margin: "0 0 4px" }}>Akun Anda dinonaktifkan</h5>
+                <div className="text-muted" style={{ fontSize: 13, lineHeight: 1.55 }}>
+                  Admin ARSIVA telah menonaktifkan akun ini, sehingga Anda tidak dapat masuk untuk sementara. Data dan dokumen Anda tetap tersimpan. Hubungi Admin unit kerja Anda bila akses perlu diaktifkan kembali.
+                </div>
+              </div>
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 2 }}>
+              <button type="button" className="btn btn-secondary" autoFocus onClick={() => setNonaktifOpen(false)}>Mengerti</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

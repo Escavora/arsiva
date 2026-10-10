@@ -88,12 +88,16 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   }
   const data = await res.json().catch(() => ({}));
   if (res.status === 401) window.dispatchEvent(new Event(EVENT_SESI_BERAKHIR));
+  // guard.ts menolak akun yang dinonaktifkan Admin dengan 403 + pesan ini.
+  if (res.status === 403 && /dinonaktifkan/i.test(String(data?.error ?? ""))) window.dispatchEvent(new Event(EVENT_AKUN_NONAKTIF));
   if (!res.ok) throw new Error(data?.error ?? "Permintaan gagal.");
   return data as T;
 }
 
 /** Dipicu api() saat server menjawab 401 (sesi habis/dicabut), agar provider mengeluarkan pengguna. */
 const EVENT_SESI_BERAKHIR = "arsiva:sesi-berakhir";
+/** Dipicu api() saat server menyatakan akun dinonaktifkan Admin. */
+const EVENT_AKUN_NONAKTIF = "arsiva:akun-nonaktif";
 
 /** Profil pengguna dari GET /api/me — peran & unit dibaca server dari database, bukan dari token. */
 type ApiMe = { id: string; nama: string; email: string; unit: string; peran: Role; threshold: number };
@@ -154,6 +158,8 @@ const ArsivaContext = React.createContext<Ctx | null>(null);
 
 export function ArsivaProvider({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
+  // true selama keluar() berjalan, agar pengalihan tanpa alasan tidak menimpa ?reason=…
+  const sedangKeluar = React.useRef(false);
   const { signOut } = useClerk();
   const [state, setState] = React.useState<State>(EMPTY);
   const [profil, setProfil] = React.useState<ApiMe | null>(null);
@@ -184,9 +190,17 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
     return () => { batal = true; };
   }, [isLoaded, isSignedIn]);
 
+  // Sesi Clerk hilang saat pengguna masih di dalam aplikasi (mis. akunnya dinonaktifkan
+  // Admin: ban mencabut semua sesinya). Tanpa ini halaman tetap tampil kosong.
+  // Di /login, Clerk akan menolak akun yang diblokir dan menampilkan pop-up penjelasan.
+  React.useEffect(() => {
+    if (isLoaded && !isSignedIn && !sedangKeluar.current) window.location.replace("/login");
+  }, [isLoaded, isSignedIn]);
+
   /* ── keluar: manual, sesi habis, atau idle 30 menit ── */
   const keluar = React.useCallback(
-    async (alasan?: "idle") => {
+    async (alasan?: "idle" | "nonaktif") => {
+      sedangKeluar.current = true;
       const tujuan = alasan ? `/login?reason=${alasan}` : "/login";
       try {
         await signOut({ redirectUrl: tujuan });
@@ -200,8 +214,13 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     const saatBerakhir = () => void keluar("idle");
+    const saatNonaktif = () => void keluar("nonaktif");
     window.addEventListener(EVENT_SESI_BERAKHIR, saatBerakhir);
-    return () => window.removeEventListener(EVENT_SESI_BERAKHIR, saatBerakhir);
+    window.addEventListener(EVENT_AKUN_NONAKTIF, saatNonaktif);
+    return () => {
+      window.removeEventListener(EVENT_SESI_BERAKHIR, saatBerakhir);
+      window.removeEventListener(EVENT_AKUN_NONAKTIF, saatNonaktif);
+    };
   }, [keluar]);
 
   useIdleTimeout({

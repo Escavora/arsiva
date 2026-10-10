@@ -22,6 +22,12 @@ function galatPertama(err: unknown): GalatApi {
   return err as GalatApi;
 }
 
+/** true bila Clerk menolak karena akun diblokir (dinonaktifkan Admin lewat banUser). */
+export function akunNonaktif(err: unknown): boolean {
+  const kode = galatPertama(err).code;
+  return kode === "user_banned" || kode === "user_deactivated";
+}
+
 /** Kode error pertama dari error Clerk, bila ada. */
 export function kodeClerk(err: unknown): string | undefined {
   return galatPertama(err).code;
