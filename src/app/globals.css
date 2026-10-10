@@ -467,6 +467,42 @@ html:has(.landing) { scroll-padding-top: 82px; }
   .btn-ghost { padding-block: 8px; }
 }
 
+/* — dasbor — animasi ringan; keadaan dasar = keadaan akhir, jadi tanpa animasi tetap utuh */
+@keyframes dasbor-naik { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes dasbor-tumbuh { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes dasbor-isi { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes dasbor-cincin { from { stroke-dasharray: 0 var(--keliling); } }
+@keyframes dasbor-melayang { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+@keyframes dasbor-denyut {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--denyut, var(--color-accent-2-500)) 60%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 7px transparent; }
+}
+
+.dasbor-muncul { animation: dasbor-naik 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.dasbor-batang { transform-origin: bottom; animation: dasbor-tumbuh 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.dasbor-isi { transform-origin: left; animation: dasbor-isi 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.dasbor-cincin { animation: dasbor-cincin 1s cubic-bezier(0.3, 0.7, 0.2, 1) both; }
+.dasbor-melayang { animation: dasbor-melayang 3.2s ease-in-out infinite alternate; }
+.dasbor-denyut { animation: dasbor-denyut 2.2s ease-out infinite; }
+
+/* ubin status: tautan, jadi boleh terangkat saat hover */
+.dasbor-ubin { color: inherit; text-decoration: none; transition: transform 0.18s ease, box-shadow 0.2s ease; }
+.dasbor-ubin:hover { color: inherit; transform: translateY(-2px); box-shadow: inset 0 0 0 1px var(--ubin-tepi, var(--color-divider)), 0 12px 28px -14px rgba(0, 0, 0, 0.7); }
+.dasbor-ubin:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.dasbor-ubin .dasbor-panah { opacity: 0; transform: translateX(-4px); transition: opacity 0.18s ease, transform 0.18s ease; }
+.dasbor-ubin:hover .dasbor-panah, .dasbor-ubin:focus-visible .dasbor-panah { opacity: 1; transform: none; }
+
+/* tab sebaran */
+.dasbor-tab { padding: 6px 12px; border: 0; border-radius: 999px; background: transparent; color: color-mix(in srgb, var(--color-text) 66%, transparent); font: inherit; font-size: 12.5px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
+.dasbor-tab:hover { color: var(--color-text); }
+.dasbor-tab[aria-selected="true"] { background: var(--color-accent-800); color: var(--color-accent-100); }
+.dasbor-tab:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dasbor-muncul, .dasbor-batang, .dasbor-isi, .dasbor-cincin, .dasbor-melayang, .dasbor-denyut { animation: none !important; }
+  .dasbor-ubin, .dasbor-ubin .dasbor-panah { transition: none !important; }
+}
+
 /* — interactive helpers (replacing prototype style-hover) — */
 .nav-item { transition: background 0.12s ease, color 0.12s ease; }
 .nav-item:hover { background: color-mix(in srgb, var(--color-text) 6%, transparent); }

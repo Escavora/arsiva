@@ -3,373 +3,432 @@
 import * as React from "react";
 import Link from "next/link";
 import {
-  Folders,
   ShieldCheck,
   HourglassMedium,
   WarningCircle,
+  CheckCircle,
   UploadSimple,
   FileArrowDown,
-  BellRinging,
   ArrowRight,
+  ArrowUpRight,
   FilePdf,
+  CalendarBlank,
+  Sparkle,
 } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
-import { fmt, MONTHS, todayISO, type GroupBar } from "@/lib/arsiva";
+import { fmt, MONTHS, todayISO } from "@/lib/arsiva";
 
-function StatCard({
-  label,
-  value,
-  labelColor,
-  valueColor,
-  icon,
-  iconBg,
-  iconColor,
-  iconRing,
-  barColor,
-  barPct,
-  meta,
-  cardStyle,
-}: {
-  label: string;
-  value: React.ReactNode;
-  labelColor?: string;
-  valueColor?: string;
-  icon: React.ReactNode;
-  iconBg: string;
-  iconColor: string;
-  iconRing: string;
-  barColor: string;
-  barPct: string;
-  meta: string;
-  cardStyle?: React.CSSProperties;
-}) {
+const muted = (pct: number) => `color-mix(in srgb, var(--color-text) ${pct}%, transparent)`;
+
+/** Angka yang "menghitung naik" ke nilai barunya (mis. 0 → 14 saat data selesai dimuat). */
+function useHitung(target: number, durasi = 700) {
+  const [nilai, setNilai] = React.useState(target);
+  const dariRef = React.useRef(target);
+  React.useEffect(() => {
+    const dari = dariRef.current;
+    dariRef.current = target;
+    if (dari === target) return;
+    const langsung = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mulai = performance.now();
+    let id = 0;
+    const langkah = (t: number) => {
+      const p = langsung ? 1 : Math.min(1, (t - mulai) / durasi);
+      setNilai(Math.round(dari + (target - dari) * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) id = requestAnimationFrame(langkah);
+    };
+    id = requestAnimationFrame(langkah);
+    return () => cancelAnimationFrame(id);
+  }, [target, durasi]);
+  return nilai;
+}
+
+/* ───────────────────────── Ilustrasi ───────────────────────── */
+
+/** Tumpukan dokumen dengan lencana perisai — ilustrasi hero, murni SVG + token warna. */
+function IlustrasiArsip() {
+  const kertas = { fill: "var(--color-surface-2)", stroke: "color-mix(in srgb, var(--color-text) 18%, transparent)", strokeWidth: 1.5 };
+  const garis = { stroke: "color-mix(in srgb, var(--color-text) 22%, transparent)", strokeWidth: 3, strokeLinecap: "round" as const };
   return (
-    <div className="card elev-sm" style={{ gap: 9, padding: "var(--space-4)", background: "linear-gradient(160deg, var(--color-surface-2) 0%, var(--color-surface) 62%)", ...cardStyle }}>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 10, letterSpacing: "0.09em", textTransform: "uppercase", color: labelColor ?? "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{label}</div>
-          <div style={{ fontFamily: "var(--font-heading)", fontSize: 32, lineHeight: 1.1, letterSpacing: "-0.02em", color: valueColor }}>{value}</div>
-        </div>
-        <div style={{ marginLeft: "auto", width: 32, height: 32, flex: "none", borderRadius: "var(--radius-sm)", display: "grid", placeItems: "center", background: iconBg, color: iconColor, boxShadow: `inset 0 0 0 1px ${iconRing}` }}>
-          {icon}
-        </div>
+    <svg viewBox="0 0 220 160" width="220" height="160" aria-hidden="true" className="dasbor-melayang" style={{ maxWidth: "100%", height: "auto" }}>
+      <g transform="rotate(-9 90 90)"><rect x="40" y="26" width="92" height="112" rx="10" style={kertas} /></g>
+      <g transform="rotate(5 110 86)"><rect x="66" y="20" width="92" height="112" rx="10" style={kertas} /></g>
+      <g>
+        <rect x="52" y="30" width="96" height="116" rx="11" style={{ ...kertas, fill: "var(--color-surface)" }} />
+        <rect x="52" y="30" width="96" height="22" rx="11" style={{ fill: "var(--color-accent-800)" }} />
+        <rect x="52" y="41" width="96" height="11" style={{ fill: "var(--color-accent-800)" }} />
+        <circle cx="66" cy="41" r="4" style={{ fill: "var(--color-accent-400)" }} />
+        <line x1="66" y1="68" x2="132" y2="68" style={garis} />
+        <line x1="66" y1="82" x2="120" y2="82" style={garis} />
+        <line x1="66" y1="96" x2="128" y2="96" style={garis} />
+        <line x1="66" y1="110" x2="104" y2="110" style={garis} />
+      </g>
+      <g>
+        <circle cx="152" cy="116" r="26" style={{ fill: "var(--color-ok-800)", stroke: "var(--color-ok)", strokeWidth: 2 }} />
+        <path d="M152 101 l12 5 v9 c0 8 -5.5 13 -12 16 c-6.5 -3 -12 -8 -12 -16 v-9 z" style={{ fill: "var(--color-ok)" }} />
+        <path d="M146.5 116.5 l4 4 l7.5 -8" style={{ fill: "none", stroke: "var(--color-ok-800)", strokeWidth: 2.6, strokeLinecap: "round", strokeLinejoin: "round" }} />
+      </g>
+      <circle cx="176" cy="38" r="5" style={{ fill: "var(--color-accent-2-500)" }} />
+      <circle cx="30" cy="62" r="3.5" style={{ fill: "var(--color-accent-500)" }} />
+      <circle cx="190" cy="80" r="2.5" style={{ fill: "var(--color-accent-300)" }} />
+    </svg>
+  );
+}
+
+/** Lingkaran lembut berikon untuk keadaan kosong. */
+function Kosong({ ikon, judul, warna = "var(--color-ok)", children }: { ikon: React.ReactNode; judul: string; warna?: string; children?: React.ReactNode }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 8, padding: "18px 8px" }}>
+      <div className="dasbor-melayang" style={{ width: 56, height: 56, borderRadius: "50%", display: "grid", placeItems: "center", color: warna, background: `color-mix(in srgb, ${warna} 14%, transparent)`, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${warna} 35%, transparent)` }}>
+        {ikon}
       </div>
-      <div style={{ height: 4, borderRadius: 2, background: "var(--color-neutral-800)" }}>
-        <div style={{ height: 4, borderRadius: 2, background: barColor, width: barPct }} />
-      </div>
-      <div className="card-meta">{meta}</div>
+      <div style={{ fontSize: 13.5 }}>{judul}</div>
+      {children}
     </div>
   );
 }
 
-function DistCard({ title, subtitle, bars, barColor }: { title: string; subtitle: string; bars: GroupBar[]; barColor: string }) {
+/* ───────────────────────── Potongan ───────────────────────── */
+
+type Ubin = { kunci: string; label: string; nilai: number; warna: string; teks: string; ikon: React.ReactNode };
+
+function UbinStatus({ u, total, i }: { u: Ubin; total: number; i: number }) {
+  const nilai = useHitung(u.nilai);
+  const pct = total ? Math.round((u.nilai / total) * 100) : 0;
   return (
-    <div className="card elev-sm" style={{ padding: "var(--space-6)", gap: "var(--space-4)" }}>
+    <Link
+      href={`/arsip?status=${u.kunci}`}
+      className="card dasbor-ubin dasbor-muncul"
+      aria-label={`${u.nilai} dokumen ${u.label.toLowerCase()} — lihat di arsip`}
+      style={{
+        animationDelay: `${80 + i * 60}ms`,
+        ["--ubin-tepi" as string]: `color-mix(in srgb, ${u.warna} 55%, transparent)`,
+        padding: "var(--space-4)", gap: 12,
+        background: `linear-gradient(155deg, color-mix(in srgb, ${u.warna} 14%, var(--color-surface)) 0%, var(--color-surface) 70%)`,
+        boxShadow: "inset 0 0 0 1px var(--color-divider)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <span style={{ width: 34, height: 34, borderRadius: 10, display: "grid", placeItems: "center", color: u.teks, background: `color-mix(in srgb, ${u.warna} 18%, transparent)` }}>
+          {u.ikon}
+        </span>
+        <ArrowUpRight size={16} className="dasbor-panah" style={{ marginLeft: "auto", color: u.teks }} />
+      </div>
       <div>
-        <h5 style={{ margin: "0 0 2px" }}>{title}</h5>
-        <div className="text-muted" style={{ fontSize: 12 }}>{subtitle}</div>
+        <div style={{ fontFamily: "var(--font-heading)", fontSize: 34, lineHeight: 1, letterSpacing: "-0.03em", color: u.teks }}>{nilai}</div>
+        <div style={{ fontSize: 13, marginTop: 6, color: muted(78) }}>{u.label}</div>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-        {bars.map((b) => (
-          <div key={b.nama}>
-            <div style={{ display: "flex", gap: 8, fontSize: 12, marginBottom: 4 }}>
-              <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "color-mix(in srgb, var(--color-text) 74%, transparent)" }}>{b.nama}</span>
-              <span style={{ marginLeft: "auto", fontFamily: "var(--font-heading)", flex: "none" }}>{b.jumlah}</span>
-            </div>
-            <div style={{ height: 6, borderRadius: 3, background: "var(--color-neutral-800)" }}>
-              <div style={{ height: 6, borderRadius: 3, background: barColor, width: b.w }} />
-            </div>
-          </div>
-        ))}
+      <div style={{ height: 5, borderRadius: 3, background: "var(--color-neutral-800)", overflow: "hidden" }} title={`${pct}% dari seluruh arsip`}>
+        <div className="dasbor-isi" style={{ animationDelay: `${300 + i * 60}ms`, height: "100%", width: `${pct}%`, borderRadius: 3, background: u.warna }} />
+      </div>
+    </Link>
+  );
+}
+
+const R = 64;
+const KELILING = 2 * Math.PI * R;
+
+function CincinKepatuhan({ segmen, pct }: { segmen: { nama: string; v: number; fill: string }[]; pct: string }) {
+  const total = segmen.reduce((a, s) => a + s.v, 0);
+  const aktif = segmen.filter((s) => s.v > 0);
+  const celah = aktif.length > 1 ? 3 : 0;
+  let kumulatif = 0;
+  return (
+    <div style={{ position: "relative", width: 172, height: 172, flex: "none" }}>
+      <svg viewBox="0 0 172 172" width="172" height="172" style={{ transform: "rotate(-90deg)" }} role="img" aria-label={`Kepatuhan arsip ${pct}`}>
+        <circle cx="86" cy="86" r={R} fill="none" strokeWidth="16" style={{ stroke: "var(--color-neutral-800)" }} />
+        {total > 0 && aktif.map((s, i) => {
+          const panjang = (s.v / total) * KELILING;
+          const el = (
+            <circle
+              key={s.nama}
+              className="dasbor-cincin"
+              cx="86" cy="86" r={R} fill="none" strokeWidth="16" strokeLinecap="butt"
+              strokeDasharray={`${Math.max(0, panjang - celah)} ${KELILING}`}
+              strokeDashoffset={-kumulatif}
+              style={{ stroke: s.fill, ["--keliling" as string]: `${KELILING}`, animationDelay: `${200 + i * 140}ms` }}
+            />
+          );
+          kumulatif += panjang;
+          return el;
+        })}
+      </svg>
+      <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", textAlign: "center" }}>
+        <div>
+          <div style={{ fontFamily: "var(--font-heading)", fontSize: 34, lineHeight: 1, letterSpacing: "-0.03em" }}>{pct}</div>
+          <div style={{ fontSize: 11.5, marginTop: 4, color: muted(66) }}>terkendali</div>
+        </div>
       </div>
     </div>
   );
 }
+
+const LABEL_PENDEK: Record<string, string> = {
+  "Masa berlaku aman": "Aman",
+  "Segera kadaluarsa": "Segera",
+  "Sudah kadaluarsa": "Lewat",
+  "Sudah diproses": "Diproses",
+};
+
+/* ───────────────────────── Halaman ───────────────────────── */
+
+type Tab = "kategori" | "jenis" | "pengelola";
 
 export default function DashboardPage() {
   const { me, counts, stats, allDocs, state, threshold } = useArsiva();
   const th = threshold;
+  const [tab, setTab] = React.useState<Tab>("kategori");
+  const total = useHitung(counts.total);
 
-  const prioritas = React.useMemo(
-    () => allDocs.filter((r) => r.dl <= th).sort((a, b) => a.dl - b.dl).slice(0, 5),
-    [allDocs, th],
-  );
-  const terbaru = React.useMemo(
-    () => [...allDocs].sort((a, b) => (a.u < b.u ? 1 : -1)).slice(0, 4),
-    [allDocs],
-  );
-  const jadwalDekat = React.useMemo(() => {
-    const mulai = todayISO();
-    return state.schedules
-      .filter((x) => x.st === "Direncanakan" && x.tgl >= mulai)
-      .sort((a, b) => (a.tgl < b.tgl ? -1 : 1))
-      .slice(0, 3)
-      .map((x) => {
-        const d = new Date(x.tgl + "T00:00:00");
-        return { ...x, notaris: x.notarisNama, hari: d.getDate(), bulan: MONTHS[d.getMonth()] };
-      });
-  }, [state.schedules]);
+  // Sama dengan counts.perluAksi: dalam ambang dan belum ditandai diproses.
+  const prioritas = allDocs.filter((r) => r.dl <= th && r.status !== "Diproses").sort((a, b) => a.dl - b.dl).slice(0, 5);
+  const terbaru = [...allDocs].sort((a, b) => (a.u < b.u ? 1 : -1)).slice(0, 4);
+  const hariIni = todayISO();
+  const jadwalDekat = state.schedules
+    .filter((x) => x.st === "Direncanakan" && x.tgl >= hariIni)
+    .sort((a, b) => (a.tgl < b.tgl ? -1 : 1))
+    .slice(0, 3)
+    .map((x) => {
+      const d = new Date(x.tgl + "T00:00:00");
+      return { ...x, hari: d.getDate(), bulan: MONTHS[d.getMonth()] };
+    });
+
+  const ubin: Ubin[] = [
+    { kunci: "Aman", label: "Aman", nilai: counts.aktif, warna: "var(--color-accent-500)", teks: "var(--color-accent-200)", ikon: <ShieldCheck size={18} weight="duotone" /> },
+    { kunci: "Segera", label: "Segera kadaluarsa", nilai: counts.segera, warna: "var(--color-accent-2-500)", teks: "var(--color-accent-2-300)", ikon: <HourglassMedium size={18} weight="duotone" /> },
+    { kunci: "Kadaluarsa", label: "Kadaluarsa", nilai: counts.kadaluarsa, warna: "var(--color-danger)", teks: "var(--color-danger-text)", ikon: <WarningCircle size={18} weight="duotone" /> },
+    { kunci: "Diproses", label: "Diproses", nilai: counts.diproses, warna: "var(--color-ok)", teks: "var(--color-ok-100)", ikon: <CheckCircle size={18} weight="duotone" /> },
+  ];
+
+  const sebaran = tab === "kategori" ? stats.katBars : tab === "jenis" ? stats.jenisBars : stats.ownerBars;
+  const warnaUrgensi = (dl: number) => (dl < 0 ? "var(--color-danger)" : "var(--color-accent-2-500)");
 
   return (
-    <div>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 16, marginBottom: 20, flexWrap: "wrap" }}>
-        <div>
-          <h3 style={{ margin: "0 0 4px" }}>Halo, {me.panggilan}</h3>
-          <div className="text-muted" style={{ fontSize: 13 }}>Ringkasan dan analitik arsip dokumen legal per {fmt(todayISO())}</div>
-        </div>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8, flex: "none" }}>
-          <a className="btn btn-secondary" href="/api/laporan" download>
-            <FileArrowDown size={16} />
-            Unduh Laporan
-          </a>
-          <Link className="btn btn-primary" href="/unggah">
-            <UploadSimple size={16} />
-            Unggah Dokumen
-          </Link>
-        </div>
-      </div>
-
-      {/* KPI cards */}
-      <div className="grid gap-3 mb-4 grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Total Dokumen"
-          value={counts.total}
-          icon={<Folders size={17} />}
-          iconBg="var(--color-neutral-900)"
-          iconColor="var(--color-neutral-400)"
-          iconRing="var(--color-neutral-800)"
-          barColor="var(--color-neutral-500)"
-          barPct="100%"
-          meta={`${state.cats.length} kategori aktif`}
-        />
-        <StatCard
-          label="Masa Berlaku Aman"
-          value={counts.aktif}
-          labelColor="var(--color-accent-400)"
-          valueColor="var(--color-accent-200)"
-          icon={<ShieldCheck size={17} />}
-          iconBg="var(--color-accent-900)"
-          iconColor="var(--color-accent-300)"
-          iconRing="var(--color-accent-800)"
-          barColor="var(--color-accent)"
-          barPct={stats.kpi.aktifPct}
-          meta={stats.kpi.aktifText}
-        />
-        <StatCard
-          label="Segera kadaluarsa"
-          value={counts.segera}
-          labelColor="var(--color-accent-2-400)"
-          valueColor="var(--color-accent-2-300)"
-          icon={<HourglassMedium size={17} />}
-          iconBg="var(--color-accent-2-900)"
-          iconColor="var(--color-accent-2-300)"
-          iconRing="var(--color-accent-2-800)"
-          barColor="var(--color-accent-2)"
-          barPct={stats.kpi.segeraPct}
-          meta={`Dalam ambang ${th} hari`}
-          cardStyle={{ background: "linear-gradient(160deg, var(--color-accent-2-900) 0%, var(--color-surface) 68%)", boxShadow: "inset 0 0 0 1px var(--color-accent-2-800), var(--shadow-sm)" }}
-        />
-        <StatCard
-          label="Sudah Kadaluarsa"
-          value={counts.kadaluarsa}
-          labelColor="var(--color-danger-text)"
-          valueColor="var(--color-danger-text)"
-          icon={<WarningCircle size={17} />}
-          iconBg="var(--color-danger-800)"
-          iconColor="var(--color-danger-100)"
-          iconRing="var(--color-danger-800)"
-          barColor="var(--color-danger)"
-          barPct={stats.kpi.kadalPct}
-          meta={stats.kpi.bulanIniText}
-        />
-      </div>
-
-      {/* projection + compliance */}
-      <div className="grid gap-4 mb-4 grid-cols-1 lg:grid-cols-[1.62fr_1fr] items-stretch">
-        <div className="card elev-sm" style={{ padding: "var(--space-6)", gap: "var(--space-4)" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-            <div>
-              <h5 style={{ margin: "0 0 2px" }}>Proyeksi jatuh tempo dokumen</h5>
-              <div className="text-muted" style={{ fontSize: 12 }}>Jumlah dokumen menurut bulan masa berlaku berakhir · ambang pengingat {th} hari</div>
-            </div>
-            <Link className="btn btn-ghost" href="/pengingat" style={{ marginLeft: "auto", fontSize: 12, flex: "none" }}>Atur ambang</Link>
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+      {/* HERO */}
+      <section
+        className="card dasbor-muncul"
+        style={{
+          padding: "var(--space-6)", flexDirection: "row", alignItems: "center", gap: 24, overflow: "hidden",
+          background: "linear-gradient(130deg, var(--color-section) 0%, var(--color-surface) 62%)",
+          boxShadow: "inset 0 0 0 1px var(--color-divider)",
+        }}
+      >
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+            <span className="tag tag-accent">{fmt(hariIni)}</span>
+            <span className="tag tag-neutral">{total} dokumen di arsip</span>
           </div>
-          {/* legend */}
-          <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "center" }}>
+          <h3 style={{ margin: "0 0 10px", fontSize: "clamp(24px, 2.4vw, 30px)" }}>Halo, {me.panggilan}</h3>
+          {counts.perluAksi > 0 ? (
+            <Link href="/pengingat" style={{ display: "inline-flex", alignItems: "center", gap: 10, fontSize: 15, color: "var(--color-text)", textDecoration: "none" }}>
+              <span className="dasbor-denyut" style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--color-accent-2-500)", flex: "none" }} />
+              <span><strong style={{ color: "var(--color-accent-2-300)" }}>{counts.perluAksi} dokumen</strong> perlu tindakan</span>
+              <ArrowRight size={15} style={{ color: "var(--color-accent-2-300)" }} />
+            </Link>
+          ) : (
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, fontSize: 15 }}>
+              <CheckCircle size={18} weight="fill" style={{ color: "var(--color-ok)" }} />
+              Semua dokumen terkendali
+            </div>
+          )}
+          <div style={{ display: "flex", gap: 8, marginTop: 20, flexWrap: "wrap" }}>
+            <Link className="btn btn-primary btn-solid" href="/unggah">
+              <UploadSimple size={16} />
+              Unggah
+            </Link>
+            <a className="btn btn-secondary" href="/api/laporan" download title="Unduh laporan ringkasan arsip (CSV)">
+              <FileArrowDown size={16} />
+              Laporan
+            </a>
+          </div>
+        </div>
+        <div className="hidden sm:block" style={{ flex: "none", width: 220 }}>
+          <IlustrasiArsip />
+        </div>
+      </section>
+
+      {/* UBIN STATUS */}
+      <div className="grid gap-3 grid-cols-2 xl:grid-cols-4">
+        {ubin.map((u, i) => <UbinStatus key={u.kunci} u={u} total={counts.total} i={i} />)}
+      </div>
+
+      {/* KEPATUHAN + JATUH TEMPO */}
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-[1fr_2fr] items-stretch">
+        <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "320ms", padding: "var(--space-6)", gap: "var(--space-4)", alignItems: "center" }}>
+          <h5 style={{ margin: 0, alignSelf: "flex-start" }}>Kepatuhan</h5>
+          <CincinKepatuhan segmen={stats.donut.legend} pct={stats.donut.pct} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", width: "100%" }}>
             {stats.donut.legend.map((l) => (
-              <div key={l.nama} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 11.5 }}>
-                <span style={{ width: 22, height: 3, borderRadius: 2, flex: "none", background: l.fill }} />
-                <span style={{ color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{l.nama.replace("Masa berlaku aman", "Masa berlaku aman")}</span>
-                <span style={{ fontFamily: "var(--font-heading)", color: "color-mix(in srgb, var(--color-text) 88%, transparent)" }}>{l.v}</span>
+              <div key={l.nama} title={`${l.nama}: ${l.v} dokumen (${l.pctText})`} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5 }}>
+                <span style={{ width: 9, height: 9, borderRadius: "50%", flex: "none", background: l.fill }} />
+                <span style={{ color: muted(70) }}>{LABEL_PENDEK[l.nama] ?? l.nama}</span>
+                <span style={{ marginLeft: "auto", fontFamily: "var(--font-heading)" }}>{l.v}</span>
               </div>
             ))}
           </div>
-          {/* bars */}
-          <div style={{ position: "relative", height: 158, marginTop: "var(--space-2)" }}>
-            {stats.bulan.grid.map((g) => (
-              <div key={"line" + g.b} style={{ position: "absolute", left: 26, right: 0, bottom: g.b, height: 1, background: "linear-gradient(to right, transparent, var(--color-divider) 44px, var(--color-divider) calc(100% - 44px), transparent)" }} />
-            ))}
-            {stats.bulan.grid.map((g) => (
-              <div key={"lbl" + g.lb} style={{ position: "absolute", left: 0, width: 22, textAlign: "right", bottom: g.lb, fontSize: 10, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{g.label}</div>
-            ))}
-            <div style={{ position: "absolute", left: 26, right: 0, bottom: 0, height: 158, display: "flex", alignItems: "flex-end", gap: 10 }}>
-              {stats.bulan.cols.map((c, i) => (
-                <div key={i} className="row-hover" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", gap: 6, height: "100%", borderRadius: "var(--radius-sm)", paddingBottom: 1 }}>
-                  <div style={{ fontSize: 11.5, fontFamily: "var(--font-heading)", color: "color-mix(in srgb, var(--color-text) 80%, transparent)" }}>{c.totalText}</div>
-                  <div style={{ width: "100%", maxWidth: 46, display: "flex", flexDirection: "column-reverse", gap: 1.5, borderRadius: 3, overflow: "hidden", height: c.h }}>
-                    {c.segs.map((sg, k) => (
-                      <div key={k} style={{ height: sg.h, background: sg.fill }} />
-                    ))}
-                  </div>
-                </div>
+        </div>
+
+        <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "380ms", padding: "var(--space-6)", gap: "var(--space-4)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <h5 style={{ margin: 0 }}>Jatuh tempo</h5>
+            <Link href="/pengingat" className="tag tag-warn" style={{ textDecoration: "none" }} title="Atur ambang pengingat">
+              ambang {th} hari
+            </Link>
+            <div style={{ marginLeft: "auto", display: "flex", gap: 12, flexWrap: "wrap" }}>
+              {stats.donut.legend.map((l) => (
+                <span key={l.nama} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11.5, color: muted(66) }}>
+                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: l.fill }} />
+                  {LABEL_PENDEK[l.nama] ?? l.nama}
+                </span>
               ))}
             </div>
           </div>
-          <div style={{ display: "flex", gap: 10, paddingLeft: 26 }}>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 10, height: 190, paddingTop: 8, borderBottom: "1px solid var(--color-divider)" }}>
             {stats.bulan.cols.map((c, i) => (
-              <div key={i} style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
-                <div style={{ height: 2, width: 22, margin: "0 auto 6px", borderRadius: 2, background: c.markC }} />
-                <div style={{ fontSize: 10.5, color: c.labelC }}>{c.label}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{ display: "flex", gap: 26, flexWrap: "wrap", paddingTop: "var(--space-3)", borderTop: "1px solid var(--color-divider)" }}>
-            <div>
-              <div style={{ fontSize: 10, letterSpacing: "0.09em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>Puncak jatuh tempo</div>
-              <div style={{ fontSize: 13, fontFamily: "var(--font-heading)", marginTop: 2 }}>{stats.bulan.puncakText}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 10, letterSpacing: "0.09em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>Rata-rata sisa masa berlaku</div>
-              <div style={{ fontSize: 13, fontFamily: "var(--font-heading)", marginTop: 2 }}>{stats.bulan.avgText}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 10, letterSpacing: "0.09em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>Perlu tindak lanjut</div>
-              <div style={{ fontSize: 13, fontFamily: "var(--font-heading)", marginTop: 2, color: "var(--color-accent-2-400)" }}>{counts.perluAksi} dokumen</div>
-            </div>
-          </div>
-        </div>
-
-        {/* compliance donut */}
-        <div className="card elev-sm" style={{ padding: "var(--space-6)", gap: "var(--space-4)" }}>
-          <div>
-            <h5 style={{ margin: "0 0 2px" }}>Kepatuhan arsip</h5>
-            <div className="text-muted" style={{ fontSize: 12 }}>Porsi dokumen yang masih berlaku atau sudah ditindaklanjuti</div>
-          </div>
-          <div style={{ display: "flex", justifyContent: "center", padding: "var(--space-2) 0" }}>
-            <div style={{ position: "relative", width: 172, height: 172, flex: "none", borderRadius: "50%", background: stats.donut.conic }}>
-              <div style={{ position: "absolute", inset: 0, borderRadius: "50%", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--color-bg) 55%, transparent)" }} />
-              <div style={{ position: "absolute", inset: 23, borderRadius: "50%", background: "var(--color-surface)", boxShadow: "inset 0 0 0 1px var(--color-divider)", display: "grid", placeItems: "center", textAlign: "center" }}>
-                <div>
-                  <div style={{ fontFamily: "var(--font-heading)", fontSize: 34, lineHeight: 1, letterSpacing: "-0.02em" }}>{stats.donut.pct}</div>
-                  <div style={{ fontSize: 9, letterSpacing: "0.12em", marginTop: 5, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>TERKENDALI</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-            {stats.donut.legend.map((l) => (
-              <div key={l.nama}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, marginBottom: 4 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", flex: "none", background: l.fill }} />
-                  <span style={{ minWidth: 0, flex: 1, color: "color-mix(in srgb, var(--color-text) 70%, transparent)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.nama}</span>
-                  <span style={{ fontFamily: "var(--font-heading)", flex: "none" }}>{l.v}</span>
-                  <span style={{ flex: "none", width: 34, textAlign: "right", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{l.pctText}</span>
-                </div>
-                <div style={{ height: 3, borderRadius: 2, background: "var(--color-neutral-800)" }}>
-                  <div style={{ height: 3, borderRadius: 2, background: l.fill, width: l.w }} />
+              <div key={c.label} title={`${c.label}: ${c.total} dokumen`} style={{ flex: 1, minWidth: 0, height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 12, fontFamily: "var(--font-heading)", color: c.total ? muted(85) : muted(40) }}>{c.total || ""}</span>
+                <div
+                  className="dasbor-batang"
+                  style={{ animationDelay: `${420 + i * 70}ms`, width: "100%", maxWidth: 44, height: c.h, display: "flex", flexDirection: "column-reverse", gap: 2, borderRadius: "6px 6px 2px 2px", overflow: "hidden" }}
+                >
+                  {c.segs.map((sg, k) => <div key={k} style={{ height: sg.h, background: sg.fill }} />)}
                 </div>
               </div>
             ))}
           </div>
-          <Link className="btn btn-secondary btn-block" href="/pengingat" style={{ marginTop: "auto" }}>
-            <BellRinging size={15} />
-            Tindak lanjuti {counts.perluAksi} dokumen
-          </Link>
+          <div style={{ display: "flex", gap: 10, marginTop: -6 }}>
+            {stats.bulan.cols.map((c, i) => (
+              <div key={c.label} style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
+                <span
+                  style={{
+                    display: "inline-block", fontSize: 11.5, padding: "2px 8px", borderRadius: 999,
+                    color: i === 1 ? "var(--color-accent-100)" : muted(66),
+                    background: i === 1 ? "var(--color-accent-800)" : "transparent",
+                  }}
+                >
+                  {c.label === "Terlewat" ? "Lewat" : c.label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* distributions */}
-      <div className="grid gap-4 mb-4 grid-cols-1 md:grid-cols-3 items-start">
-        <DistCard title="Sebaran kategori" subtitle="Kelompok dokumen terbanyak di arsip" bars={stats.katBars} barColor="var(--color-accent-600)" />
-        <DistCard title="Sebaran jenis dokumen" subtitle="Komposisi master data jenis yang terpakai" bars={stats.jenisBars} barColor="var(--color-accent-700)" />
-        <DistCard title="Beban pengelola" subtitle="Jumlah dokumen yang diunggah tiap staf" bars={stats.ownerBars} barColor="var(--color-neutral-500)" />
-      </div>
-
-      {/* priority + side */}
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-[1.55fr_1fr] items-start">
-        <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
+      {/* PERLU TINDAKAN + SAMPING */}
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-[1.4fr_1fr] items-start">
+        <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "440ms", padding: "var(--space-4)", gap: "var(--space-3)" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
-            <h5 style={{ margin: 0 }}>Prioritas tindak lanjut</h5>
-            <Link className="btn btn-ghost" href="/pengingat" style={{ marginLeft: "auto", fontSize: 12 }}>Lihat semua<ArrowRight size={14} /></Link>
+            <h5 style={{ margin: 0 }}>Perlu tindakan</h5>
+            <Link className="btn btn-ghost" href="/pengingat" style={{ marginLeft: "auto", fontSize: 12.5 }}>Semua<ArrowRight size={14} /></Link>
           </div>
-          <div style={{ overflowX: "auto" }}>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Dokumen</th>
-                  <th style={{ width: 110 }}>Kadaluarsa</th>
-                  <th style={{ width: 130 }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {prioritas.map((r) => (
-                  <tr key={r.id} className="baris-tautan">
-                    <td>
-                      <div style={{ fontSize: 13, maxWidth: "min(360px, 46vw)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {prioritas.length === 0 ? (
+            <Kosong ikon={<Sparkle size={26} weight="duotone" />} judul="Semua beres">
+              <div style={{ fontSize: 12.5, color: muted(66) }}>Tidak ada dokumen dalam ambang {th} hari.</div>
+            </Kosong>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {prioritas.map((r) => {
+                const w = warnaUrgensi(r.dl);
+                return (
+                  <div
+                    key={r.id}
+                    className="baris-tautan row-hover"
+                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: "var(--radius-md)", background: "var(--color-surface-2)" }}
+                  >
+                    <span style={{ width: 4, alignSelf: "stretch", borderRadius: 2, background: w, flex: "none" }} />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: 13.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
                       </div>
-                      <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{r.k}</div>
-                    </td>
-                    <td style={{ fontSize: 12 }}>
-                      {r.expText}
-                      <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{r.sisa}</div>
-                    </td>
-                    <td><span className={`tag ${r.tag}`}>{r.status}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      <div style={{ fontSize: 12, color: muted(62) }}>{r.k}</div>
+                    </div>
+                    <span
+                      style={{
+                        flex: "none", fontSize: 12, padding: "4px 10px", borderRadius: 999, whiteSpace: "nowrap",
+                        // Teks pil lebih terang dari --color-danger-text karena latarnya sudah kemerahan (kontras >=4.5).
+                        color: r.dl < 0 ? "color-mix(in srgb, var(--color-danger-text) 70%, white)" : "var(--color-accent-2-300)",
+                        background: `color-mix(in srgb, ${w} 16%, transparent)`,
+                      }}
+                    >
+                      {r.sisa}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
+          <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "500ms", padding: "var(--space-4)", gap: "var(--space-3)" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
-              <h5 style={{ margin: 0 }}>Jadwal notaris terdekat</h5>
-              <Link className="btn btn-ghost" href="/notaris" style={{ marginLeft: "auto", fontSize: 12 }}>Kelola</Link>
+              <h5 style={{ margin: 0 }}>Jadwal notaris</h5>
+              <Link className="btn btn-ghost" href="/notaris" style={{ marginLeft: "auto", fontSize: 12.5 }}>Kelola</Link>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {jadwalDekat.map((s) => (
-                <div key={s.id} style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
-                  <div style={{ flex: "none", width: 44, textAlign: "center", padding: "5px 0", borderRadius: "var(--radius-sm)", background: "var(--color-surface-2)", boxShadow: "inset 0 0 0 1px var(--color-divider)" }}>
-                    <div style={{ fontFamily: "var(--font-heading)", fontSize: 15, lineHeight: 1 }}>{s.hari}</div>
-                    <div style={{ fontSize: 10, textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{s.bulan}</div>
+            {jadwalDekat.length === 0 ? (
+              <Kosong ikon={<CalendarBlank size={24} weight="duotone" />} judul="Belum ada jadwal mendatang" warna="var(--color-accent-500)" />
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {jadwalDekat.map((s) => (
+                  <div key={s.id} style={{ display: "flex", gap: 11, alignItems: "center" }}>
+                    <div style={{ flex: "none", width: 46, textAlign: "center", padding: "6px 0", borderRadius: "var(--radius-md)", background: "var(--color-accent-900)", boxShadow: "inset 0 0 0 1px var(--color-accent-800)" }}>
+                      <div style={{ fontFamily: "var(--font-heading)", fontSize: 17, lineHeight: 1, color: "var(--color-accent-100)" }}>{s.hari}</div>
+                      <div style={{ fontSize: 10.5, marginTop: 2, color: "var(--color-accent-300)" }}>{s.bulan}</div>
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.agenda}</div>
+                      <div style={{ fontSize: 12, color: muted(62) }}>{s.jam} · {s.notarisNama}</div>
+                    </div>
                   </div>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13 }}>{s.agenda}</div>
-                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{s.notaris} · {s.jam}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
-            <h5 style={{ margin: 0 }}>Unggahan terbaru</h5>
-            <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+          <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "560ms", padding: "var(--space-4)", gap: "var(--space-3)" }}>
+            <h5 style={{ margin: 0 }}>Terbaru</h5>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {terbaru.map((r) => (
-                <div key={r.id} className="baris-tautan" style={{ display: "flex", gap: 9, alignItems: "center" }}>
-                  <FilePdf size={17} style={{ color: "var(--color-accent-400)", flex: "none" }} />
+                <div key={r.id} className="baris-tautan row-hover" style={{ display: "flex", gap: 10, alignItems: "center", padding: "6px 8px", margin: "0 -8px", borderRadius: "var(--radius-sm)" }}>
+                  <span style={{ width: 30, height: 30, flex: "none", borderRadius: 8, display: "grid", placeItems: "center", background: "var(--color-accent-900)", color: "var(--color-accent-300)" }}>
+                    <FilePdf size={16} />
+                  </span>
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <div style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
                     </div>
-                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{r.o} · {r.upText}</div>
+                    <div style={{ fontSize: 12, color: muted(62) }}>{r.o} · {r.upText}</div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* SEBARAN */}
+      <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "620ms", padding: "var(--space-4)", gap: "var(--space-4)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <h5 style={{ margin: 0 }}>Sebaran</h5>
+          <div role="tablist" aria-label="Pilih sebaran" style={{ marginLeft: "auto", display: "flex", gap: 2, padding: 3, borderRadius: 999, background: "var(--color-surface-2)" }}>
+            {([["kategori", "Kategori"], ["jenis", "Jenis"], ["pengelola", "Pengelola"]] as [Tab, string][]).map(([k, label]) => (
+              <button key={k} type="button" role="tab" aria-selected={tab === k} className="dasbor-tab" onClick={() => setTab(k)}>{label}</button>
+            ))}
+          </div>
+        </div>
+        {/* key memutar ulang animasi batang setiap ganti tab */}
+        <div key={tab} role="tabpanel" className="grid gap-x-8 gap-y-3 grid-cols-1 md:grid-cols-2">
+          {sebaran.map((b, i) => (
+            <div key={b.nama}>
+              <div style={{ display: "flex", gap: 8, fontSize: 13, marginBottom: 5 }}>
+                <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: muted(78) }}>{b.nama}</span>
+                <span style={{ marginLeft: "auto", fontFamily: "var(--font-heading)", flex: "none" }}>{b.jumlah}</span>
+              </div>
+              <div style={{ height: 8, borderRadius: 4, background: "var(--color-neutral-800)", overflow: "hidden" }}>
+                <div className="dasbor-isi" style={{ animationDelay: `${i * 50}ms`, height: "100%", width: b.w, borderRadius: 4, background: "linear-gradient(90deg, var(--color-accent-700), var(--color-accent-500))" }} />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

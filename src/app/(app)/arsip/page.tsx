@@ -42,7 +42,11 @@ function ArsipInner() {
 
   const [q, setQ] = React.useState(searchParams.get("q") ?? "");
   const [cat, setCat] = React.useState("Semua");
-  const [status, setStatus] = React.useState("Semua");
+  // ?status= dari ubin dashboard (Aman | Segera | Kadaluarsa | Diproses).
+  const [status, setStatus] = React.useState(() => {
+    const s = searchParams.get("status");
+    return s && STATUS_CHIPS.some(([v]) => v === s) ? s : "Semua";
+  });
   const [jenisF, setJenisF] = React.useState("Semua jenis");
   const [tujuanF, setTujuanF] = React.useState("Semua tujuan");
 
