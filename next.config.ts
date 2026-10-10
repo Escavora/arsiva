@@ -1,4 +1,9 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+// `next dev`: sediakan binding Cloudflare (mis. bucket R2 "FILES") lewat
+// simulasi lokal Wrangler, agar getCloudflareContext() bekerja di luar Workers.
+initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
   // Jangan pernah membawa data lokal, berkas scan, atau kredensial ke output

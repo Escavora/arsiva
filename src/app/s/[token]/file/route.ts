@@ -30,10 +30,10 @@ export async function GET(req: Request, { params }: Ctx) {
 
   const unduh = new URL(req.url).searchParams.get("unduh") === "1";
   const nama = doc.fileName ?? file.fileName;
-  return new Response(new Uint8Array(file.body), {
+  return new Response(file.body, {
     headers: {
       "Content-Type": doc.mimeType ?? file.mimeType,
-      "Content-Length": String(file.body.byteLength),
+      "Content-Length": String(file.size),
       "Content-Disposition": `${unduh ? "attachment" : "inline"}; filename="${encodeURIComponent(nama)}"`,
       // Jangan sampai tersimpan di cache bersama / proxy.
       "Cache-Control": "private, no-store",

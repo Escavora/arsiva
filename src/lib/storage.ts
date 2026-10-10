@@ -1,28 +1,64 @@
-// Adapter penyimpanan berkas hasil scan.
+// Penyimpanan berkas hasil scan di Cloudflare R2.
 //
-// Driver aktif ditentukan oleh STORAGE_DRIVER di .env: "local" (disk, untuk
-// pengembangan) atau "blob" (Vercel Blob, untuk produksi/deploy — filesystem
-// Vercel bersifat sementara sehingga driver "local" TIDAK bisa dipakai di sana).
-// Antarmuka sengaja kecil (put/get/delete) agar driver baru (S3, dsb.) bisa
-// ditambahkan tanpa mengubah kode fitur.
+// Bucket diakses lewat binding Worker `FILES` (lihat wrangler.jsonc), jadi
+// tidak ada kredensial di kode maupun .env. Bucket bersifat PRIVATE: browser
+// tidak pernah menerima URL R2 — berkas selalu disalurkan lewat endpoint kita
+// sendiri (/api/documents/[id]/file atau /s/[token]/file) yang memverifikasi
+// sesi/token lebih dulu.
+//
+// Di lokal (`next dev` / `npm run preview`) Wrangler menyimulasikan bucket di
+// .wrangler/state, jadi tidak perlu akun Cloudflare untuk pengembangan.
 
-import { createHash, randomUUID } from "node:crypto";
-import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export type StoredFile = {
-  /** Kunci logis berkas; disimpan di kolom documents.file_path */
+  /** Kunci objek di R2; disimpan di kolom documents.file_path */
   key: string;
   fileName: string;
   size: number;
   mimeType: string;
 };
 
+export type FileObject = {
+  /** Isi berkas sebagai stream, langsung bisa dipakai sebagai body Response. */
+  body: ReadableStream;
+  size: number;
+  mimeType: string;
+  fileName: string;
+};
+
 export interface StorageDriver {
   nama: string;
   put(file: File): Promise<StoredFile>;
-  get(key: string): Promise<{ body: Buffer; mimeType: string; fileName: string } | null>;
+  get(key: string): Promise<FileObject | null>;
   delete(key: string): Promise<void>;
+}
+
+/**
+ * Bagian API binding R2 yang dipakai di sini. Sengaja didefinisikan sendiri:
+ * tipe runtime Workers lengkap (`wrangler types`) menimpa tipe DOM proyek ini
+ * dan membuat `Request.json()` bertipe `unknown` di seluruh route.
+ */
+type R2Object = {
+  body: ReadableStream;
+  size: number;
+  httpMetadata?: { contentType?: string };
+  customMetadata?: Record<string, string>;
+};
+type FilesBucket = {
+  put(
+    key: string,
+    value: Blob,
+    options?: { httpMetadata?: { contentType?: string }; customMetadata?: Record<string, string> },
+  ): Promise<unknown>;
+  get(key: string): Promise<R2Object | null>;
+  delete(key: string): Promise<void>;
+};
+
+declare global {
+  interface CloudflareEnv {
+    FILES: FilesBucket;
+  }
 }
 
 const MAX_BYTES = 20 * 1024 * 1024; // PRD: maksimal 20 MB per berkas
@@ -46,171 +82,57 @@ function namaFolderBulan(): string {
   return `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
-/* ───────────────────────── Driver: local disk ───────────────────────── */
-// Hanya untuk pengembangan lokal. Filesystem Vercel bersifat sementara —
-// berkas yang ditulis driver ini TIDAK bertahan antar-deployment/request di
-// sana, jadi wajib diganti ke driver "blob" sebelum deploy.
-
-// Pakai `|| default` (bukan `??`) agar string kosong "" — yang bisa muncul bila
-// variabel di-set kosong di platform deploy — diperlakukan seperti tidak diisi.
-// turbopackIgnore: path dinamis ini membuat Turbopack menelusuri SELURUH proyek
-// (termasuk .env, data/, storage/) ke output server.
-const ROOT = path.resolve(
-  /*turbopackIgnore: true*/ process.env.STORAGE_LOCAL_DIR?.trim() || "./storage/uploads",
-);
-
-/** Cegah path traversal: kunci hasil resolveKey wajib tetap di dalam ROOT. */
-function resolveKey(key: string): string {
-  const full = path.resolve(ROOT, key);
-  if (full !== ROOT && !full.startsWith(ROOT + path.sep)) {
-    throw new Error("Kunci berkas tidak valid.");
-  }
-  return full;
+/** Ekstensi berkas (mis. ".pdf"), atau ".bin" bila tidak ada. */
+function ekstensi(nama: string): string {
+  return /\.[A-Za-z0-9]{1,10}$/.exec(nama)?.[0].toLowerCase() ?? ".bin";
 }
 
-const localDriver: StorageDriver = {
-  nama: "local",
+function bucket(): FilesBucket {
+  const files = getCloudflareContext().env.FILES;
+  if (!files) {
+    throw new Error("Binding R2 \"FILES\" tidak ditemukan. Periksa r2_buckets di wrangler.jsonc.");
+  }
+  return files;
+}
+
+const r2Driver: StorageDriver = {
+  nama: "r2",
+
   async put(file) {
     assertUploadable(file);
-    const buf = Buffer.from(await file.arrayBuffer());
-    const ext = path.extname(file.name).slice(0, 10) || ".bin";
-    const key = `${namaFolderBulan()}/${randomUUID()}${ext}`;
-    const full = resolveKey(key);
-    await mkdir(path.dirname(full), { recursive: true });
-    await writeFile(full, buf);
-    // Sidecar metadata agar nama & tipe asli tidak hilang.
-    await writeFile(`${full}.meta.json`, JSON.stringify({ fileName: file.name, mimeType: file.type }));
-    return { key, fileName: file.name, size: buf.byteLength, mimeType: file.type };
-  },
-
-  async get(key) {
-    try {
-      const full = resolveKey(key);
-      const body = await readFile(/*turbopackIgnore: true*/ full);
-      let fileName = path.basename(key);
-      let mimeType = "application/octet-stream";
-      try {
-        const meta = JSON.parse(await readFile(/*turbopackIgnore: true*/ `${full}.meta.json`, "utf8"));
-        fileName = meta.fileName ?? fileName;
-        mimeType = meta.mimeType ?? mimeType;
-      } catch {
-        // metadata opsional
-      }
-      return { body, mimeType, fileName };
-    } catch {
-      return null;
-    }
-  },
-
-  async delete(key) {
-    try {
-      const full = resolveKey(key);
-      await unlink(full);
-      await unlink(`${full}.meta.json`).catch(() => {});
-    } catch {
-      // sudah tidak ada — abaikan
-    }
-  },
-};
-
-/* ───────────────────────── Driver: Vercel Blob ───────────────────────── */
-//
-// Store Blob di sini dikonfigurasi PRIVATE — bukan public. Ini justru pilihan
-// yang tepat untuk arsip dokumen legal: URL blob tidak bisa diakses siapa pun
-// tanpa BLOB_READ_WRITE_TOKEN, sama seperti driver "local". Kunci yang
-// disimpan di documents.file_path adalah *pathname* blob (bukan URL), dan
-// setiap baca/hapus memakai token lewat SDK @vercel/blob. Sama seperti driver
-// lain, aplikasi tetap menyalurkan berkas lewat endpoint kita sendiri
-// (/api/documents/[id]/file atau /s/[token]/file) yang memverifikasi
-// sesi/token lebih dulu — bukan mengekspos blob secara langsung ke browser.
-
-const blobDriver: StorageDriver = {
-  nama: "blob",
-  async put(file) {
-    assertUploadable(file);
-    const token = process.env.BLOB_READ_WRITE_TOKEN;
-    if (!token) throw new Error("BLOB_READ_WRITE_TOKEN belum diisi di .env.");
-
-    const { put } = await import("@vercel/blob");
-    const ext = path.extname(file.name).slice(0, 10) || ".bin";
-    const pathname = `${namaFolderBulan()}/${randomUUID()}${ext}`;
-
-    const blob = await put(pathname, file, {
-      access: "private",
-      token,
-      contentType: file.type,
-      addRandomSuffix: false,
+    const key = `${namaFolderBulan()}/${crypto.randomUUID()}${ekstensi(file.name)}`;
+    await bucket().put(key, file, {
+      httpMetadata: { contentType: file.type },
+      // Metadata R2 hanya menerima string; nama di-encode agar aman untuk
+      // karakter non-ASCII.
+      customMetadata: { fileName: encodeURIComponent(file.name) },
     });
-
-    return { key: blob.pathname, fileName: file.name, size: file.size, mimeType: file.type };
+    return { key, fileName: file.name, size: file.size, mimeType: file.type };
   },
 
   async get(key) {
-    const token = process.env.BLOB_READ_WRITE_TOKEN;
-    if (!token) return null;
-    try {
-      const { get } = await import("@vercel/blob");
-      const hasil = await get(key, { access: "private", token });
-      if (!hasil || !hasil.stream) return null;
-      const body = Buffer.from(await new Response(hasil.stream).arrayBuffer());
-      const mimeType = hasil.blob.contentType || "application/octet-stream";
-      const fileName = decodeURIComponent(path.basename(key)) || "berkas";
-      return { body, mimeType, fileName };
-    } catch {
-      return null;
-    }
+    const obj = await bucket().get(key);
+    if (!obj) return null;
+    const encoded = obj.customMetadata?.fileName;
+    return {
+      body: obj.body,
+      size: obj.size,
+      mimeType: obj.httpMetadata?.contentType || "application/octet-stream",
+      fileName: encoded ? decodeURIComponent(encoded) : key.split("/").pop() || "berkas",
+    };
   },
 
   async delete(key) {
-    const token = process.env.BLOB_READ_WRITE_TOKEN;
-    if (!token) return; // tidak ada kredensial — tidak ada yang bisa dihapus
     try {
-      const { del } = await import("@vercel/blob");
-      await del(key, { token });
-    } catch {
-      // berkas sudah tidak ada / gagal dihapus — jangan blokir penghapusan dokumen
+      // R2 tidak melempar error untuk kunci yang tidak ada.
+      await bucket().delete(key);
+    } catch (err) {
+      // Gagal menghapus berkas jangan memblokir penghapusan dokumen.
+      console.error(`[arsiva:storage] gagal menghapus ${key}:`, err);
     }
   },
 };
 
-/* ───────────────────────── Pemilihan driver ───────────────────────── */
-
-/**
- * Driver dipilih SETIAP KALI dipakai (bukan sekali saat modul dimuat), sesuai
- * pola yang sama dengan getMailer() di src/lib/notify.ts — supaya nilai
- * STORAGE_DRIVER dari .env selalu terbaca terkini, termasuk oleh skrip
- * standalone yang memuat .env belakangan.
- *
- * Ketahanan tambahan (dipetik dari bug produksi 03/09/2026):
- *  - Bila STORAGE_DRIVER tidak diisi TAPI ada BLOB_READ_WRITE_TOKEN, otomatis
- *    pakai "blob". Token blob = niat jelas memakai penyimpanan cloud.
- *  - Bila resolusi jatuh ke "local" padahal sedang berjalan di Vercel
- *    (filesystem read-only), gagalkan dengan pesan jelas — bukan ENOENT yang
- *    membingungkan saat mkdir di /var/task.
- */
 export function getStorage(): StorageDriver {
-  const explicit = process.env.STORAGE_DRIVER?.trim();
-  const driver = explicit || (process.env.BLOB_READ_WRITE_TOKEN ? "blob" : "local");
-
-  switch (driver) {
-    case "blob":
-      return blobDriver;
-    case "local":
-      if (process.env.VERCEL) {
-        throw new Error(
-          "Penyimpanan berkas belum dikonfigurasi untuk produksi. Set STORAGE_DRIVER=blob " +
-            "dan BLOB_READ_WRITE_TOKEN di Environment Variables Vercel, lalu redeploy.",
-        );
-      }
-      return localDriver;
-    // TODO: tambahkan driver "s3" di sini bila diperlukan.
-    default:
-      console.warn(`[arsiva:storage] driver "${driver}" tidak dikenal, memakai "local".`);
-      return localDriver;
-  }
-}
-
-/** Checksum sederhana untuk keperluan audit/log. */
-export function checksum(buf: Buffer): string {
-  return createHash("sha256").update(buf).digest("hex").slice(0, 16);
+  return r2Driver;
 }

@@ -211,8 +211,10 @@ Aplikasi yang sekarang (DB Turso, Better Auth) berhasil dibuild dengan
 - **`src/proxy.ts` (runtime Node) diganti `src/middleware.ts` (edge).** Middleware
   Node masih eksperimental di Cloudflare dan membuat bundle membengkak: 3,52 MB
   gzip, di atas batas 3 MB paket gratis. Dengan edge middleware: **2,25 MB gzip**.
-  Next 16 menandai nama `middleware` sebagai deprecated (hanya peringatan). Saat
-  Clerk masuk (Langkah 3), `clerkMiddleware` memang berjalan di edge.
+  Next 16 menandai nama `middleware` sebagai deprecated (hanya peringatan), tapi
+  panduan upgrade resminya justru menyarankan tetap memakai `middleware` bila
+  butuh runtime edge (`node_modules/next/dist/docs/01-app/02-guides/upgrading/version-16.md`).
+  Saat Clerk masuk (Langkah 3), `clerkMiddleware` memang berjalan di edge.
 - **Memori build:** `next build` lewat OpenNext kehabisan memori dengan jumlah
   worker default. `experimental.cpus: 4` di `next.config.ts` menyelesaikannya.
 - **Turbopack menelusuri seluruh proyek** karena akses filesystem dinamis di
@@ -253,6 +255,29 @@ Aplikasi yang sekarang (DB Turso, Better Auth) berhasil dibuild dengan
   Tidak berpengaruh ke fungsi.
 - Bundle Worker naik ke **2,60 MB gzip** (batas 3 MB). Pantau terus; membuang
   Better Auth di Langkah 3 akan mengurangi ukurannya.
+
+### Hasil Langkah 2 (R2, 2026-10-10)
+
+- `src/lib/storage.ts` kini hanya berisi driver R2 lewat binding `FILES`
+  (`wrangler.jsonc`, bucket `arsiva-files`). Driver `local`, driver `blob`, dan
+  `@vercel/blob` dihapus. Tidak ada variabel `.env` untuk storage.
+- `get()` mengembalikan `ReadableStream` + `size` (bukan `Buffer`), dan kedua route
+  berkas mengalirkannya langsung. Nama asli berkas disimpan di `customMetadata`
+  R2 (di-encode URI), tipe MIME di `httpMetadata`.
+- Tipe binding R2 didefinisikan minimal di `storage.ts`. **Jangan pakai
+  `wrangler types`**: tipe runtime Workers menimpa tipe DOM proyek dan membuat
+  `Request.json()` bertipe `unknown` di semua route.
+- `initOpenNextCloudflareForDev()` di `next.config.ts`, supaya `npm run dev` juga
+  memakai bucket simulasi Wrangler (`.wrangler/state`, sudah di-ignore).
+- Bundle **turun ke 2,16 MB gzip**, karena SDK Vercel Blob ikut keluar.
+- **Terverifikasi di preview Workers dan `next dev`:** unggah PDF/PNG; tipe lain
+  ditolak; nama berkas Unicode utuh; isi unduhan identik byte per byte; 401 tanpa
+  sesi; tautan berbagi bisa diakses tanpa login; tautan yang dicabut → 403;
+  token palsu → 404; hapus dokumen ikut menghapus objek R2 (bucket kembali 0).
+- Respons berkas memakai `Transfer-Encoding: chunked` tanpa `Content-Length`
+  (OpenNext mengalirkan respons stream). Unduhan tetap utuh, hanya browser tidak
+  menampilkan persentase progres.
+- Sebelum deploy: buat bucket sungguhan dengan `npx wrangler r2 bucket create arsiva-files`.
 
 ## 6. Bagian yang tidak perlu diubah
 

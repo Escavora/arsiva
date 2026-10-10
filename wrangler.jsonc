@@ -15,5 +15,14 @@
 			"binding": "WORKER_SELF_REFERENCE",
 			"service": "arsiva"
 		}
+	],
+	"r2_buckets": [
+		{
+			// Berkas hasil scan dokumen. Bucket PRIVATE: berkas hanya disalurkan
+			// lewat /api/documents/[id]/file dan /s/[token]/file setelah sesi/token
+			// diverifikasi. Di lokal (next dev / preview) bucket disimulasikan Wrangler.
+			"binding": "FILES",
+			"bucket_name": "arsiva-files"
+		}
 	]
 }
