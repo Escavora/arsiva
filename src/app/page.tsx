@@ -33,15 +33,15 @@ const muted = (pct: number) => `color-mix(in srgb, var(--color-text) ${pct}%, tr
 
 /* ───────────────────────── Konten ───────────────────────── */
 
-type Detail = "kategori" | "ambang" | "tautan";
+type Detail = "kategori" | "ambang" | "tautan" | "format" | "peran";
 
 const FITUR: { icon: typeof Folders; judul: string; desk: string; kelas: string; sorot: boolean; detail?: Detail }[] = [
-  { icon: Folders, judul: "Arsip terpusat", desk: "PKS, akta notaris, dan sertifikat agunan tersimpan di satu tempat dan mudah ditelusuri.", kelas: "md:col-span-7", sorot: true, detail: "kategori" },
-  { icon: UploadSimple, judul: "Unggah dan kategorikan", desk: "Simpan hasil scan lalu lengkapi jenis, tujuan, kategori, dan masa berlaku dalam satu langkah.", kelas: "md:col-span-5", sorot: false },
-  { icon: BellRinging, judul: "Pengingat kadaluarsa", desk: "Notifikasi otomatis sebelum masa berlaku habis, pada ambang yang dipilih tiap pengguna.", kelas: "md:col-span-5", sorot: false, detail: "ambang" },
   { icon: ShareNetwork, judul: "Berbagi berbatas waktu", desk: "Tautan aman untuk notaris atau rekanan, dan aksesnya dapat dicabut kapan pun.", kelas: "md:col-span-7", sorot: true, detail: "tautan" },
-  { icon: CalendarDots, judul: "Jadwal notaris", desk: "Mitra notaris beserta agenda kerja samanya tercatat dalam satu tempat.", kelas: "md:col-span-6", sorot: false },
-  { icon: ShieldCheck, judul: "Hak akses berperan", desk: "Admin, Team Member, dan Pembaca dengan wewenang berbeda yang ditegakkan di sisi server.", kelas: "md:col-span-6", sorot: false },
+  { icon: Folders, judul: "Arsip terpusat", desk: "PKS, akta notaris, dan sertifikat agunan tersimpan di satu tempat dan mudah ditelusuri.", kelas: "md:col-span-5", sorot: false, detail: "kategori" },
+  { icon: BellRinging, judul: "Pengingat kadaluarsa", desk: "Notifikasi otomatis sebelum masa berlaku habis, pada ambang yang dipilih tiap pengguna.", kelas: "md:col-span-5", sorot: false, detail: "ambang" },
+  { icon: UploadSimple, judul: "Unggah dan kategorikan", desk: "Simpan hasil scan lalu lengkapi jenis, tujuan, kategori, dan masa berlaku dalam satu langkah.", kelas: "md:col-span-7", sorot: false, detail: "format" },
+  { icon: CalendarDots, judul: "Jadwal notaris", desk: "Mitra notaris beserta agenda kerja samanya tercatat dalam satu tempat.", kelas: "md:col-span-5", sorot: false },
+  { icon: ShieldCheck, judul: "Hak akses berperan", desk: "Admin, Team Member, dan Pembaca dengan wewenang berbeda yang ditegakkan di sisi server.", kelas: "md:col-span-7", sorot: false, detail: "peran" },
 ];
 
 // Kategori bawaan aplikasi (seedCats di src/lib/arsiva.ts).
@@ -114,6 +114,14 @@ function DetailFitur({ jenis }: { jenis: Detail }) {
       </div>
     );
   }
+  if (jenis === "format" || jenis === "peran") {
+    const isi = jenis === "format" ? ["PDF", "JPG", "PNG", "WebP", "≤ 20 MB"] : ["Admin", "Team Member", "Pembaca"];
+    return (
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {isi.map((t) => <Chip key={t}>{t}</Chip>)}
+      </div>
+    );
+  }
   if (jenis === "ambang") {
     return (
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
@@ -174,7 +182,7 @@ function KartuDokumen() {
       className="landing-muncul"
       style={{
         animationDelay: "320ms",
-        width: "100%", maxWidth: 420, borderRadius: 14, padding: 20,
+        width: "100%", maxWidth: 460, borderRadius: 14, padding: 22,
         background: "var(--color-surface)", boxShadow: "var(--shadow-lg)",
         display: "flex", flexDirection: "column", gap: 16,
       }}
@@ -255,13 +263,12 @@ export default function LandingPage() {
       <header
         style={{
           position: "sticky", top: 0, zIndex: 10,
-          display: "flex", alignItems: "center", gap: 12,
-          height: 66, padding: "0 24px",
           borderBottom: "1px solid var(--color-divider)",
           background: "color-mix(in srgb, var(--color-bg) 90%, transparent)",
           backdropFilter: "blur(8px)",
         }}
       >
+        <div style={{ maxWidth: 1240, margin: "0 auto", display: "flex", alignItems: "center", gap: 12, height: 66, padding: "0 24px" }}>
         <div style={{ display: "flex", gap: 11, alignItems: "center" }}>
           <MerekIkon />
           <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.02em" }}>ARSIVA</span>
@@ -275,49 +282,53 @@ export default function LandingPage() {
           <SignIn size={16} />
           Masuk
         </Link>
+        </div>
       </header>
 
       {/* HERO - split asimetris 7/5; di bawah lg kartu turun ke bawah teks */}
       <section style={{ borderBottom: "1px solid var(--color-divider)" }}>
-        <div className="grid grid-cols-1 lg:grid-cols-12" style={{ maxWidth: 1240, margin: "0 auto", minHeight: 520 }}>
+        <div className="grid grid-cols-1 lg:grid-cols-12" style={{ maxWidth: 1240, margin: "0 auto", minHeight: 620 }}>
           {/* Kolom teks */}
           <div
-            className="lg:col-span-7 px-6 pt-16 pb-12 lg:pt-[88px] lg:pb-[84px]"
+            className="lg:col-span-7 px-6 pt-16 pb-12 lg:pt-[112px] lg:pb-[104px]"
             style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}
           >
-            <div className="landing-muncul" style={{ display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: 7, padding: "5px 11px", borderRadius: 999, fontSize: 11.5, letterSpacing: "0.02em", color: "var(--color-accent-100)", background: "var(--color-accent-800)", boxShadow: "inset 0 0 0 1px var(--color-accent-600)", marginBottom: 26 }}>
-              <ShieldCheck size={13} />
-              Credit Operations Department, RO BRI Pekanbaru
-            </div>
-
             <h1
               className="landing-muncul"
               style={{
                 animationDelay: "80ms",
-                fontSize: "clamp(36px, 4.4vw, 54px)",
-                lineHeight: 1.03,
-                letterSpacing: "-0.035em",
-                fontWeight: 600,
-                margin: "0 0 20px",
-                maxWidth: "17ch",
+                fontSize: "clamp(44px, 6.4vw, 88px)",
+                lineHeight: 0.98,
+                letterSpacing: "-0.04em",
+                fontWeight: 700,
+                margin: "0 0 28px",
+                maxWidth: "13ch",
+                textWrap: "balance",
               }}
             >
-              Arsip legal yang tidak kadaluarsa diam-diam.
+              Arsip legal yang tidak kadaluarsa{" "}
+              <span style={{ color: "var(--color-accent-2-400)" }}>diam-diam.</span>
             </h1>
 
-            <p className="landing-muncul" style={{ animationDelay: "160ms", fontSize: 16.5, lineHeight: 1.6, color: muted(66), margin: "0 0 32px", maxWidth: 460 }}>
+            <p className="landing-muncul" style={{ animationDelay: "160ms", fontSize: 18, lineHeight: 1.55, color: muted(72), margin: "0 0 36px", maxWidth: 480 }}>
               Simpan, kategorikan, dan pantau masa berlaku dokumen legal bank dalam satu tempat.
             </p>
 
             <div className="landing-muncul" style={{ animationDelay: "240ms", display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Link href="/login" className="btn btn-primary btn-solid" style={{ textDecoration: "none", minHeight: 46, paddingInline: 22, borderRadius: 8, whiteSpace: "nowrap" }}>
-                <SignIn size={17} />
+              <Link href="/login" className="btn btn-primary btn-solid" style={{ textDecoration: "none", minHeight: 54, paddingInline: 30, fontSize: 16, borderRadius: 10, whiteSpace: "nowrap" }}>
+                <SignIn size={18} />
                 Masuk
               </Link>
-              <a href="#fitur" className="btn btn-secondary" style={{ textDecoration: "none", minHeight: 46, paddingInline: 22, borderRadius: 8, whiteSpace: "nowrap" }}>
+              <a href="#fitur" className="btn btn-secondary" style={{ textDecoration: "none", minHeight: 54, paddingInline: 26, fontSize: 16, borderRadius: 10, whiteSpace: "nowrap" }}>
                 Lihat kemampuannya
                 <ArrowRight size={16} className="landing-panah" />
               </a>
+            </div>
+
+            {/* Atribusi instansi: sebelumnya lencana di atas judul; teksnya sama. */}
+            <div className="landing-muncul" style={{ animationDelay: "320ms", display: "inline-flex", alignItems: "center", gap: 8, marginTop: 36, fontSize: 13, color: muted(66) }}>
+              <ShieldCheck size={15} style={{ color: "var(--color-accent-400)", flex: "none" }} />
+              Credit Operations Department, RO BRI Pekanbaru
             </div>
           </div>
 
@@ -333,8 +344,8 @@ export default function LandingPage() {
       </section>
 
       {/* KEMAMPUAN - bento asimetris 7/5, 5/7, 6/6. Enam item, enam sel. */}
-      <section id="fitur" style={{ maxWidth: 1240, margin: "0 auto", padding: "82px 24px" }}>
-        <h2 className="landing-gulir" style={{ fontSize: "clamp(26px, 3vw, 34px)", fontWeight: 600, letterSpacing: "-0.03em", margin: "0 0 40px", maxWidth: 620 }}>
+      <section id="fitur" style={{ maxWidth: 1240, margin: "0 auto", padding: "112px 24px 96px" }}>
+        <h2 className="landing-gulir" style={{ fontSize: "clamp(32px, 4.6vw, 60px)", fontWeight: 700, letterSpacing: "-0.04em", lineHeight: 1.02, margin: "0 0 56px", maxWidth: "16ch", textWrap: "balance" }}>
           Semua yang dibutuhkan tim legal, tanpa berpindah aplikasi.
         </h2>
 
@@ -350,14 +361,14 @@ export default function LandingPage() {
                 background: f.sorot
                   ? "linear-gradient(140deg, color-mix(in srgb, var(--color-section) 85%, var(--color-section-glow)) 0%, var(--color-surface) 75%)"
                   : "var(--color-surface)",
-                minHeight: 158,
+                minHeight: f.detail ? 158 : undefined,
               }}
             >
               <div>
                 <span className="landing-kartu-ikon">
                   <f.icon size={20} />
                 </span>
-                <h3 style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.015em", margin: "14px 0 6px" }}>{f.judul}</h3>
+                <h3 style={{ fontSize: f.sorot ? 24 : 17, fontWeight: 600, letterSpacing: f.sorot ? "-0.025em" : "-0.015em", margin: "14px 0 6px" }}>{f.judul}</h3>
                 <p style={{ fontSize: 13.5, lineHeight: 1.6, color: muted(62), margin: 0, maxWidth: "46ch" }}>{f.desk}</p>
               </div>
               {f.detail && (
@@ -372,7 +383,7 @@ export default function LandingPage() {
 
       {/* CARA KERJA - pita bernomor; di HP bertumpuk dengan garis atas, mulai sm berjajar dengan garis kiri */}
       <section id="alur" style={{ background: "var(--color-surface)", borderBlock: "1px solid var(--color-divider)" }}>
-        <div style={{ maxWidth: 1240, margin: "0 auto", padding: "70px 24px" }}>
+        <div style={{ maxWidth: 1240, margin: "0 auto", padding: "104px 24px" }}>
           <div className="grid grid-cols-1 sm:grid-cols-3">
             {LANGKAH.map((s) => (
               <div
@@ -380,9 +391,9 @@ export default function LandingPage() {
                 className="landing-gulir py-6 border-t first:pt-0 first:border-t-0 sm:py-1 sm:pr-7 sm:pl-7 sm:border-t-0 sm:border-l sm:first:pt-1 sm:first:pl-0 sm:first:border-l-0"
                 style={{ borderColor: "var(--color-divider)" }}
               >
-                <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.04em", color: "var(--color-accent-500)", marginBottom: 14 }}>{s.n}</div>
-                <h3 style={{ fontSize: 19, fontWeight: 600, letterSpacing: "-0.02em", margin: "0 0 7px" }}>{s.judul}</h3>
-                <p style={{ fontSize: 13.5, lineHeight: 1.6, color: muted(62), margin: 0 }}>{s.desk}</p>
+                <div aria-hidden="true" style={{ fontSize: "clamp(64px, 8vw, 96px)", fontWeight: 700, letterSpacing: "-0.05em", lineHeight: 0.85, color: "var(--color-accent-600)", marginBottom: 22 }}>{s.n}</div>
+                <h3 style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-0.03em", margin: "0 0 8px" }}>{s.judul}</h3>
+                <p style={{ fontSize: 15, lineHeight: 1.6, color: muted(68), margin: 0, maxWidth: "30ch" }}>{s.desk}</p>
               </div>
             ))}
           </div>
@@ -390,7 +401,7 @@ export default function LandingPage() {
       </section>
 
       {/* KEAMANAN - pita bergambar di kiri, daftar baris di kanan */}
-      <section id="keamanan" style={{ maxWidth: 1240, margin: "0 auto", padding: "82px 24px" }}>
+      <section id="keamanan" style={{ maxWidth: 1240, margin: "0 auto", padding: "104px 24px" }}>
         <div className="grid grid-cols-1 lg:grid-cols-12" style={{ gap: 40 }}>
           <div className="lg:col-span-5 landing-gulir">
             <div
@@ -403,7 +414,7 @@ export default function LandingPage() {
             >
               <div style={{ position: "relative", padding: "30px 28px", height: "100%", display: "flex", flexDirection: "column", gap: 28 }}>
                 <div>
-                  <h2 style={{ fontSize: "clamp(24px, 2.6vw, 31px)", fontWeight: 600, letterSpacing: "-0.03em", margin: "0 0 10px" }}>
+                  <h2 style={{ fontSize: "clamp(28px, 3.4vw, 44px)", fontWeight: 700, letterSpacing: "-0.04em", lineHeight: 1.04, margin: "0 0 14px", textWrap: "balance" }}>
                     Dokumen sensitif, dijaga sungguhan.
                   </h2>
                   <p style={{ fontSize: 14, lineHeight: 1.6, color: muted(66), margin: 0, maxWidth: "34ch" }}>
@@ -415,7 +426,7 @@ export default function LandingPage() {
                 <dl className="grid grid-cols-3" style={{ marginTop: "auto", marginBottom: 0, paddingTop: 20, borderTop: "1px solid var(--color-divider)", gap: 12 }}>
                   {ANGKA_KEAMANAN.map((a) => (
                     <div key={a.ket} style={{ minWidth: 0 }}>
-                      <dt style={{ fontSize: "clamp(22px, 2.2vw, 28px)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.1 }}>{a.nilai}</dt>
+                      <dt style={{ fontSize: "clamp(24px, 2.5vw, 34px)", fontWeight: 700, letterSpacing: "-0.04em", lineHeight: 1.05 }}>{a.nilai}</dt>
                       <dd style={{ margin: "6px 0 0", fontSize: 12.5, lineHeight: 1.45, color: muted(66) }}>{a.ket}</dd>
                     </div>
                   ))}
@@ -424,7 +435,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             {KEAMANAN.map((k, i) => (
               <div
                 key={k.judul}
@@ -447,26 +458,26 @@ export default function LandingPage() {
       </section>
 
       {/* PENUTUP - pita penuh, judul kiri dan aksi rapat ke tepi kanan */}
-      <section style={{ borderTop: "1px solid var(--color-divider)", background: "linear-gradient(165deg, var(--color-section) 0%, var(--color-bg) 82%)" }}>
+      <section style={{ borderTop: "1px solid var(--color-divider)", background: "radial-gradient(60% 90% at 85% 50%, color-mix(in srgb, var(--color-section-glow) 45%, transparent), transparent), linear-gradient(165deg, var(--color-section) 0%, var(--color-bg) 82%)" }}>
         <div
           className="landing-gulir"
           style={{
-            maxWidth: 1240, margin: "0 auto", padding: "92px 24px",
-            display: "flex", flexWrap: "wrap", gap: 36,
-            alignItems: "center", justifyContent: "space-between",
+            maxWidth: 1240, margin: "0 auto", padding: "136px 24px",
+            display: "flex", flexDirection: "column", gap: 40,
+            alignItems: "flex-start",
           }}
         >
           <div style={{ minWidth: 0 }}>
             <h2
               style={{
-                fontSize: "clamp(28px, 3.4vw, 42px)",
-                fontWeight: 600, letterSpacing: "-0.035em", lineHeight: 1.08,
-                margin: "0 0 12px", maxWidth: "32ch",
+                fontSize: "clamp(38px, 6vw, 84px)",
+                fontWeight: 700, letterSpacing: "-0.04em", lineHeight: 0.98,
+                margin: "0 0 20px", maxWidth: "13ch", textWrap: "balance",
               }}
             >
               Siap merapikan arsip legal Anda?
             </h2>
-            <p style={{ fontSize: 14.5, lineHeight: 1.6, color: muted(66), margin: 0, maxWidth: "46ch" }}>
+            <p style={{ fontSize: 16, lineHeight: 1.6, color: muted(70), margin: 0, maxWidth: "46ch" }}>
               Belum punya akun? Hubungi Admin unit kerja Anda untuk didaftarkan.
             </p>
           </div>
@@ -476,11 +487,11 @@ export default function LandingPage() {
             className="btn btn-primary btn-solid"
             style={{
               textDecoration: "none", flex: "none",
-              minHeight: 54, paddingInline: 34, borderRadius: 8,
-              fontSize: 15.5, whiteSpace: "nowrap",
+              minHeight: 68, paddingInline: 48, borderRadius: 12,
+              fontSize: 19, whiteSpace: "nowrap",
             }}
           >
-            <SignIn size={18} />
+            <SignIn size={22} />
             Masuk
           </Link>
         </div>
