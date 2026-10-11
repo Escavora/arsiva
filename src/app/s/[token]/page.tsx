@@ -94,7 +94,7 @@ export default async function SharePage({ params }: Props) {
   return (
     <Shell>
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-        <div className="tautan-cincin" style={{ ["--tautan-p" as string]: `${persen}%`, width: 64, height: 64 }} aria-hidden="true">
+        <div className="tautan-cincin tautan-cincin-masuk" style={{ ["--tautan-p" as string]: `${persen}%`, width: 64, height: 64 }} aria-hidden="true">
           <span className="tautan-cincin-isi" style={{ inset: 6, background: "var(--color-surface)" }}>
             <FileText size={22} weight="fill" style={{ color: "var(--color-accent-300)" }} />
           </span>

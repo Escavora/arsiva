@@ -546,6 +546,7 @@ function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const pathname = usePathname();
 
   return (
     <div
@@ -579,6 +580,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           style={{ position: "fixed", inset: 0, zIndex: 50 }}
         >
           <div
+            className="laci-latar"
             style={{
               position: "absolute",
               inset: 0,
@@ -587,6 +589,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             onClick={() => setMenuOpen(false)}
           />
           <aside
+            className="laci-isi"
             style={{
               position: "absolute",
               top: 0,
@@ -626,7 +629,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           style={{ flex: 1, padding: "24px 20px 60px" }}
           className="md:!px-7"
         >
-          {children}
+          {/* key = rute: tiap pindah halaman, isi menyusul masuk (lihat .halaman-masuk) */}
+          <div key={pathname} className="halaman-masuk">{children}</div>
         </main>
       </div>
     </div>

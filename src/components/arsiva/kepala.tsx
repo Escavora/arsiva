@@ -90,3 +90,36 @@ export function KepalaHalaman({
     </section>
   );
 }
+
+/**
+ * Angka yang berhitung ke nilai barunya (mis. saat ambang pengingat diganti), sehingga
+ * perubahan terbaca sebagai akibat dari aksi tadi. Nilai akhir selalu persis `nilai`;
+ * dengan prefers-reduced-motion angka langsung berganti.
+ */
+export function AngkaNaik({ nilai }: { nilai: number }) {
+  const [tampil, setTampil] = React.useState(nilai);
+  const dari = React.useRef(nilai);
+
+  React.useEffect(() => {
+    const awal = dari.current;
+    if (awal === nilai || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      dari.current = nilai;
+      setTampil(nilai);
+      return;
+    }
+    const mulai = performance.now();
+    const lama = 600;
+    let id = 0;
+    const langkah = (t: number) => {
+      const p = Math.min(1, (t - mulai) / lama);
+      const nilaiSaatIni = Math.round(awal + (nilai - awal) * (1 - Math.pow(1 - p, 3)));
+      dari.current = nilaiSaatIni;
+      setTampil(nilaiSaatIni);
+      if (p < 1) id = requestAnimationFrame(langkah);
+    };
+    id = requestAnimationFrame(langkah);
+    return () => cancelAnimationFrame(id);
+  }, [nilai]);
+
+  return <>{tampil}</>;
+}

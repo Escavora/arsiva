@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { CheckCircle, BellRinging } from "@phosphor-icons/react";
-import { KepalaHalaman, RONA_HALAMAN } from "@/components/arsiva/kepala";
+import { KepalaHalaman, RONA_HALAMAN, AngkaNaik } from "@/components/arsiva/kepala";
 import { useArsiva } from "@/components/arsiva/store";
 import { LabelKategori } from "@/components/arsiva/warna";
 
@@ -46,7 +46,7 @@ export default function PengingatPage() {
           ].map((p) => (
             <div key={p.label} className="papan-pengingat-sel">
               <div style={{ display: "flex", alignItems: "baseline", gap: "4px 10px", flexWrap: "wrap" }}>
-                <span style={{ fontFamily: "var(--font-heading)", fontWeight: 600, letterSpacing: "-0.04em", lineHeight: 0.9, fontSize: p.besar ? 56 : 40, color: p.warna, fontVariantNumeric: "tabular-nums" }}>{p.n}</span>
+                <span style={{ fontFamily: "var(--font-heading)", fontWeight: 600, letterSpacing: "-0.04em", lineHeight: 0.9, fontSize: p.besar ? 56 : 40, color: p.warna, fontVariantNumeric: "tabular-nums" }}><AngkaNaik nilai={p.n} /></span>
                 <span style={{ fontSize: 15, fontWeight: 500, color: p.warna }}>{p.label}</span>
               </div>
               <div className="papan-pengingat-ket" style={{ fontSize: 12.5, marginTop: 8, color: "color-mix(in srgb, var(--color-text) 66%, transparent)" }}>{p.ket}</div>

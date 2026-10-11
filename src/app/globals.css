@@ -212,9 +212,10 @@
   border: 1px solid transparent;
   padding: var(--space-2) calc(var(--space-3) * 1.2);
   border-radius: var(--radius-md);
-  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.12s ease;
   user-select: none;
 }
+.btn:active:not(:disabled) { transform: scale(0.97); }
 .btn svg { display: block; }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-primary { color: var(--color-accent); border-color: var(--color-accent); }
@@ -262,6 +263,7 @@
   border: 1px solid var(--color-divider);
   border-radius: var(--radius-md);
 }
+.input { transition: border-color 0.15s ease, outline-color 0.15s ease; }
 .input::placeholder { color: color-mix(in srgb, var(--color-text) 52%, transparent); }
 .input:hover { border-color: color-mix(in srgb, var(--color-text) 45%, transparent); }
 .input:focus-visible { border-color: var(--color-accent); outline: 1px solid var(--color-accent); outline-offset: 0; }
@@ -597,7 +599,7 @@ html:has(.landing) { scroll-padding-top: 82px; }
 }
 
 /* — interactive helpers (replacing prototype style-hover) — */
-.nav-item { transition: background 0.12s ease, color 0.12s ease; }
+.nav-item { transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease; }
 .nav-item:hover { background: color-mix(in srgb, var(--color-text) 6%, transparent); }
 .row-hover { transition: background 0.12s ease; }
 .row-hover:hover { background: color-mix(in srgb, var(--color-text) 4%, transparent); }
@@ -606,3 +608,47 @@ html:has(.landing) { scroll-padding-top: 82px; }
 .upload-drop:hover { border-color: var(--color-accent) !important; }
 .card-kicker { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent); }
 .card-body { margin: 0; font-size: 13px; opacity: 0.8; flex: 1; }
+
+/* — gerak aplikasi (halaman ber-sidebar) —
+   Prinsip Operate: cepat, hanya yang menjelaskan keadaan. Keadaan dasar = keadaan akhir
+   (fill-mode "backwards"), jadi konten tetap utuh bila animasi tidak jalan. */
+@keyframes masuk-naik { from { opacity: 0; transform: translateY(8px); } }
+@keyframes masuk-pudar { from { opacity: 0; } }
+@keyframes dialog-masuk { from { opacity: 0; transform: translateY(10px) scale(0.97); } }
+@keyframes laci-masuk { from { transform: translateX(-100%); } }
+@keyframes cincin-isi { from { --tautan-p: 0%; } }
+
+/* pindah halaman: blok-blok di bawah kepala menyusul berurutan (kepala punya animasinya sendiri) */
+.halaman-masuk > * > :not(.dasbor-muncul) { animation: masuk-naik 0.42s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+.halaman-masuk > * > :not(.dasbor-muncul):nth-child(2) { animation-delay: 70ms; }
+.halaman-masuk > * > :not(.dasbor-muncul):nth-child(3) { animation-delay: 130ms; }
+.halaman-masuk > * > :not(.dasbor-muncul):nth-child(n+4) { animation-delay: 180ms; }
+
+/* baris tabel: sepuluh pertama menyusul; selebihnya langsung ada */
+.table tbody tr { animation: masuk-naik 0.34s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+.table tbody tr:nth-child(2) { animation-delay: 30ms; }
+.table tbody tr:nth-child(3) { animation-delay: 60ms; }
+.table tbody tr:nth-child(4) { animation-delay: 90ms; }
+.table tbody tr:nth-child(5) { animation-delay: 120ms; }
+.table tbody tr:nth-child(6) { animation-delay: 150ms; }
+.table tbody tr:nth-child(7) { animation-delay: 180ms; }
+.table tbody tr:nth-child(8) { animation-delay: 210ms; }
+.table tbody tr:nth-child(9) { animation-delay: 240ms; }
+.table tbody tr:nth-child(n+10) { animation-delay: 270ms; }
+
+/* dialog konfirmasi dan laci menu HP */
+.dialog-backdrop { animation: masuk-pudar 0.16s ease-out backwards; }
+.dialog { animation: dialog-masuk 0.22s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+.laci-latar { animation: masuk-pudar 0.2s ease-out backwards; }
+.laci-isi { animation: laci-masuk 0.26s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+
+/* cincin sisa waktu terisi dari kosong saat tampil */
+.tautan-cincin-masuk { animation: cincin-isi 0.9s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* tanpa gerak posisi; kemunculan cukup memudar singkat */
+  .halaman-masuk > * > :not(.dasbor-muncul), .table tbody tr { animation: masuk-pudar 0.15s ease backwards; animation-delay: 0s !important; }
+  .dialog { animation: masuk-pudar 0.12s ease backwards; }
+  .laci-isi, .tautan-cincin-masuk { animation: none; }
+  .btn:active:not(:disabled) { transform: none; }
+}

@@ -49,7 +49,7 @@ function CincinSisa({ status, persen }: { status: string; persen: number }) {
   return (
     <div
       aria-hidden="true"
-      className={`tautan-cincin tautan-cincin-kecil${mati ? " tautan-cincin-mati" : ""}`}
+      className={`tautan-cincin tautan-cincin-kecil tautan-cincin-masuk${mati ? " tautan-cincin-mati" : ""}`}
       style={{ ["--tautan-p" as string]: `${status === "Aktif" ? Math.max(3, persen) : 0}%` }}
     >
       <span className="tautan-cincin-isi">
