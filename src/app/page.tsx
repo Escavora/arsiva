@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Geist } from "next/font/google";
+import { TautanHidup } from "./tautan-hidup";
 import {
   Vault,
   SignIn,
@@ -14,7 +15,6 @@ import {
   LockKey,
   ClockCountdown,
   FileText,
-  Check,
   LinkSimple,
 } from "@phosphor-icons/react/dist/ssr";
 
@@ -47,14 +47,6 @@ const FITUR: { icon: typeof Folders; judul: string; desk: string; kelas: string;
 // Kategori bawaan aplikasi (seedCats di src/lib/arsiva.ts).
 const KATEGORI_CONTOH = ["Perjanjian Kerja Sama", "Akta Notaris", "Sertifikat Agunan", "Surat Kuasa"];
 
-// Status nyata yang diturunkan aplikasi dari tanggal kadaluarsa tiap dokumen.
-// Titik warna di sini menyampaikan keadaan semantik, bukan hiasan.
-const SIKLUS = {
-  aman: { label: "Masa berlaku aman", warna: "var(--color-accent-500)" },
-  segera: { label: "Segera kadaluarsa", warna: "var(--color-accent-2-500)" },
-  lewat: { label: "Sudah kadaluarsa", warna: "var(--color-danger)" },
-  diproses: { label: "Sudah diproses", warna: "var(--color-ok)" },
-};
 
 const LANGKAH = [
   { n: "01", judul: "Unggah", desk: "Pindai dokumen legal dan simpan berkasnya ke arsip." },
@@ -143,104 +135,6 @@ function DetailFitur({ jenis }: { jenis: Detail }) {
       <span style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", color: muted(80) }}>…/s/••••••••</span>
       <span style={{ color: muted(62) }}>berlaku 7 hari</span>
       <span style={{ marginLeft: "auto", color: "var(--color-danger)", fontWeight: 500 }}>Cabut</span>
-    </div>
-  );
-}
-
-/** Tahap pada kartu hero. "selesai" = sudah dilewati, "kini" = posisi dokumen sekarang. */
-function Tahap({ warna, label, ket, keadaan }: { warna: string; label: string; ket: string; keadaan: "selesai" | "kini" }) {
-  const kini = keadaan === "kini";
-  return (
-    <div
-      // Sorotan tahap aktif ada di kelas .landing-kini (globals.css) karena dianimasikan.
-      className={kini ? "landing-kini" : undefined}
-      style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 8 }}
-    >
-      <span
-        className={kini ? "landing-kini-titik" : undefined}
-        style={{
-          width: 18, height: 18, borderRadius: "50%", flex: "none", display: "grid", placeItems: "center",
-          background: kini ? warna : "transparent", boxShadow: kini ? undefined : `inset 0 0 0 2px ${warna}`, color: warna,
-        }}
-      >
-        {!kini && <Check size={10} weight="bold" />}
-      </span>
-      <span style={{ fontSize: 14, fontWeight: kini ? 600 : 500, color: kini ? "var(--color-text)" : muted(78) }}>{label}</span>
-      <span style={{ marginLeft: "auto", fontSize: 12, color: kini ? "var(--color-accent-2-300)" : muted(62), whiteSpace: "nowrap" }}>{ket}</span>
-    </div>
-  );
-}
-
-/**
- * Ilustrasi satu dokumen melewati siklus status di aplikasi. Bukan data asli:
- * diberi label "Contoh" dan hanya memakai perilaku yang memang ada (status,
- * ambang pengingat, notifikasi ke pemilik).
- */
-function KartuDokumen() {
-  return (
-    <div
-      className="landing-muncul"
-      style={{
-        animationDelay: "320ms",
-        width: "100%", maxWidth: 460, borderRadius: 14, padding: 22,
-        background: "var(--color-surface)", boxShadow: "var(--shadow-lg)",
-        display: "flex", flexDirection: "column", gap: 16,
-      }}
-    >
-      <div style={{ fontSize: 12, color: muted(62) }}>Contoh alur satu dokumen</div>
-
-      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-        <div
-          style={{
-            width: 38, height: 38, flex: "none", borderRadius: 8, display: "grid", placeItems: "center",
-            background: "var(--color-accent-900)", color: "var(--color-accent-300)",
-            boxShadow: "inset 0 0 0 1px var(--color-accent-800)",
-          }}
-        >
-          <FileText size={19} />
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.01em", lineHeight: 1.35 }}>
-            Akta Pemberian Hak Tanggungan
-          </div>
-          <div style={{ fontSize: 12.5, color: muted(66), marginTop: 3 }}>
-            Akta Notaris · berakhir 60 hari lagi
-          </div>
-        </div>
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <Tahap warna={SIKLUS.aman.warna} label={SIKLUS.aman.label} ket="di luar ambang" keadaan="selesai" />
-        <Tahap warna={SIKLUS.segera.warna} label={SIKLUS.segera.label} ket="ambang 60 hari" keadaan="kini" />
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 12px 0", fontSize: 12, color: muted(62) }}>
-          lalu salah satu:
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, padding: "0 12px" }}>
-          {[SIKLUS.diproses, SIKLUS.lewat].map((s) => (
-            <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12.5, color: muted(78) }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", flex: "none", background: s.warna }} />
-              {s.label}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Datang setelah tahap aktif menyala: urutan sebab-akibat yang sama dengan aplikasi */}
-      <div
-        className="landing-muncul"
-        style={{
-          animationDelay: "1.5s",
-          display: "flex", alignItems: "center", gap: 9,
-          padding: "10px 12px", borderRadius: 8, fontSize: 12.5,
-          color: "var(--color-accent-2-200)",
-          background: "color-mix(in srgb, var(--color-accent-2-500) 10%, transparent)",
-        }}
-      >
-        <span className="landing-bel" style={{ flex: "none", color: "var(--color-accent-2-400)" }}>
-          <BellRinging size={16} />
-        </span>
-        Pengingat H-60 terkirim ke pemilik dokumen
-      </div>
     </div>
   );
 }
@@ -338,7 +232,7 @@ export default function LandingPage() {
             className="lg:col-span-5 px-6 pt-4 pb-16 lg:px-10 lg:py-12 landing-cahaya"
             style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
           >
-            <KartuDokumen />
+            <TautanHidup />
           </div>
         </div>
       </section>

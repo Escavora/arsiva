@@ -370,6 +370,9 @@ select.input { appearance: none; background-image: linear-gradient(transparent, 
 /* — landing — gerak hanya dengan CSS; semua dimatikan bila pengguna memilih reduced motion.
    Keadaan dasar setiap elemen adalah keadaan akhir, sehingga tanpa animasi halaman tetap utuh. */
 html:has(.landing) { scroll-padding-top: 82px; }
+/* Cahaya hero "bernapas" memakai scale(); tanpa ini lebar halaman bergoyang beberapa piksel di HP.
+   clip (bukan hidden) tidak membuat kontainer gulir, jadi header sticky tetap bekerja. */
+.landing { overflow-x: clip; }
 
 @keyframes landing-naik { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes landing-sorot {
@@ -438,6 +441,22 @@ html:has(.landing) { scroll-padding-top: 82px; }
   background: radial-gradient(closest-side, color-mix(in srgb, var(--color-section-glow) 55%, transparent), transparent);
   animation: landing-napas 7s ease-in-out infinite alternate;
 }
+
+/* peragaan tautan berbagi (hero): cincin sisa waktu dianimasikan lewat @property */
+@property --tautan-p { syntax: "<percentage>"; inherits: false; initial-value: 100%; }
+.tautan-cincin {
+  width: 76px; height: 76px; flex: none; position: relative; border-radius: 50%;
+  background: conic-gradient(from -90deg, var(--color-accent-500) var(--tautan-p), var(--color-neutral-800) 0);
+  transition: --tautan-p 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.tautan-cincin-isi {
+  position: absolute; inset: 7px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--color-surface-2);
+}
+.tautan-cincin-mati { background: conic-gradient(from -90deg, var(--color-danger) var(--tautan-p), var(--color-neutral-800) 0); }
+.tautan-huruf { display: inline-block; transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.35s ease; }
+.tautan-huruf-larut { opacity: 0; transform: translateY(-9px) scale(0.8); filter: blur(4px); }
+.tautan-waktu { transition: color 0.4s ease; }
 
 @media (prefers-reduced-motion: no-preference) {
   html:has(.landing) { scroll-behavior: smooth; }
