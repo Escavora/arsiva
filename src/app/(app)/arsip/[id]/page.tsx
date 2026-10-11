@@ -18,6 +18,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
+import { KepalaHalaman } from "@/components/arsiva/kepala";
 import { LabelKategori, TagKategori } from "@/components/arsiva/warna";
 import { useKonfirmasi } from "@/components/arsiva/konfirmasi";
 import { fmt, fmtShort } from "@/lib/arsiva";
@@ -135,16 +136,19 @@ export default function DetailPage() {
         Kembali ke arsip
       </button>
 
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 20, flexWrap: "wrap" }}>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
-            <span className={`tag ${cur.tag}`}>{cur.status}</span>
-            <TagKategori nama={cur.k} />
-          </div>
-          <h3 style={{ margin: "0 0 4px", maxWidth: 760 }}>{cur.n}</h3>
-          <div className="text-muted" style={{ fontSize: 13 }}>Diunggah {cur.upText} oleh {cur.o} · No. arsip {cur.kode}</div>
-        </div>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8, flex: "none" }}>
+      {/* pita berona status dokumen: keadaannya terbaca sebelum judulnya */}
+      <KepalaHalaman
+        ikon={FileText}
+        rona={
+          cur.status === "Diproses" ? "var(--color-ok)"
+          : cur.status === "Kadaluarsa" ? "var(--color-danger)"
+          : cur.status === "Segera kadaluarsa" ? "var(--color-accent-2-500)"
+          : "var(--color-accent-500)"
+        }
+        atas={<><span className={`tag ${cur.tag}`}>{cur.status}</span><TagKategori nama={cur.k} /></>}
+        judul={cur.n}
+        ket={<>Diunggah {cur.upText} oleh {cur.o} · No. arsip {cur.kode}</>}
+        aksi={<>
           {isAdmin && (
             <button
               type="button"
@@ -166,7 +170,7 @@ export default function DetailPage() {
             Bagikan
           </Link>
           {cur.hasFile ? (
-            <a className="btn btn-primary" href={`/api/documents/${cur.id}/file?unduh=1`}>
+            <a className="btn btn-primary btn-solid" href={`/api/documents/${cur.id}/file?unduh=1`}>
               <DownloadSimple size={16} />
               Unduh Scan
             </a>
@@ -176,8 +180,8 @@ export default function DetailPage() {
               Unduh Scan
             </button>
           )}
-        </div>
-      </div>
+        </>}
+      />
 
       <div className="grid gap-4 items-start grid-cols-1 lg:grid-cols-[1fr_1.05fr]">
         {/* preview */}

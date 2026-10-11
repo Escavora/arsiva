@@ -1,7 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { CalendarCheck, Phone, Trash, CalendarPlus, UserPlus } from "@phosphor-icons/react";
+import {
+  CalendarCheck,
+  Phone,
+  Trash,
+  CalendarPlus,
+  UserPlus,
+  CalendarDots,
+} from "@phosphor-icons/react";
+import { KepalaHalaman, RONA_HALAMAN } from "@/components/arsiva/kepala";
 import { useArsiva, type ApiSchedule } from "@/components/arsiva/store";
 import { useKonfirmasi } from "@/components/arsiva/konfirmasi";
 import { fmt, initials, todayISO } from "@/lib/arsiva";
@@ -23,6 +31,32 @@ function schedView(x: ApiSchedule, hariIni: string) {
 function urutJadwal(a: { tgl: string; akanDatang: boolean }, b: { tgl: string; akanDatang: boolean }) {
   if (a.akanDatang !== b.akanDatang) return a.akanDatang ? -1 : 1;
   return a.akanDatang ? a.tgl.localeCompare(b.tgl) : b.tgl.localeCompare(a.tgl);
+}
+
+const BULAN = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+/** Ubin tanggal (bahasa yang sama dengan Jadwal di dasbor), berona status jadwalnya. */
+function UbinTanggal({ iso, status, label }: { iso: string; status: string; label: string }) {
+  const [th, bl, hr] = iso.slice(0, 10).split("-");
+  const rona =
+    status === "Terlewat" ? "var(--color-accent-2-500)"
+    : status === "Selesai" ? "var(--color-ok)"
+    : status === "Dibatalkan" ? "var(--color-danger)"
+    : RONA_HALAMAN.notaris;
+  return (
+    <div
+      title={label}
+      style={{
+        width: 52, textAlign: "center", padding: "6px 0", borderRadius: "var(--radius-md)",
+        background: `color-mix(in srgb, ${rona} 16%, var(--color-surface))`,
+        boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${rona} 42%, transparent)`,
+        opacity: status === "Dibatalkan" ? 0.7 : 1,
+      }}
+    >
+      <div style={{ fontFamily: "var(--font-heading)", fontSize: 20, fontWeight: 600, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{Number(hr)}</div>
+      <div style={{ fontSize: 10.5, marginTop: 3, color: "color-mix(in srgb, var(--color-text) 78%, transparent)" }}>{BULAN[Number(bl) - 1]} {th.slice(2)}</div>
+    </div>
+  );
 }
 
 export default function NotarisPage() {
@@ -72,10 +106,7 @@ export default function NotarisPage() {
 
   return (
     <div>
-      <h3 style={{ margin: "0 0 4px" }}>Jadwal Notaris</h3>
-      <div className="text-muted" style={{ fontSize: 13, marginBottom: 20 }}>
-        Rekanan mitra notaris dan catatan jadwal kerja samanya.
-      </div>
+      <KepalaHalaman ikon={CalendarDots} rona={RONA_HALAMAN.notaris} judul="Jadwal Notaris" ket="Rekanan mitra notaris dan catatan jadwal kerja samanya." />
 
       {/* notaris cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(232px, 1fr))", gap: 12, marginBottom: 18 }}>
@@ -147,7 +178,7 @@ export default function NotarisPage() {
             <table className="table">
               <thead>
                 <tr>
-                  <th style={{ width: 118 }}>Tanggal</th>
+                  <th style={{ width: 84 }}>Tanggal</th>
                   <th>Agenda</th>
                   <th style={{ width: 124 }}>Status</th>
                   <th style={{ width: 92 }} />
@@ -156,11 +187,13 @@ export default function NotarisPage() {
               <tbody>
                 {jadwalRows.map((s) => (
                   <tr key={s.id}>
-                    <td style={{ fontSize: 12.5 }}>
-                      {s.tglText}
-                      <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{s.jam}</div>
+                    <td>
+                      <UbinTanggal iso={s.tgl} status={s.status} label={s.tglText} />
                     </td>
-                    <td style={{ fontSize: 13 }}>{s.agenda}</td>
+                    <td>
+                      <div style={{ fontSize: 13.5 }}>{s.agenda}</div>
+                      <div style={{ fontSize: 12, marginTop: 2, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{s.tglText} · pukul {s.jam}</div>
+                    </td>
                     <td><span className={`tag ${s.tag}`}>{s.status}</span></td>
                     <td style={{ textAlign: "right" }}>
                       {s.bisaBatal && (

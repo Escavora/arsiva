@@ -1,7 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Info, Plus, X, FloppyDisk } from "@phosphor-icons/react";
+import {
+  Info,
+  Plus,
+  X,
+  FloppyDisk,
+  Tag,
+} from "@phosphor-icons/react";
+import { KepalaHalaman, RONA_HALAMAN } from "@/components/arsiva/kepala";
 import { useArsiva } from "@/components/arsiva/store";
 import { LabelKategori } from "@/components/arsiva/warna";
 import { useKonfirmasi } from "@/components/arsiva/konfirmasi";
@@ -44,10 +51,7 @@ export default function KategoriPage() {
 
   return (
     <div>
-      <h3 style={{ margin: "0 0 4px" }}>Kategori &amp; Jenis</h3>
-      <div className="text-muted" style={{ fontSize: 13, marginBottom: 20 }}>
-        Master data kategori, jenis, dan tujuan dokumen yang muncul pada form unggah.
-      </div>
+      <KepalaHalaman ikon={Tag} rona={RONA_HALAMAN.kategori} judul="Kategori & Jenis" ket="Master data kategori, jenis, dan tujuan dokumen yang muncul pada form unggah." />
 
       {isStaf && (
         <div style={{ display: "flex", gap: 9, alignItems: "center", padding: "11px 14px", marginBottom: 16, borderRadius: "var(--radius-md)", background: "var(--color-accent-2-900)", boxShadow: "inset 0 0 0 1px var(--color-accent-2-800)", fontSize: 12.5 }}>

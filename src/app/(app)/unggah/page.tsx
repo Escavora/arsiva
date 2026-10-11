@@ -16,7 +16,9 @@ import {
   HourglassMedium,
   WarningCircle,
   CalendarBlank,
+  UploadSimple,
 } from "@phosphor-icons/react";
+import { KepalaHalaman, RONA_HALAMAN } from "@/components/arsiva/kepala";
 import { useArsiva } from "@/components/arsiva/store";
 import { TagKategori } from "@/components/arsiva/warna";
 import { days, fmt } from "@/lib/arsiva";
@@ -97,7 +99,7 @@ export default function UnggahPage() {
   if (!canWrite) {
     return (
       <div style={{ maxWidth: 640 }}>
-        <h3 style={{ margin: "0 0 4px" }}>Unggah Dokumen</h3>
+        <KepalaHalaman ikon={UploadSimple} rona={RONA_HALAMAN.unggah} judul="Unggah Dokumen" />
         <div className="card elev-sm" style={{ padding: "var(--space-6)" }}>
           <p className="text-muted" style={{ fontSize: 13, margin: 0 }}>
             Peran Pembaca tidak memiliki wewenang mengunggah dokumen. Hubungi Admin bila Anda
@@ -132,10 +134,7 @@ export default function UnggahPage() {
 
   return (
     <div>
-      <h3 style={{ margin: "0 0 4px" }}>Unggah Dokumen</h3>
-      <div className="text-muted" style={{ fontSize: 13, marginBottom: 20 }}>
-        Simpan hasil scan ke arsip dan lengkapi informasi pengelompokannya.
-      </div>
+      <KepalaHalaman ikon={UploadSimple} rona={RONA_HALAMAN.unggah} judul="Unggah Dokumen" ket="Simpan hasil scan ke arsip dan lengkapi informasi pengelompokannya." />
 
       <div className="grid gap-4 items-start grid-cols-1 lg:grid-cols-[1fr_1.08fr]">
         {/* ── KIRI: berkas ── */}

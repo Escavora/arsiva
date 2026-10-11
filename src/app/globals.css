@@ -479,6 +479,9 @@ html:has(.landing) { scroll-padding-top: 82px; }
   background: var(--color-surface-2);
 }
 .tautan-cincin-mati { background: conic-gradient(from -90deg, var(--color-danger) var(--tautan-p), var(--color-neutral-800) 0); }
+/* versi ringkas untuk tabel Riwayat tautan (halaman Bagikan) */
+.tautan-cincin-kecil { width: 38px; height: 38px; }
+.tautan-cincin-kecil .tautan-cincin-isi { inset: 4px; background: var(--color-surface); }
 .tautan-huruf { display: inline-block; transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.35s ease; }
 .tautan-huruf-larut { opacity: 0; transform: translateY(-9px) scale(0.8); filter: blur(4px); }
 .tautan-waktu { transition: color 0.4s ease; }
@@ -513,6 +516,28 @@ html:has(.landing) { scroll-padding-top: 82px; }
   ::view-transition-old(*) { animation-direction: reverse !important; }
   ::view-transition-group(*) { animation-duration: 0s !important; }
 }
+
+/* — kepala halaman (src/components/arsiva/kepala.tsx) — */
+.kepala-hantu { transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.kepala-halaman:hover .kepala-hantu { transform: rotate(-6deg) scale(1.04); }
+/* papan ringkasan Pengingat: sel dipisah garis tipis, bukan kartu di dalam kartu */
+.papan-pengingat { display: grid; grid-template-columns: 1.3fr 1fr 1fr; border-top: 1px solid var(--color-divider); }
+.papan-pengingat-sel { padding: 16px 12px 2px; }
+.papan-pengingat-sel:first-child { padding-left: 0; }
+.papan-pengingat-sel + .papan-pengingat-sel { border-left: 1px solid var(--color-divider); }
+@media (min-width: 768px) { .papan-pengingat-sel { padding: 18px 24px 2px; } }
+/* di HP: angka + label saja; keterangan panjang sudah tersirat dari tabel di bawahnya */
+@media (max-width: 767px) {
+  .papan-pengingat-ket { display: none; }
+  .papan-pengingat-sel span:first-child { font-size: 38px !important; }
+  .papan-pengingat-sel span + span { font-size: 13px !important; flex-basis: 100%; }
+}
+@media (max-width: 639px) {
+  .kepala-ikon { width: 44px !important; height: 44px !important; border-radius: 12px !important; }
+  .kepala-ikon svg { width: 22px; height: 22px; }
+  .kepala-aksi { margin-left: 0 !important; flex-basis: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .kepala-hantu { transition: none; } }
 
 /* — baris yang bisa dibuka —
    Tautan di sel nama melebar menutupi seluruh baris (klik di mana pun), tapi tetap

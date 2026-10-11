@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CheckCircle } from "@phosphor-icons/react";
+import { CheckCircle, BellRinging } from "@phosphor-icons/react";
+import { KepalaHalaman, RONA_HALAMAN } from "@/components/arsiva/kepala";
 import { useArsiva } from "@/components/arsiva/store";
 import { LabelKategori } from "@/components/arsiva/warna";
 
@@ -17,43 +18,42 @@ export default function PengingatPage() {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 16, marginBottom: 18, flexWrap: "wrap" }}>
-        <div>
-          <h3 style={{ margin: "0 0 4px" }}>Pengingat Kadaluarsa</h3>
-          <div className="text-muted" style={{ fontSize: 13 }}>
-            {counts.perluAksi} dokumen perlu ditindaklanjuti pada ambang {th} hari.
-          </div>
+      <KepalaHalaman
+        ikon={BellRinging}
+        rona={RONA_HALAMAN.pengingat}
+        judul="Pengingat Kadaluarsa"
+        ket={`${counts.perluAksi} dokumen perlu ditindaklanjuti pada ambang ${th} hari.`}
+        aksi={
+          <>
+            <span style={{ fontSize: 12.5, color: "color-mix(in srgb, var(--color-text) 66%, transparent)" }}>Ambang pengingat</span>
+            <div className="seg" style={{ background: "var(--color-bg)" }}>
+              {[30, 60, 90].map((v) => (
+                <label key={v} className="seg-opt">
+                  <input type="radio" name="amb" checked={th === v} onChange={() => void setThreshold(v)} />
+                  {v} hari
+                </label>
+              ))}
+            </div>
+          </>
+        }
+      >
+        {/* Papan ringkasan di dalam pita: angka besar berwarna status, yang terlewat paling menonjol */}
+        <div className="papan-pengingat">
+          {[
+            { n: counts.kadaluarsa, label: "Terlewat", ket: "Masa berlaku habis, belum diperbarui.", warna: "var(--color-danger-text)", besar: true },
+            { n: counts.segera, label: "Dalam ambang", ket: `Kadaluarsa dalam ${th} hari ke depan.`, warna: "var(--color-accent-2-400)", besar: false },
+            { n: counts.diproses, label: "Sudah diproses", ket: "Ditandai selesai oleh tim legal.", warna: "var(--color-ok)", besar: false },
+          ].map((p) => (
+            <div key={p.label} className="papan-pengingat-sel">
+              <div style={{ display: "flex", alignItems: "baseline", gap: "4px 10px", flexWrap: "wrap" }}>
+                <span style={{ fontFamily: "var(--font-heading)", fontWeight: 600, letterSpacing: "-0.04em", lineHeight: 0.9, fontSize: p.besar ? 56 : 40, color: p.warna, fontVariantNumeric: "tabular-nums" }}>{p.n}</span>
+                <span style={{ fontSize: 15, fontWeight: 500, color: p.warna }}>{p.label}</span>
+              </div>
+              <div className="papan-pengingat-ket" style={{ fontSize: 12.5, marginTop: 8, color: "color-mix(in srgb, var(--color-text) 66%, transparent)" }}>{p.ket}</div>
+            </div>
+          ))}
         </div>
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
-          <span className="text-muted" style={{ fontSize: 12 }}>Ambang pengingat</span>
-          <div className="seg">
-            {[30, 60, 90].map((v) => (
-              <label key={v} className="seg-opt">
-                <input type="radio" name="amb" checked={th === v} onChange={() => void setThreshold(v)} />
-                {v} hari
-              </label>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-3 mb-4 grid-cols-1 md:grid-cols-3">
-        <div className="card elev-sm" style={{ gap: 4, boxShadow: "inset 0 0 0 1px var(--color-danger-800), var(--shadow-sm)" }}>
-          <div className="card-kicker" style={{ color: "var(--color-danger-text)" }}>Terlewat</div>
-          <div style={{ fontFamily: "var(--font-heading)", fontSize: 26, lineHeight: 1.1, color: "var(--color-danger-text)" }}>{counts.kadaluarsa} dokumen</div>
-          <div className="card-body">Masa berlaku sudah habis dan belum diperbarui.</div>
-        </div>
-        <div className="card elev-sm" style={{ gap: 4, boxShadow: "inset 0 0 0 1px var(--color-accent-2-800), var(--shadow-sm)" }}>
-          <div className="card-kicker" style={{ color: "var(--color-accent-2)" }}>Dalam ambang</div>
-          <div style={{ fontFamily: "var(--font-heading)", fontSize: 26, lineHeight: 1.1, color: "var(--color-accent-2-400)" }}>{counts.segera} dokumen</div>
-          <div className="card-body">Akan kadaluarsa dalam {th} hari ke depan.</div>
-        </div>
-        <div className="card elev-sm" style={{ gap: 4 }}>
-          <div className="card-kicker" style={{ color: "var(--color-ok)" }}>Sudah diproses</div>
-          <div style={{ fontFamily: "var(--font-heading)", fontSize: 26, lineHeight: 1.1, color: "var(--color-ok)" }}>{counts.diproses} dokumen</div>
-          <div className="card-body">Ditandai selesai diperbarui oleh tim legal.</div>
-        </div>
-      </div>
+      </KepalaHalaman>
 
       <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
         <div style={{ overflowX: "auto" }}>

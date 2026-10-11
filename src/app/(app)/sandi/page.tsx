@@ -2,9 +2,14 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Key, WarningCircle, ShieldCheck } from "@phosphor-icons/react";
+import {
+  Key,
+  WarningCircle,
+  ShieldCheck,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
+import { KepalaHalaman, RONA_HALAMAN } from "@/components/arsiva/kepala";
 import { pesanClerk } from "@/lib/pesan-clerk";
 
 const MIN = 8;
@@ -52,10 +57,7 @@ export default function SandiPage() {
 
   return (
     <div style={{ maxWidth: 520 }}>
-      <h3 style={{ margin: "0 0 4px" }}>Ubah Kata Sandi</h3>
-      <div className="text-muted" style={{ fontSize: 13, marginBottom: 20 }}>
-        Gunakan kombinasi minimal {MIN} karakter dengan huruf, angka, dan simbol.
-      </div>
+      <KepalaHalaman ikon={Key} rona={RONA_HALAMAN.dashboard} judul="Ubah Kata Sandi" ket={`Gunakan kombinasi minimal ${MIN} karakter dengan huruf, angka, dan simbol.`} />
 
       <form onSubmit={simpan} className="card elev-sm" style={{ padding: "var(--space-6)", gap: "var(--space-4)" }}>
         {error && (

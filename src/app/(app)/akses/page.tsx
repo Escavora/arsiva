@@ -2,7 +2,19 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { LockKey, CheckCircle, Minus, UserPlus, Key, PencilSimple, X, FloppyDisk, GoogleLogo } from "@phosphor-icons/react";
+import {
+  LockKey,
+  CheckCircle,
+  Minus,
+  UserPlus,
+  Key,
+  PencilSimple,
+  X,
+  FloppyDisk,
+  GoogleLogo,
+  ShieldCheck,
+} from "@phosphor-icons/react";
+import { KepalaHalaman, RONA_HALAMAN } from "@/components/arsiva/kepala";
 import { useArsiva, type ApiUser } from "@/components/arsiva/store";
 import { useKonfirmasi } from "@/components/arsiva/konfirmasi";
 import type { Role } from "@/lib/arsiva";
@@ -22,6 +34,16 @@ function PermIcon({ on }: { on: boolean }) {
     ? <CheckCircle size={15} style={{ color: "var(--color-ok)" }} />
     : <Minus size={15} style={{ color: "var(--color-neutral-700)" }} />;
 }
+
+/** Rona per peran (nama variabel CSS): sama di avatar dan di tabel kewenangan. */
+const RONA_PERAN: Record<string, { isi: string; teks: string }> = {
+  Admin: { isi: "--color-accent-500", teks: "--color-accent-200" },
+  "Team Member": { isi: "--kat-toska", teks: "--kat-toska-teks" },
+  Pembaca: { isi: "--kat-pasir", teks: "--kat-pasir-teks" },
+};
+
+const inisial = (nama: string) =>
+  nama.split(/s+/).filter(Boolean).slice(0, 2).map((k) => k[0]?.toUpperCase()).join("");
 
 export default function AksesPage() {
   const router = useRouter();
@@ -62,10 +84,7 @@ export default function AksesPage() {
 
   return (
     <div>
-      <h3 style={{ margin: "0 0 4px" }}>Kelola Hak Akses</h3>
-      <div className="text-muted" style={{ fontSize: 13, marginBottom: 20 }}>
-        Pengguna terdaftar dan kewenangannya atas arsip dokumen.
-      </div>
+      <KepalaHalaman ikon={ShieldCheck} rona={RONA_HALAMAN.akses} judul="Kelola Hak Akses" ket="Pengguna terdaftar dan kewenangannya atas arsip dokumen." />
 
       {isStaf && (
         <div style={{ display: "flex", gap: 9, alignItems: "center", padding: "11px 14px", marginBottom: 16, borderRadius: "var(--radius-md)", background: "var(--color-danger-800)", boxShadow: "inset 0 0 0 1px var(--color-danger)", fontSize: 12.5 }}>
@@ -74,7 +93,7 @@ export default function AksesPage() {
         </div>
       )}
 
-      <div className="grid gap-4 items-start grid-cols-1 lg:grid-cols-[1.6fr_1fr]">
+      <div className="grid gap-4 items-start grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.6fr)]">
         {/* users */}
         <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
@@ -96,6 +115,22 @@ export default function AksesPage() {
                 {state.users.map((u) => (
                   <tr key={u.id}>
                     <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
+                      {/* avatar inisial berona peran; diredupkan bila akun nonaktif */}
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          width: 34, height: 34, flex: "none", borderRadius: "50%", display: "grid", placeItems: "center",
+                          fontSize: 12, fontWeight: 600, letterSpacing: "0.02em",
+                          color: `var(${RONA_PERAN[u.peran]?.teks ?? "--color-text"})`,
+                          background: `color-mix(in srgb, var(${RONA_PERAN[u.peran]?.isi ?? "--color-neutral-700"}) 24%, var(--color-surface))`,
+                          boxShadow: `inset 0 0 0 1px color-mix(in srgb, var(${RONA_PERAN[u.peran]?.isi ?? "--color-neutral-700"}) 50%, transparent)`,
+                          opacity: u.aktif ? 1 : 0.45,
+                        }}
+                      >
+                        {inisial(u.nama)}
+                      </span>
+                      <div style={{ minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, maxWidth: 190 }}>
                         <span style={{ fontSize: 13.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.nama}</span>
                         {u.google && (
@@ -110,6 +145,8 @@ export default function AksesPage() {
                         )}
                       </div>
                       <div style={{ fontSize: 11, maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{u.email}</div>
+                      </div>
+                      </div>
                     </td>
                     <td style={{ fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.unit}</td>
                     <td>
@@ -191,9 +228,9 @@ export default function AksesPage() {
                 <thead>
                   <tr>
                     <th>Kewenangan</th>
-                    <th style={{ width: 56 }}>Admin</th>
-                    <th style={{ width: 66 }}>Tim</th>
-                    <th style={{ width: 66 }}>Pembaca</th>
+                    <th style={{ width: 56, color: "var(--color-accent-200)" }}>Admin</th>
+                    <th style={{ width: 66, color: "var(--kat-toska-teks)" }}>Tim</th>
+                    <th style={{ width: 66, color: "var(--kat-pasir-teks)" }}>Pembaca</th>
                   </tr>
                 </thead>
                 <tbody>

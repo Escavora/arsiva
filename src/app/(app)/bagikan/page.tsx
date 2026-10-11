@@ -1,9 +1,20 @@
 "use client";
 
 import * as React from "react";
-import { LockKey, PaperPlaneTilt, Copy, ArrowSquareOut, Check, Info, Broom, WarningCircle } from "@phosphor-icons/react";
+import {
+  LockKey,
+  PaperPlaneTilt,
+  Copy,
+  ArrowSquareOut,
+  Check,
+  Info,
+  Broom,
+  WarningCircle,
+  ShareNetwork,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
+import { KepalaHalaman, RONA_HALAMAN } from "@/components/arsiva/kepala";
 import { useArsiva } from "@/components/arsiva/store";
 import { fmtShort } from "@/lib/arsiva";
 
@@ -27,6 +38,25 @@ async function salinTeks(teks: string): Promise<boolean> {
       return false;
     }
   }
+}
+
+/**
+ * Cincin sisa masa berlaku: motif yang sama dengan peragaan tautan di landing page.
+ * Aktif = sisa waktu nyata (dibuat → kadaluarsa); dicabut = merah kosong; kadaluarsa = kosong.
+ */
+function CincinSisa({ status, persen }: { status: string; persen: number }) {
+  const mati = status === "Dicabut";
+  return (
+    <div
+      aria-hidden="true"
+      className={`tautan-cincin tautan-cincin-kecil${mati ? " tautan-cincin-mati" : ""}`}
+      style={{ ["--tautan-p" as string]: `${status === "Aktif" ? Math.max(3, persen) : 0}%` }}
+    >
+      <span className="tautan-cincin-isi">
+        {status === "Aktif" ? <ShareNetwork size={14} weight="fill" style={{ color: "var(--kat-ungu-teks)" }} /> : <LockKey size={13} weight="fill" style={{ color: mati ? "var(--color-danger-text)" : "var(--color-neutral-600)" }} />}
+      </span>
+    </div>
+  );
 }
 
 // useSearchParams perlu batas Suspense agar halaman tetap bisa di-prerender.
@@ -74,15 +104,24 @@ function BagikanIsi() {
   const urlTautan = (token: string) =>
     typeof window === "undefined" ? `/s/${token}` : `${window.location.origin}/s/${token}`;
 
+  // Satu titik waktu per kunjungan halaman, cukup untuk menghitung sisa hari.
+  const [kini] = React.useState(() => Date.now());
   const shareRows = React.useMemo(
     () =>
-      state.shares.map((s) => ({
+      state.shares.map((s) => {
+        const mulai = new Date(s.dibuat).getTime();
+        const akhir = new Date(s.exp).getTime();
+        const sisaHari = Math.max(0, Math.ceil((akhir - kini) / 86400000));
+        return {
         ...s,
+        persen: akhir > mulai ? ((akhir - kini) / (akhir - mulai)) * 100 : 0,
+        sisaText: s.status === "Aktif" ? (sisaHari <= 1 ? "berakhir hari ini" : `${sisaHari} hari lagi`) : s.status === "Dicabut" ? "akses dicabut" : "masa berlaku habis",
         expText: fmtShort(s.exp.slice(0, 10)),
         dibuatText: fmtShort(s.dibuat.slice(0, 10)),
         tag: s.status === "Aktif" ? "tag-ok" : s.status === "Dicabut" ? "tag-danger" : "tag-neutral",
-      })),
-    [state.shares],
+        };
+      }),
+    [state.shares, kini],
   );
 
   const aktifText = `${shareRows.filter((x) => x.status === "Aktif").length} tautan aktif`;
@@ -120,10 +159,7 @@ function BagikanIsi() {
 
   return (
     <div>
-      <h3 style={{ margin: "0 0 4px" }}>Bagikan Dokumen</h3>
-      <div className="text-muted" style={{ fontSize: 13, marginBottom: 20 }}>
-        Buat tautan aman untuk rekanan atau notaris, dan cabut aksesnya kapan pun.
-      </div>
+      <KepalaHalaman ikon={ShareNetwork} rona={RONA_HALAMAN.bagikan} judul="Bagikan Dokumen" ket="Buat tautan aman untuk rekanan atau notaris, dan cabut aksesnya kapan pun." />
 
       <div className="grid gap-4 items-start grid-cols-1 lg:grid-cols-[1fr_1.35fr]">
         {/* buat tautan */}
@@ -179,7 +215,7 @@ function BagikanIsi() {
             <span>Tautan memakai token acak yang tidak bisa ditebak dan otomatis mati saat masa berlaku habis. Siapa pun yang memegang tautan dapat membukanya, jadi kirim hanya ke penerima yang dituju.</span>
           </div>
 
-          <button type="button" className="btn btn-primary btn-block" onClick={() => void submit()} disabled={!canWrite || kirim}>
+          <button type="button" className="btn btn-primary btn-solid btn-block" onClick={() => void submit()} disabled={!canWrite || kirim} style={{ minHeight: 42 }}>
             <PaperPlaneTilt size={16} />
             {kirim ? "Membuat…" : "Buat Tautan Aman"}
           </button>
@@ -268,8 +304,7 @@ function BagikanIsi() {
                 <tr>
                   <th>Penerima</th>
                   <th style={{ width: 170 }}>Dokumen</th>
-                  <th style={{ width: 100 }}>Berlaku s.d.</th>
-                  <th style={{ width: 96 }}>Status</th>
+                  <th style={{ width: 196 }}>Masa berlaku</th>
                   <th style={{ width: 120 }} />
                 </tr>
               </thead>
@@ -285,8 +320,17 @@ function BagikanIsi() {
                     <td style={{ fontSize: 12 }}>
                       <div style={{ maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.doc}</div>
                     </td>
-                    <td style={{ fontSize: 12 }}>{s.expText}</td>
-                    <td><span className={`tag ${s.tag}`}>{s.status}</span></td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <CincinSisa status={s.status} persen={s.persen} />
+                        <div style={{ minWidth: 0 }}>
+                          <span className={`tag ${s.tag}`}>{s.status}</span>
+                          <div style={{ fontSize: 11.5, marginTop: 3, whiteSpace: "nowrap", color: s.status === "Aktif" ? "var(--color-text)" : "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
+                            {s.sisaText} · s.d. {s.expText}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
                     <td style={{ textAlign: "right" }}>
                       {s.status === "Aktif" && (
                         <div style={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>

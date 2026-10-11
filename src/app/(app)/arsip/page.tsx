@@ -10,7 +10,9 @@ import {
   FilePdf,
   CaretRight,
   FolderOpen,
+  Folders,
 } from "@phosphor-icons/react";
+import { KepalaHalaman, RONA_HALAMAN } from "@/components/arsiva/kepala";
 import { useArsiva } from "@/components/arsiva/store";
 import { LabelKategori, TitikKategori, useRonaKategori } from "@/components/arsiva/warna";
 
@@ -85,18 +87,18 @@ function ArsipInner() {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 16, marginBottom: 18, flexWrap: "wrap" }}>
-        <div>
-          <h3 style={{ margin: "0 0 4px" }}>Arsip Dokumen</h3>
-          <div className="text-muted" style={{ fontSize: 13 }}>
-            {rows.length} dari {allDocs.length} dokumen · diurutkan dari yang terbaru
-          </div>
-        </div>
-        <Link className="btn btn-primary" href="/unggah" style={{ marginLeft: "auto" }}>
-          <UploadSimple size={16} />
-          Unggah Dokumen
-        </Link>
-      </div>
+      <KepalaHalaman
+        ikon={Folders}
+        rona={RONA_HALAMAN.arsip}
+        judul="Arsip Dokumen"
+        ket={<><strong style={{ color: "var(--color-text)", fontWeight: 600 }}>{rows.length}</strong> dari {allDocs.length} dokumen · diurutkan dari yang terbaru</>}
+        aksi={
+          <Link className="btn btn-primary btn-solid" href="/unggah">
+            <UploadSimple size={16} />
+            Unggah Dokumen
+          </Link>
+        }
+      />
 
       <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-4)" }}>
         {/* search + selects */}

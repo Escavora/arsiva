@@ -22,6 +22,7 @@ import {
   CheckCircle,
   type Icon,
 } from "@phosphor-icons/react";
+import { RONA_HALAMAN } from "./kepala";
 import { useArsiva } from "./store";
 
 type NavItem = {
@@ -35,27 +36,27 @@ type NavItem = {
 };
 
 const OPERASIONAL: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: SquaresFour, rona: "var(--color-accent-500)" },
-  { href: "/arsip", label: "Arsip Dokumen", icon: Folders, rona: "var(--kat-sian)" },
-  { href: "/unggah", label: "Unggah Dokumen", icon: UploadSimple, rona: "var(--kat-toska)" },
+  { href: "/dashboard", label: "Dashboard", icon: SquaresFour, rona: RONA_HALAMAN.dashboard },
+  { href: "/arsip", label: "Arsip Dokumen", icon: Folders, rona: RONA_HALAMAN.arsip },
+  { href: "/unggah", label: "Unggah Dokumen", icon: UploadSimple, rona: RONA_HALAMAN.unggah },
   {
     href: "/pengingat",
     label: "Pengingat Kadaluarsa",
     icon: BellRinging,
     badge: true,
-    rona: "var(--color-accent-2-500)", // sama dengan rona "Segera kadaluarsa"
+    rona: RONA_HALAMAN.pengingat,
   },
-  { href: "/bagikan", label: "Bagikan Dokumen", icon: ShareNetwork, rona: "var(--kat-ungu)" },
+  { href: "/bagikan", label: "Bagikan Dokumen", icon: ShareNetwork, rona: RONA_HALAMAN.bagikan },
 ];
 const MASTER: NavItem[] = [
-  { href: "/notaris", label: "Jadwal Notaris", icon: CalendarDots, rona: "var(--kat-nila)" },
-  { href: "/kategori", label: "Kategori & Jenis", icon: Tag, rona: "var(--kat-magenta)" },
+  { href: "/notaris", label: "Jadwal Notaris", icon: CalendarDots, rona: RONA_HALAMAN.notaris },
+  { href: "/kategori", label: "Kategori & Jenis", icon: Tag, rona: RONA_HALAMAN.kategori },
   {
     href: "/akses",
     label: "Kelola Hak Akses",
     icon: ShieldCheck,
     adminOnly: true,
-    rona: "var(--color-ok)",
+    rona: RONA_HALAMAN.akses,
   },
 ];
 
