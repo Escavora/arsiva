@@ -62,3 +62,7 @@ next-env.d.ts
 
 # skill agen pihak ketiga (pasang ulang: npx skills add ...)
 .agents/
+
+# petunjuk agen AI (ditulis ulang oleh `next dev`; tidak dibutuhkan untuk build/deploy)
+AGENTS.md
+CLAUDE.md
