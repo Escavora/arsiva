@@ -51,7 +51,7 @@ export function KepalaHalaman({
       className="card dasbor-muncul kepala-halaman"
       style={{
         position: "relative", overflow: "hidden", isolation: "isolate",
-        padding: "var(--space-6)", gap: 18, marginBottom: "var(--space-4)",
+        padding: "var(--space-6)", gap: 18, marginBottom: "var(--jarak-kepala)",
         background: `linear-gradient(125deg, color-mix(in srgb, ${rona} 20%, var(--color-bg)) 0%, var(--color-surface) 58%)`,
         boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${rona} 26%, var(--color-divider))`,
       }}
@@ -80,7 +80,7 @@ export function KepalaHalaman({
         <div style={{ minWidth: 0, flex: "1 1 0" }}>
           {atas && <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>{atas}</div>}
           <h3 style={{ margin: 0, fontSize: "clamp(24px, 2.4vw, 30px)", fontWeight: 600, letterSpacing: "-0.025em", textWrap: "balance" }}>{judul}</h3>
-          {ket && <div style={{ fontSize: 14, lineHeight: 1.5, color: muted(70), marginTop: 5 }}>{ket}</div>}
+          {ket && <div style={{ fontSize: "var(--t-isi)", lineHeight: 1.5, color: muted(70), marginTop: 5, maxWidth: "64ch", textWrap: "pretty" }}>{ket}</div>}
         </div>
 
         {aksi && <div className="kepala-aksi" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginLeft: "auto" }}>{aksi}</div>}

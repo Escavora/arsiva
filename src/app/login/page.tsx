@@ -170,7 +170,7 @@ function LoginForm() {
           </React.ViewTransition>
           <div>
             <div style={{ fontWeight: 600, fontSize: 17, letterSpacing: "-0.01em", color: "var(--color-text)" }}>ARSIVA</div>
-            <div style={{ fontSize: 10.5, letterSpacing: "0.09em", textTransform: "uppercase", color: muted(52) }}>
+            <div style={{ fontSize: "var(--t-label)", letterSpacing: "0.09em", textTransform: "uppercase", color: muted(52) }}>
               Arsip Dokumen Legal
             </div>
           </div>
@@ -183,7 +183,7 @@ function LoginForm() {
           >
             Arsip legal bank, terjaga dan tertata.
           </h2>
-          <p style={{ fontSize: 14.5, lineHeight: 1.6, color: muted(66), margin: "0 0 30px", maxWidth: "42ch" }}>
+          <p style={{ fontSize: "var(--t-isi)", lineHeight: 1.6, color: muted(66), margin: "0 0 30px", maxWidth: "42ch" }}>
             Perjanjian kerja sama, akta notaris, dan sertifikat agunan tersimpan rapi dengan kategori, masa berlaku, dan pengingat otomatis.
           </p>
 
@@ -191,13 +191,13 @@ function LoginForm() {
             {JAMINAN.map((j) => (
               <li key={j.teks} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                 <j.icon size={18} style={{ flex: "none", marginTop: 1, color: "var(--color-accent-300)" }} />
-                <span style={{ fontSize: 13.5, lineHeight: 1.5, color: muted(72) }}>{j.teks}</span>
+                <span style={{ fontSize: "var(--t-isi)", lineHeight: 1.5, color: muted(72) }}>{j.teks}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        <div style={{ marginTop: 32, fontSize: 11.5, color: muted(58) }}>
+        <div style={{ marginTop: 32, fontSize: "var(--t-label)", color: muted(58) }}>
           Akses terbatas untuk pegawai terdaftar, Credit Operations Department RO BRI Pekanbaru.
         </div>
       </div>
@@ -212,7 +212,7 @@ function LoginForm() {
           style={{
             position: "absolute", top: 24, left: 24,
             display: "none", alignItems: "center", gap: 6,
-            fontSize: 13, color: muted(64), textDecoration: "none",
+            fontSize: "var(--t-ket)", color: muted(64), textDecoration: "none",
           }}
         >
           <ArrowLeft size={15} />
@@ -221,7 +221,7 @@ function LoginForm() {
 
         <form className="login-form" onSubmit={doLogin} style={{ width: "min(432px, 100%)" }}>
           <h4 style={{ margin: "0 0 7px", fontSize: 26, letterSpacing: "-0.025em" }}>Masuk ke akun pegawai</h4>
-          <p className="text-muted" style={{ fontSize: 14.5, marginBottom: 30 }}>
+          <p className="text-muted" style={{ fontSize: "var(--t-isi)", marginBottom: 30 }}>
             {tahap === "kode"
               ? `Kami mengirim kode verifikasi ke ${email.trim()}. Masukkan kodenya di bawah.`
               : "Gunakan email korporat dan kata sandi internal Anda."}
@@ -232,7 +232,7 @@ function LoginForm() {
               <div
                 role="status"
                 style={{
-                  display: "flex", gap: 8, alignItems: "center", fontSize: 12.5,
+                  display: "flex", gap: 8, alignItems: "center", fontSize: "var(--t-ket)",
                   padding: "10px 12px", borderRadius: "var(--radius-md)",
                   background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
                   boxShadow: "inset 0 0 0 1px var(--color-accent-700)",
@@ -247,7 +247,7 @@ function LoginForm() {
               <div
                 role="alert"
                 style={{
-                  display: "flex", gap: 8, alignItems: "center", fontSize: 12.5,
+                  display: "flex", gap: 8, alignItems: "center", fontSize: "var(--t-ket)",
                   padding: "10px 12px", borderRadius: "var(--radius-md)",
                   background: "var(--color-danger-800)",
                   boxShadow: "inset 0 0 0 1px var(--color-danger)",
@@ -292,7 +292,7 @@ function LoginForm() {
                     <span className="dot" />
                     Ingat perangkat ini
                   </label>
-                  <a href="#" onClick={(e) => e.preventDefault()} style={{ marginLeft: "auto", fontSize: 12.5 }}>
+                  <a href="#" onClick={(e) => e.preventDefault()} style={{ marginLeft: "auto", fontSize: "var(--t-ket)" }}>
                     Lupa kata sandi?
                   </a>
                 </div>
@@ -306,7 +306,7 @@ function LoginForm() {
 
             {tahap === "kredensial" && (
               <>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 12, color: muted(46) }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: "var(--t-ket)", color: muted(46) }}>
                   <span style={{ flex: 1, height: 1, background: "var(--color-divider)" }} />
                   atau
                   <span style={{ flex: 1, height: 1, background: "var(--color-divider)" }} />
@@ -321,7 +321,7 @@ function LoginForm() {
               </>
             )}
 
-            <div style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12.5, lineHeight: 1.5, color: muted(52), marginTop: 2 }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: "var(--t-ket)", lineHeight: 1.5, color: muted(52), marginTop: 2 }}>
               <ShieldCheck size={16} style={{ flex: "none", marginTop: 1 }} />
               <span>
                 Sesi berakhir otomatis setelah 30 menit tanpa aktivitas. Jangan bagikan kredensial Anda kepada pihak ketiga.
@@ -347,7 +347,7 @@ function LoginForm() {
               </div>
               <div style={{ minWidth: 0 }}>
                 <h5 id="judul-nonaktif" style={{ margin: "0 0 4px" }}>Akun Anda dinonaktifkan</h5>
-                <div className="text-muted" style={{ fontSize: 13, lineHeight: 1.55 }}>
+                <div className="text-muted" style={{ fontSize: "var(--t-ket)", lineHeight: 1.55 }}>
                   Admin ARSIVA telah menonaktifkan akun ini, sehingga Anda tidak dapat masuk untuk sementara. Data dan dokumen Anda tetap tersimpan. Hubungi Admin unit kerja Anda bila akses perlu diaktifkan kembali.
                 </div>
               </div>

@@ -49,11 +49,11 @@ export default function SsoCallbackPage() {
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, textAlign: "center" }}>
-        <p className="text-muted" style={{ margin: 0, fontSize: 14.5 }} role="status">
+        <p className="text-muted" style={{ margin: 0, fontSize: "var(--t-isi)" }} role="status">
           Menyelesaikan masuk dengan Google…
         </p>
         {lama && (
-          <a href="/login" style={{ fontSize: 13 }}>
+          <a href="/login" style={{ fontSize: "var(--t-ket)" }}>
             Kembali ke halaman masuk
           </a>
         )}

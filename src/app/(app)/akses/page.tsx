@@ -87,28 +87,28 @@ export default function AksesPage() {
       <KepalaHalaman ikon={ShieldCheck} rona={RONA_HALAMAN.akses} judul="Kelola Hak Akses" ket="Pengguna terdaftar dan kewenangannya atas arsip dokumen." />
 
       {isStaf && (
-        <div style={{ display: "flex", gap: 9, alignItems: "center", padding: "11px 14px", marginBottom: 16, borderRadius: "var(--radius-md)", background: "var(--color-danger-800)", boxShadow: "inset 0 0 0 1px var(--color-danger)", fontSize: 12.5 }}>
+        <div style={{ display: "flex", gap: 9, alignItems: "center", padding: "11px 14px", marginBottom: 16, borderRadius: "var(--radius-md)", background: "var(--color-danger-800)", boxShadow: "inset 0 0 0 1px var(--color-danger)", fontSize: "var(--t-ket)" }}>
           <LockKey size={16} style={{ color: "var(--color-danger-100)", flex: "none" }} />
           Halaman ini hanya dapat diubah oleh Admin. Anda melihat dalam mode baca.
         </div>
       )}
 
-      <div className="grid gap-4 items-start grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.6fr)]">
+      <div className="grid gap-4 items-start grid-cols-1 2xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.4fr)]">
         {/* users */}
-        <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
+        <div className="card elev-sm" style={{ padding: "var(--pad-kartu)", gap: "var(--space-3)" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
             <h5 style={{ margin: 0 }}>Pengguna</h5>
-            <span className="text-muted" style={{ marginLeft: "auto", fontSize: 12 }}>{userCountText}</span>
+            <span className="text-muted" style={{ marginLeft: "auto", fontSize: "var(--t-ket)" }}>{userCountText}</span>
           </div>
           <div style={{ overflowX: "auto" }}>
-            <table className="table">
+            <table className="table table-kartu">
               <thead>
                 <tr>
                   <th>Nama</th>
-                  <th style={{ width: 112 }}>Unit kerja</th>
-                  <th style={{ width: 132 }}>Peran</th>
-                  <th style={{ width: 96 }}>Status</th>
-                  <th style={{ width: 178 }} />
+                  <th className="hidden xl:table-cell" style={{ width: 112 }}>Unit kerja</th>
+                  <th style={{ width: 124 }}>Peran</th>
+                  <th style={{ width: 88 }}>Status</th>
+                  <th style={{ width: 160 }} />
                 </tr>
               </thead>
               <tbody>
@@ -121,7 +121,7 @@ export default function AksesPage() {
                         aria-hidden="true"
                         style={{
                           width: 34, height: 34, flex: "none", borderRadius: "50%", display: "grid", placeItems: "center",
-                          fontSize: 12, fontWeight: 600, letterSpacing: "0.02em",
+                          fontSize: "var(--t-ket)", fontWeight: 600, letterSpacing: "0.02em",
                           color: `var(${RONA_PERAN[u.peran]?.teks ?? "--color-text"})`,
                           background: `color-mix(in srgb, var(${RONA_PERAN[u.peran]?.isi ?? "--color-neutral-700"}) 24%, var(--color-surface))`,
                           boxShadow: `inset 0 0 0 1px color-mix(in srgb, var(${RONA_PERAN[u.peran]?.isi ?? "--color-neutral-700"}) 50%, transparent)`,
@@ -132,7 +132,7 @@ export default function AksesPage() {
                       </span>
                       <div style={{ minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, maxWidth: 190 }}>
-                        <span style={{ fontSize: 13.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.nama}</span>
+                        <span style={{ fontSize: "var(--t-isi)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.nama}</span>
                         {u.google && (
                           <span
                             role="img"
@@ -144,33 +144,33 @@ export default function AksesPage() {
                           </span>
                         )}
                       </div>
-                      <div style={{ fontSize: 11, maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{u.email}</div>
+                      <div style={{ fontSize: "var(--t-label)", maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{u.email}</div>
                       </div>
                       </div>
                     </td>
-                    <td style={{ fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.unit}</td>
-                    <td>
+                    <td data-label="Unit kerja" className="hidden xl:table-cell" style={{ fontSize: "var(--t-ket)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.unit}</td>
+                    <td data-label="Peran">
                       <select
                         className="input"
                         aria-label={`Peran ${u.nama}`}
                         value={u.peran}
                         onChange={(e) => void setUserPeran(u.id, e.target.value as Role)}
                         disabled={isStaf}
-                        style={{ minHeight: "var(--tinggi-ringkas)", minWidth: 122, fontSize: 12.5, padding: "3px 8px" }}
+                        style={{ minHeight: "var(--tinggi-ringkas)", minWidth: 122, fontSize: "var(--t-ket)", padding: "3px 8px" }}
                       >
                         <option>Admin</option>
                         <option>Team Member</option>
                         <option>Pembaca</option>
                       </select>
                     </td>
-                    <td><span className={`tag ${u.aktif ? "tag-ok" : "tag-neutral"}`}>{u.aktif ? "Aktif" : "Nonaktif"}</span></td>
+                    <td data-label="Status"><span className={`tag ${u.aktif ? "tag-ok" : "tag-neutral"}`}>{u.aktif ? "Aktif" : "Nonaktif"}</span></td>
                     <td style={{ textAlign: "right" }}>
                       {isAdmin && (
                         <div style={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
                           <button type="button" className="btn btn-ghost btn-icon" onClick={() => bukaEditUser(u)} title="Ubah data pengguna" style={{ width: 26, height: 26 }}>
                             <PencilSimple size={13} />
                           </button>
-                          <button type="button" className="btn btn-ghost" onClick={() => void toggleUser(u.id, !u.aktif)} style={{ fontSize: 11.5 }}>{u.aktif ? "Nonaktifkan" : "Aktifkan"}</button>
+                          <button type="button" className="btn btn-ghost" onClick={() => void toggleUser(u.id, !u.aktif)} style={{ fontSize: "var(--t-label)" }}>{u.aktif ? "Nonaktifkan" : "Aktifkan"}</button>
                           <button
                             type="button"
                             className="btn btn-ghost"
@@ -184,7 +184,7 @@ export default function AksesPage() {
                               tombol: "Hapus Pengguna",
                               aksi: () => removeUser(u.id),
                             })}
-                            style={{ fontSize: 11.5, color: "var(--color-danger-text)" }}
+                            style={{ fontSize: "var(--t-label)", color: "var(--color-danger-text)" }}
                           >
                             Hapus
                           </button>
@@ -198,8 +198,8 @@ export default function AksesPage() {
           </div>
 
           <div style={{ paddingTop: "var(--space-3)", borderTop: "1px solid var(--color-divider)" }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", marginBottom: 10 }}>Tambah pengguna baru</div>
-            <div className="grid gap-3 items-end grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.1fr_1.3fr_1fr_118px_auto]">
+            <div style={{ fontSize: "var(--t-label)", letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", marginBottom: 10 }}>Tambah pengguna baru</div>
+            <div className="grid gap-3 items-end grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
               <div className="field" style={{ margin: 0 }}><label htmlFor="akses-nama">Nama</label><input id="akses-nama" className="input" placeholder="Nama pegawai" value={nu.nama} onChange={(e) => setNu((v) => ({ ...v, nama: e.target.value }))} /></div>
               <div className="field" style={{ margin: 0 }}><label htmlFor="akses-email-korporat">Email korporat</label><input id="akses-email-korporat" className="input" placeholder="nama@bank.co.id" value={nu.email} onChange={(e) => setNu((v) => ({ ...v, email: e.target.value }))} /></div>
               <div className="field" style={{ margin: 0 }}><label htmlFor="akses-unit-kerja">Unit kerja</label><input id="akses-unit-kerja" className="input" placeholder="mis. Legal Kredit" value={nu.unit} onChange={(e) => setNu((v) => ({ ...v, unit: e.target.value }))} /></div>
@@ -211,7 +211,7 @@ export default function AksesPage() {
                   <option>Pembaca</option>
                 </select>
               </div>
-              <button type="button" className="btn btn-primary" onClick={() => void tambah()}>
+              <button type="button" className="btn btn-primary sm:col-span-2 xl:col-span-1 xl:justify-self-start" onClick={() => void tambah()}>
                 <UserPlus size={15} />
                 Tambah
               </button>
@@ -219,9 +219,9 @@ export default function AksesPage() {
           </div>
         </div>
 
-        {/* matrix + session */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
+        {/* matrix + session: berdampingan di bawah tabel, bertumpuk di sampingnya pada layar ≥1536px */}
+        <div className="grid gap-4 items-start grid-cols-1 lg:grid-cols-2 2xl:grid-cols-1">
+          <div className="card elev-sm" style={{ padding: "var(--pad-kartu)", gap: "var(--space-3)" }}>
             <h5 style={{ margin: 0 }}>Kewenangan per peran</h5>
             <div style={{ overflowX: "auto" }}>
               <table className="table">
@@ -236,7 +236,7 @@ export default function AksesPage() {
                 <tbody>
                   {MATRIX.map((m) => (
                     <tr key={m.nama}>
-                      <td style={{ fontSize: 12.5 }}>{m.nama}</td>
+                      <td style={{ fontSize: "var(--t-ket)" }}>{m.nama}</td>
                       <td><PermIcon on={m.a} /></td>
                       <td><PermIcon on={m.s} /></td>
                       <td><PermIcon on={m.p} /></td>
@@ -246,9 +246,9 @@ export default function AksesPage() {
               </table>
             </div>
           </div>
-          <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
+          <div className="card elev-sm" style={{ padding: "var(--pad-kartu)", gap: "var(--space-3)" }}>
             <h5 style={{ margin: 0 }}>Keamanan sesi</h5>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", rowGap: 11, columnGap: 12, fontSize: 12.5, alignItems: "center" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", rowGap: 11, columnGap: 12, fontSize: "var(--t-ket)", alignItems: "center" }}>
               <span className="text-muted">Sesi login otomatis berakhir</span><span>30 menit</span>
             </div>
             <button type="button" className="btn btn-secondary btn-block" onClick={() => router.push("/sandi")}>
@@ -284,7 +284,7 @@ export default function AksesPage() {
             </div>
 
             {editForm.email.trim().toLowerCase() !== editUser.email && (
-              <div style={{ fontSize: 11.5, color: "color-mix(in srgb, var(--color-text) 62%, transparent)", display: "flex", gap: 7 }}>
+              <div style={{ fontSize: "var(--t-label)", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", display: "flex", gap: 7 }}>
                 <LockKey size={14} style={{ flex: "none", marginTop: 1 }} />
                 <span>Mengubah email berarti pengguna ini akan masuk memakai alamat baru mulai sekarang.</span>
               </div>

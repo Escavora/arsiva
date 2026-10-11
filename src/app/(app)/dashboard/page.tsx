@@ -82,7 +82,7 @@ function Kosong({ ikon, judul, warna = "var(--color-ok)", children }: { ikon: Re
       <div className="dasbor-melayang" style={{ width: 56, height: 56, borderRadius: "50%", display: "grid", placeItems: "center", color: warna, background: `color-mix(in srgb, ${warna} 14%, transparent)`, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${warna} 35%, transparent)` }}>
         {ikon}
       </div>
-      <div style={{ fontSize: 13.5 }}>{judul}</div>
+      <div style={{ fontSize: "var(--t-isi)" }}>{judul}</div>
       {children}
     </div>
   );
@@ -116,7 +116,7 @@ function UbinStatus({ u, total, i }: { u: Ubin; total: number; i: number }) {
       </div>
       <div>
         <div style={{ fontFamily: "var(--font-heading)", fontSize: 34, lineHeight: 1, letterSpacing: "-0.03em", color: u.teks }}>{nilai}</div>
-        <div style={{ fontSize: 13, marginTop: 6, color: muted(78) }}>{u.label}</div>
+        <div style={{ fontSize: "var(--t-ket)", marginTop: 6, color: muted(78) }}>{u.label}</div>
       </div>
       <div style={{ height: 5, borderRadius: 3, background: "var(--color-neutral-800)", overflow: "hidden" }} title={`${pct}% dari seluruh arsip`}>
         <div className="dasbor-isi" style={{ animationDelay: `${300 + i * 60}ms`, height: "100%", width: `${pct}%`, borderRadius: 3, background: u.warna }} />
@@ -156,7 +156,7 @@ function CincinKepatuhan({ segmen, pct }: { segmen: { nama: string; v: number; f
       <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", textAlign: "center" }}>
         <div>
           <div style={{ fontFamily: "var(--font-heading)", fontSize: 34, lineHeight: 1, letterSpacing: "-0.03em" }}>{pct}</div>
-          <div style={{ fontSize: 11.5, marginTop: 4, color: muted(66) }}>terkendali</div>
+          <div style={{ fontSize: "var(--t-label)", marginTop: 4, color: muted(66) }}>terkendali</div>
         </div>
       </div>
     </div>
@@ -222,13 +222,13 @@ export default function DashboardPage() {
           </div>
           <h3 style={{ margin: "0 0 10px", fontSize: "clamp(24px, 2.4vw, 30px)" }}>Halo, {me.panggilan}</h3>
           {counts.perluAksi > 0 ? (
-            <Link href="/pengingat" style={{ display: "inline-flex", alignItems: "center", gap: 10, fontSize: 15, color: "var(--color-text)", textDecoration: "none" }}>
+            <Link href="/pengingat" style={{ display: "inline-flex", alignItems: "center", gap: 10, fontSize: "var(--t-bacaan)", color: "var(--color-text)", textDecoration: "none" }}>
               <span className="dasbor-denyut" style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--color-accent-2-500)", flex: "none" }} />
               <span><strong style={{ color: "var(--color-accent-2-300)" }}>{counts.perluAksi} dokumen</strong> perlu tindakan</span>
               <ArrowRight size={15} style={{ color: "var(--color-accent-2-300)" }} />
             </Link>
           ) : (
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, fontSize: 15 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, fontSize: "var(--t-bacaan)" }}>
               <CheckCircle size={18} weight="fill" style={{ color: "var(--color-ok)" }} />
               Semua dokumen terkendali
             </div>
@@ -255,13 +255,13 @@ export default function DashboardPage() {
       </div>
 
       {/* KEPATUHAN + JATUH TEMPO */}
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-[1fr_2fr] items-stretch">
-        <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "320ms", padding: "var(--space-6)", gap: "var(--space-4)", alignItems: "center" }}>
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] items-stretch">
+        <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "320ms", padding: "var(--pad-kartu)", gap: "var(--space-4)", alignItems: "center" }}>
           <h5 style={{ margin: 0, alignSelf: "flex-start" }}>Kepatuhan</h5>
           <CincinKepatuhan segmen={stats.donut.legend} pct={stats.donut.pct} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", width: "100%" }}>
             {stats.donut.legend.map((l) => (
-              <div key={l.nama} title={`${l.nama}: ${l.v} dokumen (${l.pctText})`} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5 }}>
+              <div key={l.nama} title={`${l.nama}: ${l.v} dokumen (${l.pctText})`} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "var(--t-ket)" }}>
                 <span style={{ width: 9, height: 9, borderRadius: "50%", flex: "none", background: l.fill }} />
                 <span style={{ color: muted(70) }}>{LABEL_PENDEK[l.nama] ?? l.nama}</span>
                 <span style={{ marginLeft: "auto", fontFamily: "var(--font-heading)" }}>{l.v}</span>
@@ -270,7 +270,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "380ms", padding: "var(--space-6)", gap: "var(--space-4)" }}>
+        <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "380ms", padding: "var(--pad-kartu)", gap: "var(--space-4)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <h5 style={{ margin: 0 }}>Jatuh tempo</h5>
             <Link href="/pengingat" className="tag tag-warn" style={{ textDecoration: "none" }} title="Atur ambang pengingat">
@@ -278,7 +278,7 @@ export default function DashboardPage() {
             </Link>
             <div style={{ marginLeft: "auto", display: "flex", gap: 12, flexWrap: "wrap" }}>
               {stats.donut.legend.map((l) => (
-                <span key={l.nama} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11.5, color: muted(66) }}>
+                <span key={l.nama} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: "var(--t-label)", color: muted(66) }}>
                   <span style={{ width: 7, height: 7, borderRadius: "50%", background: l.fill }} />
                   {LABEL_PENDEK[l.nama] ?? l.nama}
                 </span>
@@ -288,7 +288,7 @@ export default function DashboardPage() {
           <div style={{ display: "flex", alignItems: "flex-end", gap: 10, height: 190, paddingTop: 8, borderBottom: "1px solid var(--color-divider)" }}>
             {stats.bulan.cols.map((c, i) => (
               <div key={c.label} title={`${c.label}: ${c.total} dokumen`} style={{ flex: 1, minWidth: 0, height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 12, fontFamily: "var(--font-heading)", color: c.total ? muted(85) : muted(40) }}>{c.total || ""}</span>
+                <span style={{ fontSize: "var(--t-ket)", fontFamily: "var(--font-heading)", color: c.total ? muted(85) : muted(40) }}>{c.total || ""}</span>
                 <div
                   className="dasbor-batang"
                   style={{ animationDelay: `${420 + i * 70}ms`, width: "100%", maxWidth: 44, height: c.h, display: "flex", flexDirection: "column-reverse", gap: 2, borderRadius: "6px 6px 2px 2px", overflow: "hidden" }}
@@ -303,7 +303,7 @@ export default function DashboardPage() {
               <div key={c.label} style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
                 <span
                   style={{
-                    display: "inline-block", fontSize: 11.5, padding: "2px 8px", borderRadius: 999,
+                    display: "inline-block", fontSize: "var(--t-label)", padding: "2px 8px", borderRadius: 999,
                     color: i === 1 ? "var(--color-accent-100)" : muted(66),
                     background: i === 1 ? "var(--color-accent-800)" : "transparent",
                   }}
@@ -317,15 +317,15 @@ export default function DashboardPage() {
       </div>
 
       {/* PERLU TINDAKAN + SAMPING */}
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-[1.4fr_1fr] items-start">
-        <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "440ms", padding: "var(--space-4)", gap: "var(--space-3)" }}>
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] items-start">
+        <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "440ms", padding: "var(--pad-kartu)", gap: "var(--space-3)" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
             <h5 style={{ margin: 0 }}>Perlu tindakan</h5>
-            <Link className="btn btn-ghost" href="/pengingat" style={{ marginLeft: "auto", fontSize: 12.5 }}>Semua<ArrowRight size={14} /></Link>
+            <Link className="btn btn-ghost" href="/pengingat" style={{ marginLeft: "auto", fontSize: "var(--t-ket)" }}>Semua<ArrowRight size={14} /></Link>
           </div>
           {prioritas.length === 0 ? (
             <Kosong ikon={<Sparkle size={26} weight="duotone" />} judul="Semua beres">
-              <div style={{ fontSize: 12.5, color: muted(66) }}>Tidak ada dokumen dalam ambang {th} hari.</div>
+              <div style={{ fontSize: "var(--t-ket)", color: muted(66) }}>Tidak ada dokumen dalam ambang {th} hari.</div>
             </Kosong>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -338,14 +338,14 @@ export default function DashboardPage() {
                     style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: "var(--radius-md)", background: "var(--color-surface-2)" }}
                   >
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: 13.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <div style={{ fontSize: "var(--t-isi)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
                       </div>
                       <div style={{ color: muted(66), marginTop: 2 }}><LabelKategori nama={r.k} fontSize={12} /></div>
                     </div>
                     <span
                       style={{
-                        flex: "none", fontSize: 12, padding: "4px 10px", borderRadius: 999, whiteSpace: "nowrap",
+                        flex: "none", fontSize: "var(--t-ket)", padding: "4px 10px", borderRadius: 999, whiteSpace: "nowrap",
                         // Teks pil lebih terang dari --color-danger-text karena latarnya sudah kemerahan (kontras >=4.5).
                         color: r.dl < 0 ? "color-mix(in srgb, var(--color-danger-text) 70%, white)" : "var(--color-accent-2-300)",
                         background: `color-mix(in srgb, ${w} 16%, transparent)`,
@@ -361,10 +361,10 @@ export default function DashboardPage() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "500ms", padding: "var(--space-4)", gap: "var(--space-3)" }}>
+          <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "500ms", padding: "var(--pad-kartu)", gap: "var(--space-3)" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <h5 style={{ margin: 0 }}>Jadwal notaris</h5>
-              <Link className="btn btn-ghost" href="/notaris" style={{ marginLeft: "auto", fontSize: 12.5 }}>Kelola</Link>
+              <Link className="btn btn-ghost" href="/notaris" style={{ marginLeft: "auto", fontSize: "var(--t-ket)" }}>Kelola</Link>
             </div>
             {jadwalDekat.length === 0 ? (
               <Kosong ikon={<CalendarBlank size={24} weight="duotone" />} judul="Belum ada jadwal mendatang" warna="var(--color-accent-500)" />
@@ -374,11 +374,11 @@ export default function DashboardPage() {
                   <div key={s.id} style={{ display: "flex", gap: 11, alignItems: "center" }}>
                     <div style={{ flex: "none", width: 46, textAlign: "center", padding: "6px 0", borderRadius: "var(--radius-md)", background: "var(--color-accent-900)", boxShadow: "inset 0 0 0 1px var(--color-accent-800)" }}>
                       <div style={{ fontFamily: "var(--font-heading)", fontSize: 17, lineHeight: 1, color: "var(--color-accent-100)" }}>{s.hari}</div>
-                      <div style={{ fontSize: 10.5, marginTop: 2, color: "var(--color-accent-300)" }}>{s.bulan}</div>
+                      <div style={{ fontSize: "var(--t-label)", marginTop: 2, color: "var(--color-accent-300)" }}>{s.bulan}</div>
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.agenda}</div>
-                      <div style={{ fontSize: 12, color: muted(62) }}>{s.jam} · {s.notarisNama}</div>
+                      <div style={{ fontSize: "var(--t-ket)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.agenda}</div>
+                      <div style={{ fontSize: "var(--t-ket)", color: muted(62) }}>{s.jam} · {s.notarisNama}</div>
                     </div>
                   </div>
                 ))}
@@ -386,7 +386,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "560ms", padding: "var(--space-4)", gap: "var(--space-3)" }}>
+          <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "560ms", padding: "var(--pad-kartu)", gap: "var(--space-3)" }}>
             <h5 style={{ margin: 0 }}>Terbaru</h5>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {terbaru.map((r) => (
@@ -395,10 +395,10 @@ export default function DashboardPage() {
                     <FilePdf size={16} />
                   </span>
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <div style={{ fontSize: "var(--t-ket)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
                     </div>
-                    <div style={{ fontSize: 12, color: muted(62) }}>{r.o} · {r.upText}</div>
+                    <div style={{ fontSize: "var(--t-ket)", color: muted(62) }}>{r.o} · {r.upText}</div>
                   </div>
                 </div>
               ))}
@@ -408,7 +408,7 @@ export default function DashboardPage() {
       </div>
 
       {/* SEBARAN */}
-      <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "620ms", padding: "var(--space-4)", gap: "var(--space-4)" }}>
+      <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "620ms", padding: "var(--pad-kartu)", gap: "var(--space-4)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <h5 style={{ margin: 0 }}>Sebaran</h5>
           <div role="tablist" aria-label="Pilih sebaran" style={{ marginLeft: "auto", display: "flex", gap: 2, padding: 3, borderRadius: 999, background: "var(--color-surface-2)" }}>
@@ -421,7 +421,7 @@ export default function DashboardPage() {
         <div key={tab} role="tabpanel" className="grid gap-x-8 gap-y-3 grid-cols-1 md:grid-cols-2">
           {sebaran.map((b, i) => (
             <div key={b.nama}>
-              <div style={{ display: "flex", gap: 8, fontSize: 13, marginBottom: 5 }}>
+              <div style={{ display: "flex", gap: 8, fontSize: "var(--t-ket)", marginBottom: 5 }}>
                 {tab === "kategori" ? (
                   <span style={{ minWidth: 0, overflow: "hidden", whiteSpace: "nowrap", color: muted(78) }}><LabelKategori nama={b.nama} fontSize={13} /></span>
                 ) : (

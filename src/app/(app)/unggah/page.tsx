@@ -100,8 +100,8 @@ export default function UnggahPage() {
     return (
       <div style={{ maxWidth: 640 }}>
         <KepalaHalaman ikon={UploadSimple} rona={RONA_HALAMAN.unggah} judul="Unggah Dokumen" />
-        <div className="card elev-sm" style={{ padding: "var(--space-6)" }}>
-          <p className="text-muted" style={{ fontSize: 13, margin: 0 }}>
+        <div className="card elev-sm" style={{ padding: "var(--pad-kartu)" }}>
+          <p className="text-muted" style={{ fontSize: "var(--t-ket)", margin: 0 }}>
             Peran Pembaca tidak memiliki wewenang mengunggah dokumen. Hubungi Admin bila Anda
             memerlukan akses ini.
           </p>
@@ -136,7 +136,7 @@ export default function UnggahPage() {
     <div>
       <KepalaHalaman ikon={UploadSimple} rona={RONA_HALAMAN.unggah} judul="Unggah Dokumen" ket="Simpan hasil scan ke arsip dan lengkapi informasi pengelompokannya." />
 
-      <div className="grid gap-4 items-start grid-cols-1 lg:grid-cols-[1fr_1.08fr]">
+      <div className="grid gap-4 items-start grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)]">
         {/* ── KIRI: berkas ── */}
         <div className="lg:sticky" style={{ top: 84 }}>
           <input
@@ -167,7 +167,7 @@ export default function UnggahPage() {
               </div>
               <div>
                 <div style={{ fontSize: 16 }}>{seret ? "Lepaskan untuk mengunggah" : "Tarik berkas scan ke sini"}</div>
-                <div style={{ fontSize: 13, marginTop: 4, color: muted(62) }}>atau klik untuk memilih</div>
+                <div style={{ fontSize: "var(--t-ket)", marginTop: 4, color: muted(62) }}>atau klik untuk memilih</div>
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center" }}>
                 {["PDF", "JPG", "PNG", "WebP", "≤ 20 MB"].map((t) => (
@@ -191,8 +191,8 @@ export default function UnggahPage() {
                   {pdf ? <FilePdf size={19} /> : <FileImage size={19} />}
                 </span>
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 13.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.name}</div>
-                  <div style={{ fontSize: 12, color: muted(62) }}>{ukuran(file.size)} · siap diunggah</div>
+                  <div style={{ fontSize: "var(--t-isi)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.name}</div>
+                  <div style={{ fontSize: "var(--t-ket)", color: muted(62) }}>{ukuran(file.size)} · siap diunggah</div>
                 </div>
                 <label htmlFor="unggah-berkas" className="btn btn-secondary btn-icon" title="Ganti berkas" aria-label="Ganti berkas" style={{ cursor: "pointer" }}>
                   <ArrowsClockwise size={16} />
@@ -207,7 +207,7 @@ export default function UnggahPage() {
 
         {/* ── KANAN: informasi + ringkasan ── */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "80ms", padding: "var(--space-6)", gap: "var(--space-4)" }}>
+          <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "80ms", padding: "var(--pad-kartu)", gap: "var(--space-4)" }}>
             <h5 style={{ margin: 0 }}>Informasi dokumen</h5>
             <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
               <div className="field" style={{ gridColumn: "1 / -1" }}>
@@ -254,7 +254,7 @@ export default function UnggahPage() {
           </div>
 
           {/* Pratinjau bagaimana dokumen akan tampil di arsip — dihitung dari isian, bukan disimpan */}
-          <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "160ms", padding: "var(--space-6)", gap: "var(--space-4)" }}>
+          <div className="card elev-sm dasbor-muncul" style={{ animationDelay: "160ms", padding: "var(--pad-kartu)", gap: "var(--space-4)" }}>
             <h5 style={{ margin: 0 }}>Pratinjau di arsip</h5>
 
             <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
@@ -262,7 +262,7 @@ export default function UnggahPage() {
                 {status?.ikon ?? <CalendarBlank size={18} />}
               </span>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: 14.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: up.nama.trim() ? "var(--color-text)" : muted(55) }}>
+                <div style={{ fontSize: "var(--t-isi)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: up.nama.trim() ? "var(--color-text)" : muted(55) }}>
                   {up.nama.trim() || "Nama dokumen"}
                 </div>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 6 }}>
@@ -275,20 +275,20 @@ export default function UnggahPage() {
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <div style={{ padding: "10px 12px", borderRadius: "var(--radius-md)", background: "var(--color-surface-2)" }}>
-                <div style={{ fontSize: 12, color: muted(62) }}>Masa berlaku</div>
-                <div style={{ fontSize: 14, marginTop: 2, color: status?.teks }}>{status ? status.ket : "—"}</div>
+                <div style={{ fontSize: "var(--t-ket)", color: muted(62) }}>Masa berlaku</div>
+                <div style={{ fontSize: "var(--t-isi)", marginTop: 2, color: status?.teks }}>{status ? status.ket : "—"}</div>
               </div>
               <div style={{ padding: "10px 12px", borderRadius: "var(--radius-md)", background: "var(--color-surface-2)" }} title={`Pengingat dikirim ${threshold} hari sebelum kadaluarsa`}>
-                <div style={{ fontSize: 12, color: muted(62), display: "flex", alignItems: "center", gap: 5 }}><BellRinging size={13} />Pengingat</div>
+                <div style={{ fontSize: "var(--t-ket)", color: muted(62), display: "flex", alignItems: "center", gap: 5 }}><BellRinging size={13} />Pengingat</div>
                 {/* Sudah dalam ambang → cron mengirimnya pada jadwal berikutnya, bukan di tanggal yang telah lewat. */}
-                <div style={{ fontSize: 14, marginTop: 2 }}>
+                <div style={{ fontSize: "var(--t-isi)", marginTop: 2 }}>
                   {!tglPengingat ? "—" : sisa != null && sisa <= threshold ? "Segera dikirim" : fmt(tglPengingat)}
                 </div>
               </div>
             </div>
 
             <div>
-              <div style={{ display: "flex", alignItems: "center", fontSize: 12.5, marginBottom: 6 }}>
+              <div style={{ display: "flex", alignItems: "center", fontSize: "var(--t-ket)", marginBottom: 6 }}>
                 <span style={{ color: muted(70) }}>Kelengkapan</span>
                 <span style={{ marginLeft: "auto", fontFamily: "var(--font-heading)" }}>{lengkap}/{wajib.length}</span>
               </div>
@@ -297,7 +297,7 @@ export default function UnggahPage() {
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 12px", marginTop: 12 }}>
                 {periksa.map((p) => (
-                  <div key={p.label} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12.5, color: p.ok ? "var(--color-text)" : muted(62) }}>
+                  <div key={p.label} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: "var(--t-ket)", color: p.ok ? "var(--color-text)" : muted(62) }}>
                     {p.ok ? <CheckCircle size={16} weight="fill" style={{ color: "var(--color-ok)", flex: "none" }} /> : <Circle size={16} style={{ flex: "none" }} />}
                     <span>
                       {p.label}

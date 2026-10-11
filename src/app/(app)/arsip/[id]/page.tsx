@@ -116,12 +116,12 @@ export default function DetailPage() {
   if (!cur) {
     return (
       <div>
-        <button type="button" className="btn btn-ghost" onClick={() => router.push("/arsip")} style={{ marginBottom: 12, fontSize: 12.5 }}>
+        <button type="button" className="btn btn-ghost" onClick={() => router.push("/arsip")} style={{ marginBottom: 12, fontSize: "var(--t-ket)" }}>
           <ArrowLeft size={14} />
           Kembali ke arsip
         </button>
-        <div className="card elev-sm" style={{ padding: "var(--space-6)", textAlign: "center" }}>
-          <div className="text-muted" style={{ fontSize: 13 }}>
+        <div className="card elev-sm" style={{ padding: "var(--pad-kartu)", textAlign: "center" }}>
+          <div className="text-muted" style={{ fontSize: "var(--t-ket)" }}>
             {state.loading ? "Memuat dokumen…" : "Dokumen tidak ditemukan."}
           </div>
         </div>
@@ -131,7 +131,7 @@ export default function DetailPage() {
 
   return (
     <div>
-      <button type="button" className="btn btn-ghost" onClick={() => router.push("/arsip")} style={{ marginBottom: 12, fontSize: 12.5 }}>
+      <button type="button" className="btn btn-ghost" onClick={() => router.push("/arsip")} style={{ marginBottom: 12, fontSize: "var(--t-ket)" }}>
         <ArrowLeft size={14} />
         Kembali ke arsip
       </button>
@@ -183,12 +183,12 @@ export default function DetailPage() {
         </>}
       />
 
-      <div className="grid gap-4 items-start grid-cols-1 lg:grid-cols-[1fr_1.05fr]">
+      <div className="grid gap-4 items-start grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
         {/* preview */}
-        <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
+        <div className="card elev-sm" style={{ padding: "var(--pad-kartu)", gap: "var(--space-3)" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
             <h5 style={{ margin: 0 }}>Pratinjau hasil scan</h5>
-            <span className="text-muted" style={{ marginLeft: "auto", fontSize: 12 }}>
+            <span className="text-muted" style={{ marginLeft: "auto", fontSize: "var(--t-ket)" }}>
               {cur.hasFile ? `${cur.s}${ext ? ` · ${ext.toUpperCase()}` : ""}` : "Belum ada berkas"}
             </span>
           </div>
@@ -210,8 +210,8 @@ export default function DetailPage() {
             ) : (
               <div style={{ padding: 20 }}>
                 <FileText size={38} style={{ color: "var(--color-neutral-600)", margin: "0 auto" }} />
-                <div style={{ fontSize: 13, marginTop: 10 }}>{cur.hasFile ? cur.fileName : "Belum ada berkas hasil scan"}</div>
-                <div className="text-muted" style={{ fontSize: 12, maxWidth: 300, margin: "4px auto 0" }}>
+                <div style={{ fontSize: "var(--t-ket)", marginTop: 10 }}>{cur.hasFile ? cur.fileName : "Belum ada berkas hasil scan"}</div>
+                <div className="text-muted" style={{ fontSize: "var(--t-ket)", maxWidth: 300, margin: "4px auto 0" }}>
                   {cur.hasFile
                     ? "Pratinjau tidak tersedia untuk jenis berkas ini. Buka di tab baru untuk melihatnya."
                     : "Dokumen ini tercatat tanpa berkas hasil scan."}
@@ -254,9 +254,9 @@ export default function DetailPage() {
 
         {/* info + shares + history */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
+          <div className="card elev-sm" style={{ padding: "var(--pad-kartu)", gap: "var(--space-3)" }}>
             <h5 style={{ margin: 0 }}>Informasi dokumen</h5>
-            <div style={{ display: "grid", gridTemplateColumns: "132px 1fr", rowGap: 11, columnGap: 14, fontSize: 13 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "132px 1fr", rowGap: 11, columnGap: 14, fontSize: "var(--t-ket)" }}>
               <div className="text-muted">Jenis dokumen</div><div>{cur.j}</div>
               <div className="text-muted">Tujuan</div><div>{cur.t}</div>
               <div className="text-muted">Kategori</div><div><LabelKategori nama={cur.k} fontSize={13} /></div>
@@ -276,37 +276,37 @@ export default function DetailPage() {
             </div>
           </div>
 
-          <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
+          <div className="card elev-sm" style={{ padding: "var(--pad-kartu)", gap: "var(--space-3)" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <h5 style={{ margin: 0 }}>Tautan berbagi aktif</h5>
-              <Link className="btn btn-ghost" href={`/bagikan?doc=${cur.id}`} style={{ marginLeft: "auto", fontSize: 12 }}>Buat tautan</Link>
+              <Link className="btn btn-ghost" href={`/bagikan?doc=${cur.id}`} style={{ marginLeft: "auto", fontSize: "var(--t-ket)" }}>Buat tautan</Link>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {curShares.map((s) => (
                 <div key={s.id} style={{ display: "flex", gap: 10, alignItems: "center" }}>
                   <LinkSimple size={16} style={{ color: "var(--color-accent-400)", flex: "none" }} />
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: 12.5 }}>{s.email}</div>
-                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{s.tipe} · berlaku s.d. {s.expText}</div>
+                    <div style={{ fontSize: "var(--t-ket)" }}>{s.email}</div>
+                    <div style={{ fontSize: "var(--t-label)", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{s.tipe} · berlaku s.d. {s.expText}</div>
                   </div>
                   <span className={`tag ${s.tag}`}>{s.status}</span>
                 </div>
               ))}
               {curShares.length === 0 && (
-                <div className="text-muted" style={{ fontSize: 12.5 }}>Belum ada tautan berbagi untuk dokumen ini.</div>
+                <div className="text-muted" style={{ fontSize: "var(--t-ket)" }}>Belum ada tautan berbagi untuk dokumen ini.</div>
               )}
             </div>
           </div>
 
-          <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
+          <div className="card elev-sm" style={{ padding: "var(--pad-kartu)", gap: "var(--space-3)" }}>
             <h5 style={{ margin: 0 }}>Ringkasan status</h5>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {ringkasan.map((h, i) => (
                 <div key={i} style={{ display: "flex", gap: 10 }}>
                   <div style={{ flex: "none", width: 8, height: 8, marginTop: 6, borderRadius: "50%", background: h.dot }} />
                   <div>
-                    <div style={{ fontSize: 12.5 }}>{h.teks}</div>
-                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{h.waktu}</div>
+                    <div style={{ fontSize: "var(--t-ket)" }}>{h.teks}</div>
+                    <div style={{ fontSize: "var(--t-label)", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{h.waktu}</div>
                   </div>
                 </div>
               ))}

@@ -59,12 +59,12 @@ export default function SandiPage() {
     <div style={{ maxWidth: 520 }}>
       <KepalaHalaman ikon={Key} rona={RONA_HALAMAN.dashboard} judul="Ubah Kata Sandi" ket={`Gunakan kombinasi minimal ${MIN} karakter dengan huruf, angka, dan simbol.`} />
 
-      <form onSubmit={simpan} className="card elev-sm" style={{ padding: "var(--space-6)", gap: "var(--space-4)" }}>
+      <form onSubmit={simpan} className="card elev-sm" style={{ padding: "var(--pad-kartu)", gap: "var(--space-4)" }}>
         {error && (
           <div
             role="alert"
             style={{
-              display: "flex", gap: 8, alignItems: "center", fontSize: 12.5,
+              display: "flex", gap: 8, alignItems: "center", fontSize: "var(--t-ket)",
               padding: "10px 12px", borderRadius: "var(--radius-md)",
               background: "var(--color-danger-800)",
               boxShadow: "inset 0 0 0 1px var(--color-danger)",
@@ -77,7 +77,7 @@ export default function SandiPage() {
         )}
 
         {isLoaded && user && !user.passwordEnabled && (
-          <div className="text-muted" style={{ fontSize: 12.5, lineHeight: 1.5 }}>
+          <div className="text-muted" style={{ fontSize: "var(--t-ket)", lineHeight: 1.5 }}>
             Akun Anda masuk lewat Google dan tidak memiliki kata sandi ARSIVA, sehingga tidak ada yang perlu diubah di sini.
           </div>
         )}
@@ -107,15 +107,15 @@ export default function SandiPage() {
         <label className="radio" style={{ alignItems: "flex-start" }}>
           <input type="checkbox" checked={keluarkanLain} onChange={(e) => setKeluarkanLain(e.target.checked)} />
           <span className="dot" style={{ marginTop: 2 }} />
-          <span style={{ fontSize: 12.5, lineHeight: 1.5 }}>
+          <span style={{ fontSize: "var(--t-ket)", lineHeight: 1.5 }}>
             Keluarkan sesi di perangkat lain
-            <span className="text-muted" style={{ display: "block", fontSize: 11.5 }}>
+            <span className="text-muted" style={{ display: "block", fontSize: "var(--t-label)" }}>
               Disarankan bila Anda menduga akun pernah diakses orang lain.
             </span>
           </span>
         </label>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 11.5, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: "var(--t-label)", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
           <ShieldCheck size={15} style={{ flex: "none", marginTop: 1 }} />
           <span>Kata sandi disimpan dalam bentuk terenkripsi dan tidak pernah ditampilkan kembali.</span>
         </div>

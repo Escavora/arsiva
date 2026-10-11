@@ -54,7 +54,7 @@ function UbinTanggal({ iso, status, label }: { iso: string; status: string; labe
       }}
     >
       <div style={{ fontFamily: "var(--font-heading)", fontSize: 20, fontWeight: 600, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{Number(hr)}</div>
-      <div style={{ fontSize: 10.5, marginTop: 3, color: "color-mix(in srgb, var(--color-text) 78%, transparent)" }}>{BULAN[Number(bl) - 1]} {th.slice(2)}</div>
+      <div style={{ fontSize: "var(--t-label)", marginTop: 3, color: "color-mix(in srgb, var(--color-text) 78%, transparent)" }}>{BULAN[Number(bl) - 1]} {th.slice(2)}</div>
     </div>
   );
 }
@@ -109,7 +109,7 @@ export default function NotarisPage() {
       <KepalaHalaman ikon={CalendarDots} rona={RONA_HALAMAN.notaris} judul="Jadwal Notaris" ket="Rekanan mitra notaris dan catatan jadwal kerja samanya." />
 
       {/* notaris cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(232px, 1fr))", gap: 12, marginBottom: 18 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: "var(--jarak-blok)" }}>
         {cards.map((n) => (
           <div
             key={n.id}
@@ -125,18 +125,18 @@ export default function NotarisPage() {
             style={{ gap: 7, cursor: "pointer", boxShadow: n.id === aktif ? "inset 0 0 0 1px var(--color-accent)" : "var(--shadow-sm)" }}
           >
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <div style={{ width: 32, height: 32, flex: "none", borderRadius: "50%", background: "var(--color-accent-900)", color: "var(--color-accent-200)", display: "grid", placeItems: "center", fontSize: 12, fontFamily: "var(--font-heading)" }}>{n.inisial}</div>
+              <div style={{ width: 32, height: 32, flex: "none", borderRadius: "50%", background: "var(--color-accent-900)", color: "var(--color-accent-200)", display: "grid", placeItems: "center", fontSize: "var(--t-ket)", fontFamily: "var(--font-heading)" }}>{n.inisial}</div>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 13.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.nama}</div>
-                <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.kantor}</div>
+                <div title={n.nama} style={{ fontSize: "var(--t-isi)", lineHeight: 1.3, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{n.nama}</div>
+                <div style={{ fontSize: "var(--t-label)", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.kantor}</div>
               </div>
             </div>
             <div className="card-meta" style={{ gap: 10 }}>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><CalendarCheck size={13} />{n.jumlahText}</span>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Phone size={13} />{n.tel}</span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: "var(--space-2)", borderTop: "1px solid var(--color-divider)" }}>
-              <span style={{ fontSize: 11, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{n.email}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: "auto", paddingTop: "var(--space-2)", borderTop: "1px solid var(--color-divider)" }}>
+              <span title={n.email} style={{ fontSize: "var(--t-label)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{n.email}</span>
               {isAdmin && (
                 <button
                   type="button"
@@ -155,7 +155,7 @@ export default function NotarisPage() {
                       aksi: () => removeNotaris(n.id),
                     });
                   }}
-                  style={{ marginLeft: "auto", flex: "none", fontSize: 11.5, color: "var(--color-danger-text)" }}
+                  style={{ marginLeft: "auto", flex: "none", fontSize: "var(--t-label)", color: "var(--color-danger-text)" }}
                   title="Hapus mitra notaris"
                 >
                   <Trash size={13} />
@@ -167,15 +167,15 @@ export default function NotarisPage() {
         ))}
       </div>
 
-      <div className="grid gap-4 items-start grid-cols-1 lg:grid-cols-[1.5fr_1fr]">
+      <div className="grid gap-4 items-start grid-cols-1 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         {/* jadwal table */}
-        <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
+        <div className="card elev-sm" style={{ padding: "var(--pad-kartu)", gap: "var(--space-3)" }}>
           <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
             <h5 style={{ margin: 0 }}>Jadwal kerja sama — {notarisAktif?.nama}</h5>
-            <span className="text-muted" style={{ marginLeft: "auto", fontSize: 12 }}>{notarisAktif?.kantor}</span>
+            <span className="text-muted" style={{ marginLeft: "auto", fontSize: "var(--t-ket)" }}>{notarisAktif?.kantor}</span>
           </div>
           <div style={{ overflowX: "auto" }}>
-            <table className="table">
+            <table className="table table-kartu table-kartu-jadwal">
               <thead>
                 <tr>
                   <th style={{ width: 84 }}>Tanggal</th>
@@ -191,10 +191,10 @@ export default function NotarisPage() {
                       <UbinTanggal iso={s.tgl} status={s.status} label={s.tglText} />
                     </td>
                     <td>
-                      <div style={{ fontSize: 13.5 }}>{s.agenda}</div>
-                      <div style={{ fontSize: 12, marginTop: 2, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{s.tglText} · pukul {s.jam}</div>
+                      <div style={{ fontSize: "var(--t-isi)" }}>{s.agenda}</div>
+                      <div style={{ fontSize: "var(--t-ket)", marginTop: 2, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{s.tglText} · pukul {s.jam}</div>
                     </td>
-                    <td><span className={`tag ${s.tag}`}>{s.status}</span></td>
+                    <td data-label="Status"><span className={`tag ${s.tag}`}>{s.status}</span></td>
                     <td style={{ textAlign: "right" }}>
                       {s.bisaBatal && (
                         <button
@@ -210,7 +210,7 @@ export default function NotarisPage() {
                             tombol: "Batalkan Jadwal",
                             aksi: () => cancelSchedule(s.id),
                           })}
-                          style={{ fontSize: 12, color: "var(--color-danger-text)" }}
+                          style={{ fontSize: "var(--t-ket)", color: "var(--color-danger-text)" }}
                         >
                           Batalkan
                         </button>
@@ -222,12 +222,26 @@ export default function NotarisPage() {
             </table>
           </div>
           {jadwalRows.length === 0 && (
-            <div className="text-muted" style={{ fontSize: 12.5, padding: "16px 0", textAlign: "center" }}>Belum ada jadwal kerja sama dengan mitra ini.</div>
+            <div className="text-muted" style={{ fontSize: "var(--t-ket)", padding: "16px 0", textAlign: "center" }}>Belum ada jadwal kerja sama dengan mitra ini.</div>
+          )}
+          {riwayatJadwal.length > 0 && (
+            <div style={{ paddingTop: "var(--space-4)", borderTop: "1px solid var(--color-divider)" }}>
+              <div style={{ fontSize: "var(--t-label)", letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", marginBottom: 8 }}>Riwayat kerja sama</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {riwayatJadwal.map((h) => (
+                  <div key={h.id} style={{ display: "flex", gap: 8, fontSize: "var(--t-ket)", alignItems: "baseline" }}>
+                    <span style={{ color: "color-mix(in srgb, var(--color-text) 62%, transparent)", flex: "none", width: 74 }}>{h.tglText}</span>
+                    <span style={{ minWidth: 0 }}>{h.agenda}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 
-        {/* add schedule + add notaris + riwayat */}
-        <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-4)" }}>
+        {/* kanan: dua tugas terpisah, tiap tugas satu kartu */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--jarak-blok)" }}>
+        <div className="card elev-sm" style={{ padding: "var(--pad-kartu)", gap: "var(--space-4)" }}>
           <h5 style={{ margin: 0 }}>Tambah jadwal</h5>
           <div className="field">
             <label htmlFor="notaris-mitra-notaris">Mitra notaris</label>
@@ -247,11 +261,12 @@ export default function NotarisPage() {
             <CalendarPlus size={16} />
             Simpan Jadwal
           </button>
+        </div>
 
-          <div style={{ paddingTop: "var(--space-3)", borderTop: "1px solid var(--color-divider)", display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
+        <div className="card elev-sm" style={{ padding: "var(--pad-kartu)", gap: "var(--space-3)" }}>
             <div>
               <h5 style={{ margin: "0 0 2px" }}>Tambah mitra notaris</h5>
-              <div className="text-muted" style={{ fontSize: 12 }}>Daftarkan rekanan baru agar bisa dijadwalkan.</div>
+              <div className="text-muted" style={{ fontSize: "var(--t-ket)" }}>Daftarkan rekanan baru agar bisa dijadwalkan.</div>
             </div>
             <div className="field" style={{ margin: 0 }}><label htmlFor="notaris-nama-notaris">Nama notaris</label><input id="notaris-nama-notaris" className="input" placeholder="mis. Farid Hakim, S.H., M.Kn." value={nn.nama} onChange={(e) => setNn((v) => ({ ...v, nama: e.target.value }))} /></div>
             <div className="field" style={{ margin: 0 }}><label htmlFor="notaris-kantor-wilayah">Kantor / wilayah</label><input id="notaris-kantor-wilayah" className="input" placeholder="mis. Hakim & Rekan · Pekanbaru" value={nn.kantor} onChange={(e) => setNn((v) => ({ ...v, kantor: e.target.value }))} /></div>
@@ -263,18 +278,6 @@ export default function NotarisPage() {
               <UserPlus size={16} />
               Tambah Mitra
             </button>
-          </div>
-
-          <div style={{ paddingTop: "var(--space-3)", borderTop: "1px solid var(--color-divider)" }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", marginBottom: 8 }}>Riwayat kerja sama</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {riwayatJadwal.map((h) => (
-                <div key={h.id} style={{ display: "flex", gap: 8, fontSize: 12, alignItems: "baseline" }}>
-                  <span style={{ color: "color-mix(in srgb, var(--color-text) 62%, transparent)", flex: "none", width: 74 }}>{h.tglText}</span>
-                  <span style={{ minWidth: 0 }}>{h.agenda}</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>

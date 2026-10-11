@@ -161,10 +161,10 @@ function BagikanIsi() {
     <div>
       <KepalaHalaman ikon={ShareNetwork} rona={RONA_HALAMAN.bagikan} judul="Bagikan Dokumen" ket="Buat tautan aman untuk rekanan atau notaris, dan cabut aksesnya kapan pun." />
 
-      <div className="grid gap-4 items-start grid-cols-1 lg:grid-cols-[1fr_1.35fr]">
+      <div className="grid gap-4 items-start grid-cols-1 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)]">
         {/* buat tautan */}
-        <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-4)" }}>
-          <h5 style={{ margin: 0 }}>Buat tautan baru</h5>
+        <div className="card elev-sm" style={{ padding: "var(--pad-kartu)", gap: "var(--space-4)" }}>
+          <h5 style={{ margin: 0, minHeight: 36, display: "flex", alignItems: "center" }}>Buat tautan baru</h5>
 
           <div className="field">
             <label htmlFor="bagikan-dokumen">Dokumen</label>
@@ -210,7 +210,7 @@ function BagikanIsi() {
             </select>
           </div>
 
-          <div style={{ fontSize: 12, color: "color-mix(in srgb, var(--color-text) 62%, transparent)", display: "flex", gap: 7 }}>
+          <div style={{ fontSize: "var(--t-ket)", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", display: "flex", gap: 7 }}>
             <LockKey size={15} style={{ flex: "none", marginTop: 1 }} />
             <span>Tautan memakai token acak yang tidak bisa ditebak dan otomatis mati saat masa berlaku habis. Siapa pun yang memegang tautan dapat membukanya, jadi kirim hanya ke penerima yang dituju.</span>
           </div>
@@ -221,7 +221,7 @@ function BagikanIsi() {
           </button>
 
           {!canWrite && (
-            <div className="text-muted" style={{ fontSize: 11.5 }}>
+            <div className="text-muted" style={{ fontSize: "var(--t-label)" }}>
               Peran Pembaca tidak dapat membuat tautan berbagi.
             </div>
           )}
@@ -236,7 +236,7 @@ function BagikanIsi() {
                 boxShadow: "inset 0 0 0 1px var(--color-accent-700)",
               }}
             >
-              <div style={{ fontSize: 12.5, color: "var(--color-accent-100)" }}>
+              <div style={{ fontSize: "var(--t-ket)", color: "var(--color-accent-100)" }}>
                 {hasil.terkirim ? (
                   <>Tautan sudah <strong>dikirim ke email</strong> {hasil.email}.</>
                 ) : (
@@ -247,7 +247,7 @@ function BagikanIsi() {
                 <input
                   className="input" readOnly value={hasil.url}
                   onFocus={(e) => e.currentTarget.select()}
-                  style={{ fontSize: 12, fontFamily: "ui-monospace, monospace" }}
+                  style={{ fontSize: "var(--t-ket)", fontFamily: "ui-monospace, monospace" }}
                 />
                 <button
                   type="button" className="btn btn-secondary" style={{ flex: "none" }}
@@ -262,7 +262,7 @@ function BagikanIsi() {
                   <ArrowSquareOut size={15} />
                 </a>
               </div>
-              <div style={{ display: "flex", gap: 7, fontSize: 11.5, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
+              <div style={{ display: "flex", gap: 7, fontSize: "var(--t-label)", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
                 <Info size={14} style={{ flex: "none", marginTop: 1 }} />
                 <span>
                   {hasil.terkirim
@@ -280,10 +280,10 @@ function BagikanIsi() {
         </div>
 
         {/* riwayat */}
-        <div className="card elev-sm" style={{ padding: "var(--space-4)", gap: "var(--space-3)" }}>
-          <div style={{ display: "flex", alignItems: "center" }}>
+        <div className="card elev-sm" style={{ padding: "var(--pad-kartu)", gap: "var(--space-3)" }}>
+          <div style={{ display: "flex", alignItems: "center", minHeight: 36 }}>
             <h5 style={{ margin: 0 }}>Riwayat tautan</h5>
-            <span className="text-muted" style={{ marginLeft: "auto", fontSize: 12 }}>{aktifText}</span>
+            <span className="text-muted" style={{ marginLeft: "auto", fontSize: "var(--t-ket)" }}>{aktifText}</span>
             {isAdmin && (
               <button
                 type="button"
@@ -291,7 +291,7 @@ function BagikanIsi() {
                 onClick={() => setBersihOpen(true)}
                 disabled={jumlahTidakAktif === 0}
                 title={jumlahTidakAktif === 0 ? "Tidak ada tautan tidak aktif" : "Hapus tautan dicabut & kadaluarsa"}
-                style={{ marginLeft: 12, fontSize: 12 }}
+                style={{ marginLeft: 12, fontSize: "var(--t-ket)" }}
               >
                 <Broom size={14} />
                 Bersihkan
@@ -299,25 +299,25 @@ function BagikanIsi() {
             )}
           </div>
           <div style={{ overflowX: "auto" }}>
-            <table className="table">
+            <table className="table table-kartu">
               <thead>
                 <tr>
                   <th>Penerima</th>
-                  <th style={{ width: 170 }}>Dokumen</th>
-                  <th style={{ width: 196 }}>Masa berlaku</th>
+                  <th style={{ width: 150 }}>Dokumen</th>
+                  <th style={{ width: 180 }}>Masa berlaku</th>
                   <th style={{ width: 120 }} />
                 </tr>
               </thead>
               <tbody>
                 {shareRows.map((s) => (
                   <tr key={s.id}>
-                    <td>
-                      <div style={{ fontSize: 13 }}>{s.email}</div>
-                      <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
+                    <td className="sel-lentur">
+                      <div title={s.email} style={{ fontSize: "var(--t-ket)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.email}</div>
+                      <div style={{ fontSize: "var(--t-label)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
                         {s.tipe} · dibuat {s.dibuatText}
                       </div>
                     </td>
-                    <td style={{ fontSize: 12 }}>
+                    <td data-label="Dokumen" style={{ fontSize: "var(--t-ket)" }}>
                       <div style={{ maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.doc}</div>
                     </td>
                     <td>
@@ -325,7 +325,7 @@ function BagikanIsi() {
                         <CincinSisa status={s.status} persen={s.persen} />
                         <div style={{ minWidth: 0 }}>
                           <span className={`tag ${s.tag}`}>{s.status}</span>
-                          <div style={{ fontSize: 11.5, marginTop: 3, whiteSpace: "nowrap", color: s.status === "Aktif" ? "var(--color-text)" : "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
+                          <div style={{ fontSize: "var(--t-label)", marginTop: 3, color: s.status === "Aktif" ? "var(--color-text)" : "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
                             {s.sisaText} · s.d. {s.expText}
                           </div>
                         </div>
@@ -335,7 +335,7 @@ function BagikanIsi() {
                       {s.status === "Aktif" && (
                         <div style={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
                           <button
-                            type="button" className="btn btn-ghost" style={{ fontSize: 12 }}
+                            type="button" className="btn btn-ghost" style={{ fontSize: "var(--t-ket)" }}
                             onClick={() => void salin(urlTautan(s.token), `row-${s.id}`)}
                             title="Salin tautan"
                           >
@@ -346,7 +346,7 @@ function BagikanIsi() {
                             <button
                               type="button" className="btn btn-ghost"
                               onClick={() => void revokeShare(s.id)}
-                              style={{ fontSize: 12, color: "var(--color-danger-text)" }}
+                              style={{ fontSize: "var(--t-ket)", color: "var(--color-danger-text)" }}
                             >
                               Cabut
                             </button>
@@ -360,7 +360,7 @@ function BagikanIsi() {
             </table>
           </div>
           {shareRows.length === 0 && (
-            <div className="text-muted" style={{ fontSize: 12.5, padding: "16px 0", textAlign: "center" }}>
+            <div className="text-muted" style={{ fontSize: "var(--t-ket)", padding: "16px 0", textAlign: "center" }}>
               Belum ada tautan berbagi yang dibuat.
             </div>
           )}
@@ -377,7 +377,7 @@ function BagikanIsi() {
               </div>
               <div style={{ minWidth: 0 }}>
                 <h5 style={{ margin: "0 0 4px" }}>Bersihkan riwayat tautan?</h5>
-                <div className="text-muted" style={{ fontSize: 12.5 }}>
+                <div className="text-muted" style={{ fontSize: "var(--t-ket)" }}>
                   <strong style={{ color: "var(--color-text)" }}>{jumlahTidakAktif} tautan</strong> yang sudah dicabut atau kadaluarsa akan dihapus permanen dari riwayat. Tautan yang masih <strong style={{ color: "var(--color-text)" }}>aktif tetap dipertahankan</strong>.
                 </div>
               </div>

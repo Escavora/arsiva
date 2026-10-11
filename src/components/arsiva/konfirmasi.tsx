@@ -66,7 +66,7 @@ export function useKonfirmasi() {
           </div>
           <div style={{ minWidth: 0 }}>
             <h5 id={judulId} style={{ margin: "0 0 4px" }}>{permintaan.judul}</h5>
-            <div className="text-muted" style={{ fontSize: 12.5 }}>{permintaan.isi}</div>
+            <div className="text-muted" style={{ fontSize: "var(--t-ket)" }}>{permintaan.isi}</div>
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 2 }}>

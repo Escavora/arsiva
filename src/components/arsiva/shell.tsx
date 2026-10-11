@@ -87,7 +87,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
           gap: 10,
           padding: "9px 12px",
           borderRadius: "var(--radius-md)",
-          fontSize: 14,
+          fontSize: "var(--t-isi)",
           textDecoration: "none",
           color: on
             ? "var(--color-text)"
@@ -108,7 +108,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
         {item.badge && counts.perluAksi > 0 && (
           <span
             className="tag tag-warn"
-            style={{ marginLeft: "auto", fontSize: 10, padding: "1px 7px" }}
+            style={{ marginLeft: "auto", fontSize: "var(--t-label)", padding: "1px 7px" }}
           >
             {counts.perluAksi}
           </span>
@@ -146,7 +146,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
           <div
             style={{
               fontFamily: "var(--font-heading)",
-              fontSize: 15,
+              fontSize: "var(--t-bacaan)",
               letterSpacing: "-0.01em",
             }}
           >
@@ -154,7 +154,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
           </div>
           <div
             style={{
-              fontSize: 10,
+              fontSize: "var(--t-label)",
               letterSpacing: "0.09em",
               textTransform: "uppercase",
               color: "color-mix(in srgb, var(--color-text) 62%, transparent)",
@@ -176,7 +176,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
       >
         <div
           style={{
-            fontSize: 10,
+            fontSize: "var(--t-label)",
             letterSpacing: "0.1em",
             textTransform: "uppercase",
             color: "color-mix(in srgb, var(--color-text) 62%, transparent)",
@@ -188,7 +188,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
         {OPERASIONAL.map(renderItem)}
         <div
           style={{
-            fontSize: 10,
+            fontSize: "var(--t-label)",
             letterSpacing: "0.1em",
             textTransform: "uppercase",
             color: "color-mix(in srgb, var(--color-text) 62%, transparent)",
@@ -221,7 +221,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
               color: "var(--color-accent-200)",
               display: "grid",
               placeItems: "center",
-              fontSize: 12,
+              fontSize: "var(--t-ket)",
               fontFamily: "var(--font-heading)",
             }}
           >
@@ -230,7 +230,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
           <div style={{ minWidth: 0, lineHeight: 1.25 }}>
             <div
               style={{
-                fontSize: 13,
+                fontSize: "var(--t-ket)",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -240,7 +240,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             </div>
             <div
               style={{
-                fontSize: 11,
+                fontSize: "var(--t-label)",
                 color: "color-mix(in srgb, var(--color-text) 62%, transparent)",
               }}
             >
@@ -256,7 +256,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
               onNavigate?.();
               router.push("/sandi");
             }}
-            style={{ flex: 1, fontSize: 12 }}
+            style={{ flex: 1, fontSize: "var(--t-ket)" }}
           >
             <Key size={15} />
             Kata Sandi
@@ -265,7 +265,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             type="button"
             className="btn btn-secondary"
             onClick={() => void logout()}
-            style={{ flex: "none", fontSize: 12 }}
+            style={{ flex: "none", fontSize: "var(--t-ket)" }}
             title="Keluar akun"
           >
             <SignOut size={15} />
@@ -285,7 +285,7 @@ function RolePill({ peran }: { peran: string }) {
         display: "inline-flex",
         alignItems: "center",
         gap: 6,
-        fontSize: 12,
+        fontSize: "var(--t-ket)",
         padding: "5px 11px",
         borderRadius: 999,
         color: "var(--color-accent-200)",
@@ -365,7 +365,7 @@ function LoncengNotifikasi() {
               position: "absolute", top: -5, right: -5, minWidth: 17, height: 17,
               padding: "0 4px", borderRadius: 999,
               background: "var(--color-accent-2)", color: "#1a1200",
-              fontSize: 10, fontWeight: 700, lineHeight: "17px", textAlign: "center",
+              fontSize: "var(--t-label)", fontWeight: 700, lineHeight: "17px", textAlign: "center",
               boxShadow: "0 0 0 2px var(--color-bg)",
             }}
           >
@@ -383,8 +383,8 @@ function LoncengNotifikasi() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 14px", borderBottom: "1px solid var(--color-divider)" }}>
-            <h5 style={{ margin: 0, fontSize: 14 }}>Notifikasi</h5>
-            <span className="text-muted" style={{ fontSize: 11.5 }}>
+            <h5 style={{ margin: 0, fontSize: "var(--t-isi)" }}>Notifikasi</h5>
+            <span className="text-muted" style={{ fontSize: "var(--t-label)" }}>
               {belumDibaca > 0 ? `${belumDibaca} belum dibaca` : "semua terbaca"}
             </span>
             {belumDibaca > 0 && (
@@ -392,7 +392,7 @@ function LoncengNotifikasi() {
                 type="button"
                 className="btn btn-ghost"
                 onClick={() => void markNotificationsRead()}
-                style={{ marginLeft: "auto", fontSize: 11.5 }}
+                style={{ marginLeft: "auto", fontSize: "var(--t-label)" }}
               >
                 Tandai dibaca
               </button>
@@ -403,7 +403,7 @@ function LoncengNotifikasi() {
             {notif.length === 0 && (
               <div style={{ padding: "28px 14px", textAlign: "center" }}>
                 <CheckCircle size={26} style={{ color: "var(--color-neutral-700)", margin: "0 auto" }} />
-                <div className="text-muted" style={{ fontSize: 12.5, marginTop: 8 }}>Belum ada notifikasi.</div>
+                <div className="text-muted" style={{ fontSize: "var(--t-ket)", marginTop: 8 }}>Belum ada notifikasi.</div>
               </div>
             )}
             {notif.map((n) => (
@@ -427,17 +427,17 @@ function LoncengNotifikasi() {
                   }}
                 />
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 12.5, lineHeight: 1.4, fontWeight: n.dibaca ? 400 : 600 }}>{n.judul}</div>
+                  <div style={{ fontSize: "var(--t-ket)", lineHeight: 1.4, fontWeight: n.dibaca ? 400 : 600 }}>{n.judul}</div>
                   <div
                     className="text-muted"
                     style={{
-                      fontSize: 11.5, lineHeight: 1.45, marginTop: 2,
+                      fontSize: "var(--t-label)", lineHeight: 1.45, marginTop: 2,
                       display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                     }}
                   >
                     {n.pesan}
                   </div>
-                  <div style={{ fontSize: 10.5, marginTop: 4, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
+                  <div style={{ fontSize: "var(--t-label)", marginTop: 4, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>
                     {waktuRelatif(n.createdAt)}
                   </div>
                 </div>
@@ -449,7 +449,7 @@ function LoncengNotifikasi() {
             type="button"
             className="btn btn-ghost"
             onClick={() => { setBuka(false); router.push("/pengingat"); }}
-            style={{ width: "100%", borderRadius: 0, padding: "10px", fontSize: 12, borderTop: "1px solid var(--color-divider)" }}
+            style={{ width: "100%", borderRadius: 0, padding: "10px", fontSize: "var(--t-ket)", borderTop: "1px solid var(--color-divider)" }}
           >
             Lihat pengingat kadaluarsa
           </button>
@@ -496,7 +496,7 @@ function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
       <div
         className="hidden md:block"
         style={{
-          fontSize: 11,
+          fontSize: "var(--t-label)",
           letterSpacing: "0.09em",
           textTransform: "uppercase",
           color: "color-mix(in srgb, var(--color-text) 62%, transparent)",

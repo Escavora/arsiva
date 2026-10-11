@@ -27,7 +27,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             <Vault size={18} />
           </span>
           <span style={{ fontWeight: 600, letterSpacing: "-0.01em" }}>ARSIVA</span>
-          <span style={{ fontSize: 12.5, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>Dokumen dibagikan kepada Anda</span>
+          <span style={{ fontSize: "var(--t-ket)", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>Dokumen dibagikan kepada Anda</span>
         </div>
         <div className="card elev-md" style={{ padding: "var(--space-6)", gap: "var(--space-4)" }}>
           {children}
@@ -45,7 +45,7 @@ function Pesan({ judul, isi, ikon: Ikon, rona }: { judul: string; isi: string; i
         <Ikon size={30} weight="fill" />
       </span>
       <h3 style={{ margin: 0, fontSize: 26, fontWeight: 600, letterSpacing: "-0.025em" }}>{judul}</h3>
-      <p style={{ fontSize: 14.5, lineHeight: 1.6, margin: 0, color: "color-mix(in srgb, var(--color-text) 72%, transparent)" }}>
+      <p style={{ fontSize: "var(--t-isi)", lineHeight: 1.6, margin: 0, color: "color-mix(in srgb, var(--color-text) 72%, transparent)" }}>
         {isi}
       </p>
     </Shell>
@@ -101,7 +101,7 @@ export default async function SharePage({ params }: Props) {
         </div>
         <div style={{ minWidth: 0 }}>
           <span className="tag tag-ok">Tautan aktif</span>
-          <div style={{ fontSize: 14, marginTop: 6 }}>
+          <div style={{ fontSize: "var(--t-isi)", marginTop: 6 }}>
             <strong style={{ fontWeight: 600 }}>{sisaHari <= 1 ? "Berakhir hari ini" : `${sisaHari} hari lagi`}</strong>
             <span style={{ color: "color-mix(in srgb, var(--color-text) 66%, transparent)" }}> · berlaku s.d. {berlakuSampai}</span>
           </div>
@@ -110,12 +110,12 @@ export default async function SharePage({ params }: Props) {
 
       <div>
         <h3 style={{ margin: "0 0 6px", fontSize: "clamp(22px, 4vw, 28px)", fontWeight: 600, letterSpacing: "-0.025em", textWrap: "balance" }}>{doc.namaDokumen}</h3>
-        <div className="text-muted" style={{ fontSize: 13 }}>
+        <div className="text-muted" style={{ fontSize: "var(--t-ket)" }}>
           Dibagikan kepada {share.penerimaEmail} · {share.penerimaTipe}
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "130px 1fr", rowGap: 9, columnGap: 12, fontSize: 13 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "130px 1fr", rowGap: 9, columnGap: 12, fontSize: "var(--t-ket)" }}>
         <div className="text-muted">Kategori</div>
         <div>{doc.kategori?.nama ?? "—"}</div>
         <div className="text-muted">Jenis dokumen</div>
@@ -140,12 +140,12 @@ export default async function SharePage({ params }: Props) {
           </a>
         </div>
       ) : (
-        <div className="text-muted" style={{ fontSize: 12.5 }}>
+        <div className="text-muted" style={{ fontSize: "var(--t-ket)" }}>
           Berkas hasil scan belum tersedia untuk dokumen ini.
         </div>
       )}
 
-      <div className="text-muted" style={{ fontSize: 11, borderTop: "1px solid var(--color-divider)", paddingTop: 12 }}>
+      <div className="text-muted" style={{ fontSize: "var(--t-label)", borderTop: "1px solid var(--color-divider)", paddingTop: 12 }}>
         Tautan ini bersifat rahasia dan hanya untuk penerima yang dituju. Akses berakhir otomatis saat masa berlaku habis atau dicabut.
       </div>
     </Shell>

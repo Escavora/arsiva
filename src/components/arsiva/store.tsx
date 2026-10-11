@@ -509,7 +509,7 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
       <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, color: "var(--color-text)" }}>
         <div className="card elev-sm" style={{ maxWidth: 420, padding: "var(--space-6)", display: "grid", gap: 16 }}>
           <h4 style={{ margin: 0 }}>Akses ditolak</h4>
-          <div className="text-muted" style={{ fontSize: 13.5, lineHeight: 1.6 }}>{akunError}</div>
+          <div className="text-muted" style={{ fontSize: "var(--t-isi)", lineHeight: 1.6 }}>{akunError}</div>
           <button type="button" className="btn btn-secondary" onClick={() => void keluar()}>Keluar</button>
         </div>
       </div>
@@ -520,7 +520,7 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
   if (isPending) {
     return (
       <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--color-text)" }}>
-        <div className="text-muted" style={{ fontSize: 13 }}>Memuat…</div>
+        <div className="text-muted" style={{ fontSize: "var(--t-ket)" }}>Memuat…</div>
       </div>
     );
   }
