@@ -299,7 +299,10 @@ export default function UnggahPage() {
                 {periksa.map((p) => (
                   <div key={p.label} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12.5, color: p.ok ? "var(--color-text)" : muted(62) }}>
                     {p.ok ? <CheckCircle size={16} weight="fill" style={{ color: "var(--color-ok)", flex: "none" }} /> : <Circle size={16} style={{ flex: "none" }} />}
-                    {p.label}{p.opsional ? <span style={{ color: muted(55) }}>(opsional)</span> : null}
+                    <span>
+                      {p.label}
+                      {p.opsional ? <span style={{ color: muted(55) }}> (opsional)</span> : null}
+                    </span>
                   </div>
                 ))}
               </div>
