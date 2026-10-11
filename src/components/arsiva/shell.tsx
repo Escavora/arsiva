@@ -41,7 +41,7 @@ const OPERASIONAL: NavItem[] = [
   { href: "/unggah", label: "Unggah Dokumen", icon: UploadSimple, rona: RONA_HALAMAN.unggah },
   {
     href: "/pengingat",
-    label: "Pengingat Kadaluarsa",
+    label: "Pengingat Kedaluwarsa",
     icon: BellRinging,
     badge: true,
     rona: RONA_HALAMAN.pengingat,
@@ -314,7 +314,7 @@ function waktuRelatif(iso: string): string {
 }
 
 const WARNA_TIPE: Record<string, string> = {
-  kadaluarsa: "var(--color-accent-2)",
+  kedaluwarsa: "var(--color-accent-2)",
   berbagi: "var(--color-accent)",
   sistem: "var(--color-neutral-500)",
 };
@@ -452,7 +452,7 @@ function LoncengNotifikasi() {
             onClick={() => { setBuka(false); router.push("/pengingat"); }}
             style={{ width: "100%", borderRadius: 0, padding: "10px", fontSize: "var(--t-ket)", borderTop: "1px solid var(--color-divider)" }}
           >
-            Lihat pengingat kadaluarsa
+            Lihat pengingat kedaluwarsa
           </button>
         </div>
       )}

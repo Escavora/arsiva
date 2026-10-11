@@ -35,7 +35,7 @@ export type ApiSchedule = {
 export type ApiShare = {
   id: number; documentId: number; doc: string; email: string;
   tipe: "Notaris" | "Rekanan"; token: string; exp: string; dibuat: string;
-  status: "Aktif" | "Dicabut" | "Kadaluarsa"; bisaCabut: boolean;
+  status: "Aktif" | "Dicabut" | "Kedaluwarsa"; bisaCabut: boolean;
 };
 export type ApiUser = {
   id: string; nama: string; email: string; unit: string; peran: Role; aktif: boolean;

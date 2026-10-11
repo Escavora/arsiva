@@ -22,7 +22,7 @@ export default function PengingatPage() {
       <KepalaHalaman
         ikon={BellRinging}
         rona={RONA_HALAMAN.pengingat}
-        judul="Pengingat Kadaluarsa"
+        judul="Pengingat Kedaluwarsa"
         ket={siap ? `${counts.perluAksi} dokumen perlu ditindaklanjuti pada ambang ${th} hari.` : "Memuat dokumen…"}
         aksi={
           <>
@@ -42,7 +42,7 @@ export default function PengingatPage() {
         <div className="papan-pengingat">
           {[
             { n: counts.kadaluarsa, label: "Terlewat", ket: "Masa berlaku habis, belum diperbarui.", warna: "var(--color-danger-text)", besar: true },
-            { n: counts.segera, label: "Dalam ambang", ket: `Kadaluarsa dalam ${th} hari ke depan.`, warna: "var(--color-accent-2-400)", besar: false },
+            { n: counts.segera, label: "Dalam ambang", ket: `Kedaluwarsa dalam ${th} hari ke depan.`, warna: "var(--color-accent-2-400)", besar: false },
             { n: counts.diproses, label: "Sudah diproses", ket: "Ditandai selesai oleh tim legal.", warna: "var(--color-ok)", besar: false },
           ].map((p) => (
             <div key={p.label} className="papan-pengingat-sel">
@@ -63,7 +63,7 @@ export default function PengingatPage() {
               <tr>
                 <th>Dokumen</th>
                 <th className="hidden xl:table-cell" style={{ width: 178 }}>Kategori</th>
-                <th className="hidden md:table-cell" style={{ width: 120 }}>Kadaluarsa</th>
+                <th className="hidden md:table-cell" style={{ width: 120 }}>Kedaluwarsa</th>
                 <th style={{ width: 110 }}>Sisa waktu</th>
                 <th className="hidden md:table-cell" style={{ width: 132 }}>Status</th>
                 <th style={{ width: 150 }}>Tindakan</th>
@@ -79,7 +79,7 @@ export default function PengingatPage() {
                     <div style={{ fontSize: "var(--t-label)", color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{r.j} · {r.o}</div>
                   </td>
                   <td data-label="Kategori" className="hidden xl:table-cell"><LabelKategori nama={r.k} /></td>
-                  <td data-label="Kadaluarsa" className="hidden md:table-cell" style={{ fontSize: "var(--t-ket)" }}>{r.expText}</td>
+                  <td data-label="Kedaluwarsa" className="hidden md:table-cell" style={{ fontSize: "var(--t-ket)" }}>{r.expText}</td>
                   <td data-label="Sisa waktu" style={{ fontSize: "var(--t-ket)", color: r.sisaC }}>{r.sisa}</td>
                   <td data-label="Status" className="hidden md:table-cell"><span className={`tag ${r.tag}`}>{r.status}</span></td>
                   <td>
@@ -96,7 +96,7 @@ export default function PengingatPage() {
         {siap && rows.length === 0 && (
           <div style={{ padding: "30px 0", textAlign: "center" }}>
             <CheckCircle size={28} style={{ color: "var(--color-ok)", margin: "0 auto" }} />
-            <div style={{ fontSize: "var(--t-isi)", marginTop: 8 }}>Tidak ada dokumen yang mendekati kadaluarsa</div>
+            <div style={{ fontSize: "var(--t-isi)", marginTop: 8 }}>Tidak ada dokumen yang mendekati kedaluwarsa</div>
             <div className="text-muted" style={{ fontSize: "var(--t-ket)" }}>Semua dokumen berada di luar ambang {th} hari.</div>
           </div>
         )}

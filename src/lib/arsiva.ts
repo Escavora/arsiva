@@ -32,7 +32,7 @@ export type Doc = {
   k: string; // kategori
   j: string; // jenis
   t: string; // tujuan
-  e: string; // tanggal kadaluarsa (ISO)
+  e: string; // tanggal kedaluwarsa (ISO)
   u: string; // tanggal unggah (ISO)
   o: string; // owner
   s: string; // ukuran file
@@ -166,7 +166,7 @@ export function days(iso: string | undefined): number {
   return Math.round((d.getTime() - today().getTime()) / 86400000);
 }
 
-export type DocStatus = "Aman" | "Segera kadaluarsa" | "Kadaluarsa" | "Diproses";
+export type DocStatus = "Aman" | "Segera kedaluwarsa" | "Kedaluwarsa" | "Diproses";
 
 export type ViewDoc = Doc & {
   id: number;
@@ -193,10 +193,10 @@ export function viewDoc<T extends Doc & { id: number }>(d: T, th: number): T & V
     status = "Diproses";
     tag = "tag-ok";
   } else if (dl < 0) {
-    status = "Kadaluarsa";
+    status = "Kedaluwarsa";
     tag = "tag-danger";
   } else if (dl <= th) {
-    status = "Segera kadaluarsa";
+    status = "Segera kedaluwarsa";
     tag = "tag-warn";
   }
   const sisa = dl < 0 ? `lewat ${Math.abs(dl)} hari` : `${dl} hari lagi`;
@@ -233,8 +233,8 @@ export type Counts = {
 
 export function computeCounts(all: ViewDoc[]): Counts {
   const aktif = all.filter((r) => r.status === "Aman").length;
-  const segera = all.filter((r) => r.status === "Segera kadaluarsa").length;
-  const kadaluarsa = all.filter((r) => r.status === "Kadaluarsa").length;
+  const segera = all.filter((r) => r.status === "Segera kedaluwarsa").length;
+  const kadaluarsa = all.filter((r) => r.status === "Kedaluwarsa").length;
   const diproses = all.filter((r) => r.status === "Diproses").length;
   return {
     total: all.length,
@@ -308,8 +308,8 @@ export function analytics(all: ViewDoc[], th: number, counts: Counts): Analytics
     }
     const key =
       r.status === "Diproses" ? "proses"
-      : r.status === "Kadaluarsa" ? "kadal"
-      : r.status === "Segera kadaluarsa" ? "segera"
+      : r.status === "Kedaluwarsa" ? "kadal"
+      : r.status === "Segera kedaluwarsa" ? "segera"
       : "aman";
     buckets[bi][key]++;
   });
@@ -352,8 +352,8 @@ export function analytics(all: ViewDoc[], th: number, counts: Counts): Analytics
 
   const dcounts = [
     { nama: "Masa berlaku aman", v: counts.aktif, fill: C_AMAN },
-    { nama: "Segera kadaluarsa", v: counts.segera, fill: C_SEGERA },
-    { nama: "Sudah kadaluarsa", v: counts.kadaluarsa, fill: C_KADAL },
+    { nama: "Segera kedaluwarsa", v: counts.segera, fill: C_SEGERA },
+    { nama: "Sudah kedaluwarsa", v: counts.kadaluarsa, fill: C_KADAL },
     { nama: "Sudah diproses", v: counts.diproses, fill: C_PROSES },
   ];
   const legend: LegendItem[] = dcounts.map((d) => ({

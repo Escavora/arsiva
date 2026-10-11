@@ -141,8 +141,8 @@ export default function DetailPage() {
         ikon={FileText}
         rona={
           cur.status === "Diproses" ? "var(--color-ok)"
-          : cur.status === "Kadaluarsa" ? "var(--color-danger)"
-          : cur.status === "Segera kadaluarsa" ? "var(--color-accent-2-500)"
+          : cur.status === "Kedaluwarsa" ? "var(--color-danger)"
+          : cur.status === "Segera kedaluwarsa" ? "var(--color-accent-2-500)"
           : "var(--color-accent-500)"
         }
         atas={<><span className={`tag ${cur.tag}`}>{cur.status}</span><TagKategori nama={cur.k} /></>}
@@ -261,8 +261,8 @@ export default function DetailPage() {
               <div className="text-muted">Tujuan</div><div>{cur.t}</div>
               <div className="text-muted">Kategori</div><div><LabelKategori nama={cur.k} fontSize={13} /></div>
               <div className="text-muted">Tanggal unggah</div><div>{cur.upText}</div>
-              <div className="text-muted">Tanggal kadaluarsa</div><div>{cur.expText} <span className={cur.sisaC === "inherit" ? "text-muted" : undefined} style={cur.sisaC === "inherit" ? undefined : { color: cur.sisaC }}>({cur.sisa})</span></div>
-              <div className="text-muted">Ambang pengingat</div><div>{threshold} hari sebelum kadaluarsa</div>
+              <div className="text-muted">Tanggal kedaluwarsa</div><div>{cur.expText} <span className={cur.sisaC === "inherit" ? "text-muted" : undefined} style={cur.sisaC === "inherit" ? undefined : { color: cur.sisaC }}>({cur.sisa})</span></div>
+              <div className="text-muted">Ambang pengingat</div><div>{threshold} hari sebelum kedaluwarsa</div>
             </div>
             <div style={{ display: "flex", gap: 8, marginTop: 2, flexWrap: "wrap" }}>
               <button type="button" className="btn btn-secondary" onClick={bukaEdit}>
@@ -354,8 +354,8 @@ export default function DetailPage() {
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="id-tanggal-kadaluarsa">Tanggal kadaluarsa</label>
-                <input id="id-tanggal-kadaluarsa" className="input" type="date" value={form.exp} onChange={(e) => setForm((v) => ({ ...v, exp: e.target.value }))} />
+                <label htmlFor="id-tanggal-kedaluwarsa">Tanggal kedaluwarsa</label>
+                <input id="id-tanggal-kedaluwarsa" className="input" type="date" value={form.exp} onChange={(e) => setForm((v) => ({ ...v, exp: e.target.value }))} />
               </div>
             </div>
             <div className="field">

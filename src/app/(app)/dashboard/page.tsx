@@ -166,8 +166,8 @@ function CincinKepatuhan({ segmen, pct }: { segmen: { nama: string; v: number; f
 
 const LABEL_PENDEK: Record<string, string> = {
   "Masa berlaku aman": "Aman",
-  "Segera kadaluarsa": "Segera",
-  "Sudah kadaluarsa": "Lewat",
+  "Segera kedaluwarsa": "Segera",
+  "Sudah kedaluwarsa": "Lewat",
   "Sudah diproses": "Diproses",
 };
 
@@ -198,8 +198,8 @@ export default function DashboardPage() {
 
   const ubin: Ubin[] = [
     { kunci: "Aman", label: "Aman", nilai: counts.aktif, warna: "var(--color-accent-500)", teks: "var(--color-accent-200)", ikon: <ShieldCheck size={18} weight="duotone" /> },
-    { kunci: "Segera", label: "Segera kadaluarsa", nilai: counts.segera, warna: "var(--color-accent-2-500)", teks: "var(--color-accent-2-300)", ikon: <HourglassMedium size={18} weight="duotone" /> },
-    { kunci: "Kadaluarsa", label: "Kadaluarsa", nilai: counts.kadaluarsa, warna: "var(--color-danger)", teks: "var(--color-danger-text)", ikon: <WarningCircle size={18} weight="duotone" /> },
+    { kunci: "Segera", label: "Segera kedaluwarsa", nilai: counts.segera, warna: "var(--color-accent-2-500)", teks: "var(--color-accent-2-300)", ikon: <HourglassMedium size={18} weight="duotone" /> },
+    { kunci: "Kedaluwarsa", label: "Kedaluwarsa", nilai: counts.kadaluarsa, warna: "var(--color-danger)", teks: "var(--color-danger-text)", ikon: <WarningCircle size={18} weight="duotone" /> },
     { kunci: "Diproses", label: "Diproses", nilai: counts.diproses, warna: "var(--color-ok)", teks: "var(--color-ok-100)", ikon: <CheckCircle size={18} weight="duotone" /> },
   ];
 

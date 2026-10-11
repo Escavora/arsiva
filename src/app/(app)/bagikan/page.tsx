@@ -42,7 +42,7 @@ async function salinTeks(teks: string): Promise<boolean> {
 
 /**
  * Cincin sisa masa berlaku: motif yang sama dengan peragaan tautan di landing page.
- * Aktif = sisa waktu nyata (dibuat → kadaluarsa); dicabut = merah kosong; kadaluarsa = kosong.
+ * Aktif = sisa waktu nyata (dibuat → kedaluwarsa); dicabut = merah kosong; kedaluwarsa = kosong.
  */
 function CincinSisa({ status, persen }: { status: string; persen: number }) {
   const mati = status === "Dicabut";
@@ -290,7 +290,7 @@ function BagikanIsi() {
                 className="btn btn-ghost"
                 onClick={() => setBersihOpen(true)}
                 disabled={jumlahTidakAktif === 0}
-                title={jumlahTidakAktif === 0 ? "Tidak ada tautan tidak aktif" : "Hapus tautan dicabut & kadaluarsa"}
+                title={jumlahTidakAktif === 0 ? "Tidak ada tautan tidak aktif" : "Hapus tautan dicabut & kedaluwarsa"}
                 style={{ marginLeft: 12, fontSize: "var(--t-ket)" }}
               >
                 <Broom size={14} />
@@ -379,7 +379,7 @@ function BagikanIsi() {
               <div style={{ minWidth: 0 }}>
                 <h5 style={{ margin: "0 0 4px" }}>Bersihkan riwayat tautan?</h5>
                 <div className="text-muted" style={{ fontSize: "var(--t-ket)" }}>
-                  <strong style={{ color: "var(--color-text)" }}>{jumlahTidakAktif} tautan</strong> yang sudah dicabut atau kadaluarsa akan dihapus permanen dari riwayat. Tautan yang masih <strong style={{ color: "var(--color-text)" }}>aktif tetap dipertahankan</strong>.
+                  <strong style={{ color: "var(--color-text)" }}>{jumlahTidakAktif} tautan</strong> yang sudah dicabut atau kedaluwarsa akan dihapus permanen dari riwayat. Tautan yang masih <strong style={{ color: "var(--color-text)" }}>aktif tetap dipertahankan</strong>.
                 </div>
               </div>
             </div>

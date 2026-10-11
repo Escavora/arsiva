@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     if (!categoryId) throw new HttpError(400, "Kategori wajib dipilih.");
     if (!typeId) throw new HttpError(400, "Jenis dokumen wajib dipilih.");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(tanggalKadaluarsa)) {
-      throw new HttpError(400, "Tanggal kadaluarsa tidak valid.");
+      throw new HttpError(400, "Tanggal kedaluwarsa tidak valid.");
     }
 
     // Berkas opsional — dokumen bisa didaftarkan dulu, scan menyusul.

@@ -77,7 +77,7 @@ export const documents = pgTable(
     mimeType: text("mime_type"),
     // Tipe date; mode "string" menjaga nilainya tetap "YYYY-MM-DD" di kode.
     tanggalKadaluarsa: date("tanggal_kadaluarsa", { mode: "string" }).notNull(),
-    // "aktif" | "diproses" — status kadaluarsa/segera diturunkan dari tanggal
+    // "aktif" | "diproses" — status kedaluwarsa/segera diturunkan dari tanggal
     status: text("status", { enum: ["aktif", "diproses"] }).notNull().default("aktif"),
     createdAt: ts("created_at").notNull().defaultNow(),
     updatedAt: ts("updated_at").notNull().defaultNow(),

@@ -86,7 +86,7 @@
   --color-danger-text: #ec7c72;
 
   /* ── Warna identitas kategori (data, bukan status) ──
-     Rona dipilih di sela rona status (biru Aman, jingga Segera, merah Kadaluarsa, hijau Diproses)
+     Rona dipilih di sela rona status (biru Aman, jingga Segera, merah Kedaluwarsa, hijau Diproses)
      dan selalu tampil sebagai titik + nama, tidak pernah sebagai pil berisi seperti tag status.
      -teks ≥ 7:1 di bg/surface/surface-2. Dipetakan lewat src/components/arsiva/warna.tsx. */
   --kat-ungu: #a07cf0;    --kat-ungu-teks: #c9b6ff;
@@ -332,7 +332,7 @@ select.input { appearance: none; background-image: linear-gradient(transparent, 
   font-size: var(--t-label);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
-  white-space: nowrap; /* status seperti "Segera kadaluarsa" tidak boleh terpotong dua baris */
+  white-space: nowrap; /* status seperti "Segera kedaluwarsa" tidak boleh terpotong dua baris */
   padding: 3px 10px;
   border-radius: calc(var(--radius-md) * 0.75);
 }

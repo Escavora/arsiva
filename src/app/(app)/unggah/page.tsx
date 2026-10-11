@@ -76,7 +76,7 @@ export default function UnggahPage() {
     if (!up.nama.trim()) return say("Isi nama dokumen terlebih dahulu.");
     if (!up.typeId) return say("Pilih jenis dokumen.");
     if (!up.categoryId) return say("Pilih kategori dokumen.");
-    if (!up.exp) return say("Isi tanggal kadaluarsa.");
+    if (!up.exp) return say("Isi tanggal kedaluwarsa.");
 
     const fd = new FormData();
     fd.set("nama", up.nama.trim());
@@ -114,8 +114,8 @@ export default function UnggahPage() {
   const sisa = up.exp ? days(up.exp) : null;
   const status =
     sisa == null ? null
-    : sisa < 0 ? { label: "Kadaluarsa", warna: "var(--color-danger)", teks: "var(--color-danger-text)", ikon: <WarningCircle size={18} weight="duotone" />, ket: `lewat ${Math.abs(sisa)} hari` }
-    : sisa <= threshold ? { label: "Segera kadaluarsa", warna: "var(--color-accent-2-500)", teks: "var(--color-accent-2-300)", ikon: <HourglassMedium size={18} weight="duotone" />, ket: `${sisa} hari lagi` }
+    : sisa < 0 ? { label: "Kedaluwarsa", warna: "var(--color-danger)", teks: "var(--color-danger-text)", ikon: <WarningCircle size={18} weight="duotone" />, ket: `lewat ${Math.abs(sisa)} hari` }
+    : sisa <= threshold ? { label: "Segera kedaluwarsa", warna: "var(--color-accent-2-500)", teks: "var(--color-accent-2-300)", ikon: <HourglassMedium size={18} weight="duotone" />, ket: `${sisa} hari lagi` }
     : { label: "Aman", warna: "var(--color-accent-500)", teks: "var(--color-accent-200)", ikon: <ShieldCheck size={18} weight="duotone" />, ket: `${sisa} hari lagi` };
   const tglPengingat = up.exp ? kurangiHari(up.exp, threshold) : null;
 
@@ -124,7 +124,7 @@ export default function UnggahPage() {
     { label: "Nama dokumen", ok: !!up.nama.trim() },
     { label: "Jenis dokumen", ok: !!up.typeId },
     { label: "Kategori", ok: !!up.categoryId },
-    { label: "Tanggal kadaluarsa", ok: !!up.exp },
+    { label: "Tanggal kedaluwarsa", ok: !!up.exp },
     { label: "Berkas hasil scan", ok: !!file, opsional: true },
   ];
   const wajib = periksa.filter((p) => !p.opsional);
@@ -239,8 +239,8 @@ export default function UnggahPage() {
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="unggah-tanggal-kadaluarsa">Tanggal kadaluarsa</label>
-                <input id="unggah-tanggal-kadaluarsa" className="input" type="date" value={up.exp} onChange={(e) => setUp((v) => ({ ...v, exp: e.target.value }))} />
+                <label htmlFor="unggah-tanggal-kedaluwarsa">Tanggal kedaluwarsa</label>
+                <input id="unggah-tanggal-kedaluwarsa" className="input" type="date" value={up.exp} onChange={(e) => setUp((v) => ({ ...v, exp: e.target.value }))} />
               </div>
               <div className="field" style={{ gridColumn: "1 / -1" }}>
                 <label htmlFor="unggah-keterangan-tambahan-opsional">Keterangan tambahan (opsional)</label>
@@ -278,7 +278,7 @@ export default function UnggahPage() {
                 <div style={{ fontSize: "var(--t-ket)", color: muted(62) }}>Masa berlaku</div>
                 <div style={{ fontSize: "var(--t-isi)", marginTop: 2, color: status?.teks }}>{status ? status.ket : "—"}</div>
               </div>
-              <div style={{ padding: "10px 12px", borderRadius: "var(--radius-md)", background: "var(--color-surface-2)" }} title={`Pengingat dikirim ${threshold} hari sebelum kadaluarsa`}>
+              <div style={{ padding: "10px 12px", borderRadius: "var(--radius-md)", background: "var(--color-surface-2)" }} title={`Pengingat dikirim ${threshold} hari sebelum kedaluwarsa`}>
                 <div style={{ fontSize: "var(--t-ket)", color: muted(62), display: "flex", alignItems: "center", gap: 5 }}><BellRinging size={13} />Pengingat</div>
                 {/* Sudah dalam ambang → cron mengirimnya pada jadwal berikutnya, bukan di tanggal yang telah lewat. */}
                 <div style={{ fontSize: "var(--t-isi)", marginTop: 2 }}>

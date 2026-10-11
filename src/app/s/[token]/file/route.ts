@@ -6,7 +6,7 @@ type Ctx = { params: Promise<{ token: string }> };
 
 /**
  * GET /s/:token/file — berkas untuk penerima tautan (tanpa login).
- * Akses hanya sah bila token cocok, belum dicabut, dan belum kadaluarsa.
+ * Akses hanya sah bila token cocok, belum dicabut, dan belum kedaluwarsa.
  */
 export async function GET(req: Request, { params }: Ctx) {
   const { token } = await params;

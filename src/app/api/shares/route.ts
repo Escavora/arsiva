@@ -19,7 +19,7 @@ function mapShare(s: {
   dokumen?: { namaDokumen: string } | null;
 }) {
   const now = Date.now();
-  const status = s.revokedAt ? "Dicabut" : s.expiresAt.getTime() < now ? "Kadaluarsa" : "Aktif";
+  const status = s.revokedAt ? "Dicabut" : s.expiresAt.getTime() < now ? "Kedaluwarsa" : "Aktif";
   return {
     id: s.id,
     documentId: s.documentId,
@@ -121,7 +121,7 @@ export async function POST(req: Request) {
 
 /**
  * DELETE /api/shares — bersihkan riwayat tautan yang sudah tidak aktif
- * (dicabut ATAU kadaluarsa). Khusus Admin. Tautan yang masih aktif TIDAK
+ * (dicabut ATAU kedaluwarsa). Khusus Admin. Tautan yang masih aktif TIDAK
  * disentuh, supaya penerima yang sedang memakainya tidak kehilangan akses.
  */
 export async function DELETE() {

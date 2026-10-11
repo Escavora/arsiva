@@ -36,7 +36,7 @@ export function kodeClerk(err: unknown): string | undefined {
 const UMUM: Record<string, string> = {
   form_code_incorrect: "Kode verifikasi salah. Periksa kembali.",
   verification_failed: "Kode verifikasi salah. Periksa kembali.",
-  verification_expired: "Kode verifikasi sudah kadaluarsa. Masuk ulang untuk meminta kode baru.",
+  verification_expired: "Kode verifikasi sudah kedaluwarsa. Masuk ulang untuk meminta kode baru.",
   form_param_format_invalid__email_address: "Format email tidak valid.",
   form_param_type_invalid__email_address: "Format email tidak valid.",
   form_email_address_blocked: "Alamat email ini tidak diizinkan.",

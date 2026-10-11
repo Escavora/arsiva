@@ -12,22 +12,22 @@ Staf legal dan operasional di Credit Operations Department, RO BRI Pekanbaru. Me
 
 ## Product Purpose
 
-Satu arsip digital untuk dokumen legal bank (perjanjian kerja sama, akta notaris, sertifikat agunan, surat kuasa) yang selama ini tersebar di banyak tempat sehingga sulit dicari dan masa berlakunya terlewat. Sukses berarti dokumen mudah ditemukan, tidak ada yang kadaluarsa tanpa diketahui, dan dokumen dapat dibagikan ke pihak luar tanpa kehilangan kendali atas aksesnya.
+Satu arsip digital untuk dokumen legal bank (perjanjian kerja sama, akta notaris, sertifikat agunan, surat kuasa) yang selama ini tersebar di banyak tempat sehingga sulit dicari dan masa berlakunya terlewat. Sukses berarti dokumen mudah ditemukan, tidak ada yang kedaluwarsa tanpa diketahui, dan dokumen dapat dibagikan ke pihak luar tanpa kehilangan kendali atas aksesnya.
 
 ## Positioning
 
-Berbagi dokumen ke notaris dan rekanan dengan aman: tautan bertoken acak 256-bit, berbatas waktu (3 sampai 30 hari), dan dapat dicabut kapan saja. Folder bersama biasa tidak memberi kendali akses sehalus itu. (Pengingat kadaluarsa otomatis, jadwal notaris, dan hak akses per peran adalah kemampuan pendukung, tetapi bukan jawaban yang dipilih sebagai pembeda utama.)
+Berbagi dokumen ke notaris dan rekanan dengan aman: tautan bertoken acak 256-bit, berbatas waktu (3 sampai 30 hari), dan dapat dicabut kapan saja. Folder bersama biasa tidak memberi kendali akses sehalus itu. (Pengingat kedaluwarsa otomatis, jadwal notaris, dan hak akses per peran adalah kemampuan pendukung, tetapi bukan jawaban yang dipilih sebagai pembeda utama.)
 
 ## Operating Context
 
-Alur kerja nyata: dokumen dipindai, diunggah dengan jenis, tujuan, kategori, dan tanggal kadaluarsa; sistem menandai status (Aman, Segera kadaluarsa, Kadaluarsa, Diproses) berdasarkan ambang pengingat per pengguna (30, 60, atau 90 hari) dan mengirim pengingat sekali ke pemilik dokumen. Sesi login berakhir otomatis setelah 30 menit tanpa aktivitas. Pengguna dibuat oleh Admin; tidak ada pendaftaran publik. Masuk dengan email dan kata sandi, atau dengan akun Google yang emailnya sudah didaftarkan Admin.
+Alur kerja nyata: dokumen dipindai, diunggah dengan jenis, tujuan, kategori, dan tanggal kedaluwarsa; sistem menandai status (Aman, Segera kedaluwarsa, Kedaluwarsa, Diproses) berdasarkan ambang pengingat per pengguna (30, 60, atau 90 hari) dan mengirim pengingat sekali ke pemilik dokumen. Sesi login berakhir otomatis setelah 30 menit tanpa aktivitas. Pengguna dibuat oleh Admin; tidak ada pendaftaran publik. Masuk dengan email dan kata sandi, atau dengan akun Google yang emailnya sudah didaftarkan Admin.
 
 ## Capabilities and Constraints
 
-- Fitur yang ada: arsip dan pencarian, unggah (PDF, JPG, PNG, WebP, maksimal 20 MB), pratinjau berkas, kategori/jenis/tujuan, jadwal dan mitra notaris, pengingat kadaluarsa (in-app dan email), tautan berbagi, kelola hak akses, laporan unduhan (CSV), dasbor.
+- Fitur yang ada: arsip dan pencarian, unggah (PDF, JPG, PNG, WebP, maksimal 20 MB), pratinjau berkas, kategori/jenis/tujuan, jadwal dan mitra notaris, pengingat kedaluwarsa (in-app dan email), tautan berbagi, kelola hak akses, laporan unduhan (CSV), dasbor.
 - Stack: Next.js (App Router), Postgres (Neon) lewat Drizzle, Clerk untuk autentikasi, Cloudflare R2 untuk berkas, Resend untuk email; target hosting Cloudflare Workers.
 - Klaim keamanan di antarmuka hanya boleh yang benar-benar ada di kode. **Belum ada** audit log dan verifikasi dua langkah; keduanya sengaja dihapus dari teks.
-- Istilah baku di antarmuka: status dokumen "Aman", "Segera kadaluarsa", "Kadaluarsa", "Diproses"; ejaan yang dipakai "kadaluarsa" (bukan "kedaluwarsa").
+- Istilah baku di antarmuka: status dokumen "Aman", "Segera kedaluwarsa", "Kedaluwarsa", "Diproses"; ejaan yang dipakai "kedaluwarsa" (baku menurut KBBI; bukan "kadaluarsa").
 - Belum diputuskan: standar aksesibilitas formal (pekerjaan saat ini memakai WCAG AA sebagai pedoman, tetapi bukan persyaratan yang ditetapkan pemilik produk); apakah aplikasi dipakai nyata atau terutama untuk demo PKL.
 
 ## Brand Commitments

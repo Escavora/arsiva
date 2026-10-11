@@ -10,7 +10,7 @@ export type ApiDoc = {
   k: string; // kategori
   j: string; // jenis
   t: string; // tujuan
-  e: string; // tanggal kadaluarsa (YYYY-MM-DD)
+  e: string; // tanggal kedaluwarsa (YYYY-MM-DD)
   u: string; // tanggal unggah (YYYY-MM-DD)
   o: string; // pemilik/pengunggah
   s: string; // ukuran berkas, mis. "3,2 MB"

@@ -11,7 +11,7 @@ export const RONA_HALAMAN = {
   dashboard: "var(--color-accent-500)",
   arsip: "var(--kat-sian)",
   unggah: "var(--kat-toska)",
-  pengingat: "var(--color-accent-2-500)", // sama dengan rona "Segera kadaluarsa"
+  pengingat: "var(--color-accent-2-500)", // sama dengan rona "Segera kedaluwarsa"
   bagikan: "var(--kat-ungu)",
   notaris: "var(--kat-nila)",
   kategori: "var(--kat-magenta)",

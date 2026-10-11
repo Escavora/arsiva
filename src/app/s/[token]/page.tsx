@@ -78,7 +78,7 @@ export default async function SharePage({ params }: Props) {
   // eslint-disable-next-line react-hooks/purity
   const kini = Date.now();
   if (share.expiresAt.getTime() < kini) {
-    return <Pesan judul="Tautan kadaluarsa" ikon={ClockCountdown} rona="var(--color-neutral-400)" isi="Masa berlaku tautan sudah habis. Silakan minta tautan baru kepada pengirim." />;
+    return <Pesan judul="Tautan kedaluwarsa" ikon={ClockCountdown} rona="var(--color-neutral-400)" isi="Masa berlaku tautan sudah habis. Silakan minta tautan baru kepada pengirim." />;
   }
 
   const doc = share.dokumen!;

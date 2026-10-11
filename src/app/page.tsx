@@ -38,7 +38,7 @@ type Detail = "kategori" | "ambang" | "tautan" | "format" | "peran";
 const FITUR: { icon: typeof Folders; judul: string; desk: string; kelas: string; sorot: boolean; detail?: Detail }[] = [
   { icon: ShareNetwork, judul: "Berbagi berbatas waktu", desk: "Tautan aman untuk notaris atau rekanan, dan aksesnya dapat dicabut kapan pun.", kelas: "md:col-span-7", sorot: true, detail: "tautan" },
   { icon: Folders, judul: "Arsip terpusat", desk: "PKS, akta notaris, dan sertifikat agunan tersimpan di satu tempat dan mudah ditelusuri.", kelas: "md:col-span-5", sorot: false, detail: "kategori" },
-  { icon: BellRinging, judul: "Pengingat kadaluarsa", desk: "Notifikasi otomatis sebelum masa berlaku habis, pada ambang yang dipilih tiap pengguna.", kelas: "md:col-span-5", sorot: false, detail: "ambang" },
+  { icon: BellRinging, judul: "Pengingat kedaluwarsa", desk: "Notifikasi otomatis sebelum masa berlaku habis, pada ambang yang dipilih tiap pengguna.", kelas: "md:col-span-5", sorot: false, detail: "ambang" },
   { icon: UploadSimple, judul: "Unggah dan kategorikan", desk: "Simpan hasil scan lalu lengkapi jenis, tujuan, kategori, dan masa berlaku dalam satu langkah.", kelas: "md:col-span-7", sorot: false, detail: "format" },
   { icon: CalendarDots, judul: "Jadwal notaris", desk: "Mitra notaris beserta agenda kerja samanya tercatat dalam satu tempat.", kelas: "md:col-span-5", sorot: false },
   { icon: ShieldCheck, judul: "Hak akses berperan", desk: "Admin, Team Member, dan Pembaca dengan wewenang berbeda yang ditegakkan di sisi server.", kelas: "md:col-span-7", sorot: false, detail: "peran" },
@@ -50,7 +50,7 @@ const KATEGORI_CONTOH = ["Perjanjian Kerja Sama", "Akta Notaris", "Sertifikat Ag
 
 const LANGKAH = [
   { n: "01", judul: "Unggah", desk: "Pindai dokumen legal dan simpan berkasnya ke arsip." },
-  { n: "02", judul: "Lengkapi", desk: "Pilih kategori, jenis, tujuan, dan tanggal kadaluarsa." },
+  { n: "02", judul: "Lengkapi", desk: "Pilih kategori, jenis, tujuan, dan tanggal kedaluwarsa." },
   { n: "03", judul: "Pantau", desk: "Terima pengingat, tandai selesai, atau bagikan dengan aman." },
 ];
 
@@ -208,7 +208,7 @@ export default function LandingPage() {
                 textWrap: "balance",
               }}
             >
-              Arsip legal yang tidak kadaluarsa{" "}
+              Arsip legal yang tidak kedaluwarsa{" "}
               <span style={{ color: "var(--color-accent-2-400)" }}>diam-diam.</span>
             </h1>
 

@@ -13,7 +13,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "ARSIVA — Arsip Dokumen Legal",
   description:
-    "Satu tempat arsip dokumen legal bank: unggah, kategorikan, pantau kadaluarsa, dan bagikan secara aman.",
+    "Satu tempat arsip dokumen legal bank: unggah, kategorikan, pantau kedaluwarsa, dan bagikan secara aman.",
 };
 
 export default function RootLayout({

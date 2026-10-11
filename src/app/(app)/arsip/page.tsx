@@ -25,8 +25,8 @@ function chipStyle(active: boolean): React.CSSProperties {
 const STATUS_CHIPS: [string, string][] = [
   ["Semua", "Semua"],
   ["Aman", "Aman"],
-  ["Segera", "Segera kadaluarsa"],
-  ["Kadaluarsa", "Kadaluarsa"],
+  ["Segera", "Segera kedaluwarsa"],
+  ["Kedaluwarsa", "Kedaluwarsa"],
   ["Diproses", "Diproses"],
 ];
 
@@ -45,7 +45,7 @@ function ArsipInner() {
 
   const [q, setQ] = React.useState(searchParams.get("q") ?? "");
   const [cat, setCat] = React.useState("Semua");
-  // ?status= dari ubin dashboard (Aman | Segera | Kadaluarsa | Diproses).
+  // ?status= dari ubin dashboard (Aman | Segera | Kedaluwarsa | Diproses).
   const [status, setStatus] = React.useState(() => {
     const s = searchParams.get("status");
     return s && STATUS_CHIPS.some(([v]) => v === s) ? s : "Semua";
@@ -79,8 +79,8 @@ function ArsipInner() {
       if (jenisF !== "Semua jenis" && r.j !== jenisF) return false;
       if (tujuanF !== "Semua tujuan" && r.t !== tujuanF) return false;
       if (status === "Aman" && r.status !== "Aman") return false;
-      if (status === "Segera" && r.status !== "Segera kadaluarsa") return false;
-      if (status === "Kadaluarsa" && r.status !== "Kadaluarsa") return false;
+      if (status === "Segera" && r.status !== "Segera kedaluwarsa") return false;
+      if (status === "Kedaluwarsa" && r.status !== "Kedaluwarsa") return false;
       if (status === "Diproses" && r.status !== "Diproses") return false;
       return true;
     });
@@ -168,7 +168,7 @@ function ArsipInner() {
                 <th className="hidden md:table-cell" style={{ width: 178 }}>Kategori</th>
                 <th className="hidden xl:table-cell" style={{ width: 130 }}>Jenis</th>
                 <th className="hidden xl:table-cell" style={{ width: 112 }}>Tujuan</th>
-                <th className="hidden md:table-cell" style={{ width: 118 }}>Kadaluarsa</th>
+                <th className="hidden md:table-cell" style={{ width: 118 }}>Kedaluwarsa</th>
                 <th style={{ width: 132 }}>Status</th>
                 <th className="hidden md:table-cell" style={{ width: 76 }} />
               </tr>
@@ -193,7 +193,7 @@ function ArsipInner() {
                   <td data-label="Kategori" className="hidden md:table-cell"><LabelKategori nama={r.k} /></td>
                   <td className="hidden xl:table-cell" style={{ fontSize: "var(--t-ket)" }}>{r.j}</td>
                   <td className="hidden xl:table-cell" style={{ fontSize: "var(--t-ket)" }}>{r.t}</td>
-                  <td data-label="Kadaluarsa" className="hidden md:table-cell" style={{ fontSize: "var(--t-ket)" }}>
+                  <td data-label="Kedaluwarsa" className="hidden md:table-cell" style={{ fontSize: "var(--t-ket)" }}>
                     {r.expText}
                     <div style={{ fontSize: "var(--t-label)", color: r.sisaC === "inherit" ? "color-mix(in srgb, var(--color-text) 62%, transparent)" : r.sisaC }}>{r.sisa}</div>
                   </td>

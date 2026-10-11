@@ -37,9 +37,9 @@ export async function GET() {
       const status = d.p
         ? "Diproses"
         : sisa < 0
-          ? "Kadaluarsa"
+          ? "Kedaluwarsa"
           : sisa <= ambang
-            ? "Segera kadaluarsa"
+            ? "Segera kedaluwarsa"
             : "Aman";
       return { ...d, sisa, status };
     });
@@ -59,10 +59,10 @@ export async function GET() {
     L.push(baris("Keterangan", "Jumlah"));
     L.push(baris("Total dokumen", denganStatus.length));
     L.push(baris("Masa berlaku aman", hitung("Aman")));
-    L.push(baris("Segera kadaluarsa", hitung("Segera kadaluarsa")));
-    L.push(baris("Sudah kadaluarsa", hitung("Kadaluarsa")));
+    L.push(baris("Segera kedaluwarsa", hitung("Segera kedaluwarsa")));
+    L.push(baris("Sudah kedaluwarsa", hitung("Kedaluwarsa")));
     L.push(baris("Sudah diproses", hitung("Diproses")));
-    L.push(baris("Perlu tindak lanjut", hitung("Segera kadaluarsa") + hitung("Kadaluarsa")));
+    L.push(baris("Perlu tindak lanjut", hitung("Segera kedaluwarsa") + hitung("Kedaluwarsa")));
     L.push("");
 
     // Sebaran per kategori
@@ -85,7 +85,7 @@ export async function GET() {
         "Tujuan",
         "Pemilik",
         "Tanggal Unggah",
-        "Tanggal Kadaluarsa",
+        "Tanggal Kedaluwarsa",
         "Sisa Hari",
         "Status",
         "Ukuran Berkas",

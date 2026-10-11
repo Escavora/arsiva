@@ -11,7 +11,7 @@ frontend, API, dan logika bisnis dalam satu repo, UI berbahasa Indonesia.
 
 **Fitur:** arsip dokumen (cari, filter, detail), unggah scan (PDF/JPG/PNG/WebP,
 maks 20 MB), kategori/jenis/tujuan, mitra dan jadwal notaris, pengingat
-kadaluarsa (cron + email + notifikasi in-app), berbagi dokumen lewat tautan
+kedaluwarsa (cron + email + notifikasi in-app), berbagi dokumen lewat tautan
 berbatas waktu yang bisa dicabut, manajemen pengguna dan peran
 (Admin / Team Member / Pembaca).
 

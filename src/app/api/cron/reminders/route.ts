@@ -1,4 +1,4 @@
-// Proses terjadwal pengingat kadaluarsa (PRD §7).
+// Proses terjadwal pengingat kedaluwarsa (PRD §7).
 //
 // Memeriksa dokumen yang masuk ambang pengingat masing-masing pemilik, lalu
 // mengirim notifikasi (email lewat adapter + notifikasi in-app) satu kali per
@@ -7,7 +7,7 @@
 //
 // Cara memanggil:
 //   curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/reminders
-// Di Vercel, jadwalkan lewat vercel.json (lihat README).
+// Penjadwalan otomatis di Cloudflare (Cron Triggers) belum dipasang; lihat README.
 
 import { db, schema } from "@/db";
 import { notify, emailHtml, getMailer } from "@/lib/notify";
@@ -50,13 +50,13 @@ async function jalankan() {
 
     const judul =
       sisa < 0
-        ? `Dokumen kadaluarsa: ${d.namaDokumen}`
-        : `Dokumen akan kadaluarsa dalam ${sisa} hari: ${d.namaDokumen}`;
+        ? `Dokumen kedaluwarsa: ${d.namaDokumen}`
+        : `Dokumen akan kedaluwarsa dalam ${sisa} hari: ${d.namaDokumen}`;
     const paragraf = [
       sisa < 0
         ? `Dokumen "${d.namaDokumen}" sudah melewati masa berlaku pada ${fmt(d.tanggalKadaluarsa)} (${Math.abs(sisa)} hari lalu).`
         : `Dokumen "${d.namaDokumen}" akan berakhir masa berlakunya pada ${fmt(d.tanggalKadaluarsa)}.`,
-      "Silakan tindak lanjuti melalui halaman Pengingat Kadaluarsa di ARSIVA.",
+      "Silakan tindak lanjuti melalui halaman Pengingat Kedaluwarsa di ARSIVA.",
     ];
     const base = envUrl(process.env.NEXT_PUBLIC_APP_URL, "http://localhost:3000");
 
