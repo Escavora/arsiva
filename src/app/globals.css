@@ -375,15 +375,6 @@ html:has(.landing) { scroll-padding-top: 82px; }
 .landing { overflow-x: clip; }
 
 @keyframes landing-naik { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-@keyframes landing-sorot {
-  from { background: transparent; box-shadow: none; }
-  to { background: color-mix(in srgb, var(--color-accent-2-500) 12%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent-2-500) 45%, transparent); }
-}
-@keyframes landing-denyut {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent-2-500) 60%, transparent); }
-  70%, 100% { box-shadow: 0 0 0 9px transparent; }
-}
-@keyframes landing-bel { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(14deg); } 40% { transform: rotate(-11deg); } 60% { transform: rotate(7deg); } 80% { transform: rotate(-4deg); } }
 @keyframes landing-napas { from { opacity: 0.7; transform: scale(0.94); } to { opacity: 1; transform: scale(1.04); } }
 
 /* masuk saat halaman dimuat; jeda diatur lewat style={{ animationDelay }} */
@@ -425,14 +416,35 @@ html:has(.landing) { scroll-padding-top: 82px; }
 .landing-baris-ikon { color: var(--color-accent-400); transition: color 0.2s ease, transform 0.2s ease; }
 .landing-baris:hover .landing-baris-ikon { color: var(--color-accent-200); transform: scale(1.1); }
 
-/* kartu dokumen di hero: tahap aktif menyala, titiknya berdenyut, lalu pengingat datang */
-.landing-kini {
-  background: color-mix(in srgb, var(--color-accent-2-500) 12%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent-2-500) 45%, transparent);
-  animation: landing-sorot 0.6s ease 0.9s both;
+/* "Cara kerja" bercerita lewat gulir: section menjadi garis waktu (--alur); rel terisi dari kiri
+   dan tiap simpul + angka menyala tepat saat isian rel mencapainya (--i = urutan langkah).
+   Keadaan dasar = semua menyala, jadi tanpa dukungan atau dengan reduced motion tetap utuh. */
+.alur { view-timeline: --alur block; }
+.alur-rel {
+  position: absolute; top: 5px; left: 6px; right: 0; height: 2px; border-radius: 2px;
+  background: var(--color-divider);
 }
-.landing-kini-titik { animation: landing-denyut 2.4s ease-out 1.4s infinite; }
-.landing-bel { display: inline-flex; transform-origin: 50% 10%; animation: landing-bel 0.9s ease-in-out 2.2s both; }
+.alur-rel::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; transform-origin: left;
+  background: linear-gradient(90deg, var(--color-accent-600), var(--color-accent-400));
+}
+.alur-simpul {
+  display: block; position: relative; width: 12px; height: 12px; margin-bottom: 30px; border-radius: 50%;
+  background: var(--color-accent-400);
+  box-shadow: 0 0 0 4px var(--color-surface), 0 0 0 5px color-mix(in srgb, var(--color-accent-400) 45%, transparent);
+}
+.alur-angka { color: var(--color-accent-500); }
+@supports (animation-timeline: view()) {
+  @keyframes alur-isi { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes alur-simpul-nyala { from { background: var(--color-neutral-800); box-shadow: 0 0 0 4px var(--color-surface), 0 0 0 5px var(--color-divider); } }
+  @keyframes alur-angka-nyala { from { color: var(--color-neutral-800); } }
+  .alur-rel::after { animation: alur-isi linear both; animation-timeline: --alur; animation-range: cover 28% cover 62%; }
+  .alur-simpul, .alur-angka {
+    animation: alur-simpul-nyala linear both; animation-timeline: --alur;
+    animation-range: cover calc(28% + var(--i) * 11%) cover calc(31% + var(--i) * 11%);
+  }
+  .alur-angka { animation-name: alur-angka-nyala; }
+}
 
 /* cahaya di belakang kartu hero bernapas pelan */
 .landing-cahaya { position: relative; isolation: isolate; }
@@ -463,6 +475,30 @@ html:has(.landing) { scroll-padding-top: 82px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .landing *, .landing *::before, .landing *::after { animation: none !important; transition: none !important; }
+}
+
+/* — transisi halaman beranda ↔ login (React <ViewTransition>, lihat ARAH di kedua page.tsx) —
+   Konten lama pergi cepat, yang baru datang sedikit lebih pelan; ikon merek berpindah tempat
+   di atas keduanya sehingga terbaca sebagai satu benda yang sama. */
+::view-transition { pointer-events: none; }
+@keyframes vt-pudar { from { opacity: 0; filter: blur(3px); } to { opacity: 1; filter: blur(0); } }
+@keyframes vt-geser { from { translate: var(--vt-geser); } to { translate: 0; } }
+::view-transition-old(.halaman-maju), ::view-transition-old(.halaman-mundur) {
+  animation: 160ms ease-in both vt-pudar reverse, 380ms cubic-bezier(0.4, 0, 0.2, 1) both vt-geser reverse;
+}
+::view-transition-new(.halaman-maju), ::view-transition-new(.halaman-mundur) {
+  animation: 240ms ease-out 140ms both vt-pudar, 380ms cubic-bezier(0.4, 0, 0.2, 1) both vt-geser;
+}
+::view-transition-old(.halaman-maju) { --vt-geser: -56px; }
+::view-transition-new(.halaman-maju) { --vt-geser: 56px; }
+::view-transition-old(.halaman-mundur) { --vt-geser: 56px; }
+::view-transition-new(.halaman-mundur) { --vt-geser: -56px; }
+::view-transition-group(.merek) { z-index: 10; animation-duration: 420ms; animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1); }
+@media (prefers-reduced-motion: reduce) {
+  /* Tanpa gerak posisi; pergantian halaman cukup memudar. */
+  ::view-transition-old(*), ::view-transition-new(*) { animation: 150ms ease both vt-pudar !important; }
+  ::view-transition-old(*) { animation-direction: reverse !important; }
+  ::view-transition-group(*) { animation-duration: 0s !important; }
 }
 
 /* — baris yang bisa dibuka —

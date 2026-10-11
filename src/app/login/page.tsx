@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Geist } from "next/font/google";
 import {
@@ -41,11 +42,16 @@ const JAMINAN = [
   { icon: FileText, teks: "Berkas hanya terbuka lewat sesi login atau tautan yang sah." },
 ];
 
+// Arah transisi dari/ke beranda; pasangannya ada di src/app/page.tsx.
+const ARAH = { maju: "halaman-maju", mundur: "halaman-mundur", default: "none" };
+
 export default function LoginPage() {
   return (
-    <React.Suspense fallback={null}>
-      <LoginForm />
-    </React.Suspense>
+    <React.ViewTransition enter={ARAH} exit={ARAH} default="none">
+      <React.Suspense fallback={null}>
+        <LoginForm />
+      </React.Suspense>
+    </React.ViewTransition>
   );
 }
 
@@ -149,7 +155,8 @@ function LoginForm() {
           flexDirection: "column",
         }}
       >
-        <a href="/" style={{ display: "flex", gap: 12, alignItems: "center", textDecoration: "none", alignSelf: "flex-start" }}>
+        <Link href="/" transitionTypes={["mundur"]} style={{ display: "flex", gap: 12, alignItems: "center", textDecoration: "none", alignSelf: "flex-start" }}>
+          <React.ViewTransition name="arsiva-merek" share="merek" default="none">
           <div
             style={{
               width: 38, height: 38, borderRadius: "var(--radius-md)",
@@ -160,13 +167,14 @@ function LoginForm() {
           >
             <Vault size={21} />
           </div>
+          </React.ViewTransition>
           <div>
             <div style={{ fontWeight: 600, fontSize: 17, letterSpacing: "-0.01em", color: "var(--color-text)" }}>ARSIVA</div>
             <div style={{ fontSize: 10.5, letterSpacing: "0.09em", textTransform: "uppercase", color: muted(52) }}>
               Arsip Dokumen Legal
             </div>
           </div>
-        </a>
+        </Link>
 
         <div style={{ marginTop: "auto", maxWidth: 460 }}>
           <h2
@@ -189,7 +197,7 @@ function LoginForm() {
           </ul>
         </div>
 
-        <div style={{ marginTop: 32, fontSize: 11.5, color: muted(42) }}>
+        <div style={{ marginTop: 32, fontSize: 11.5, color: muted(58) }}>
           Akses terbatas untuk pegawai terdaftar, Credit Operations Department RO BRI Pekanbaru.
         </div>
       </div>
@@ -197,8 +205,9 @@ function LoginForm() {
       {/* ── Panel form (kanan) ── */}
       <div style={{ position: "relative", display: "grid", placeItems: "center", padding: 40 }}>
         {/* tautan kembali - hanya tampil saat panel brand tersembunyi (mobile) */}
-        <a
+        <Link
           href="/"
+          transitionTypes={["mundur"]}
           className="login-back"
           style={{
             position: "absolute", top: 24, left: 24,
@@ -208,7 +217,7 @@ function LoginForm() {
         >
           <ArrowLeft size={15} />
           Beranda
-        </a>
+        </Link>
 
         <form className="login-form" onSubmit={doLogin} style={{ width: "min(432px, 100%)" }}>
           <h4 style={{ margin: "0 0 7px", fontSize: 26, letterSpacing: "-0.025em" }}>Masuk ke akun pegawai</h4>

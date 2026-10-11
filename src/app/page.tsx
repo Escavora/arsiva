@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { ViewTransition, type ReactNode } from "react";
 import Link from "next/link";
 import { Geist } from "next/font/google";
 import { TautanHidup } from "./tautan-hidup";
@@ -141,8 +141,13 @@ function DetailFitur({ jenis }: { jenis: Detail }) {
 
 /* ───────────────────────── Halaman ───────────────────────── */
 
+// Arah transisi halaman: ke login = maju (geser ke kiri), kembali ke beranda = mundur.
+// Navigasi tanpa tipe (tombol Back peramban, refresh) tidak menggeser apa pun.
+const ARAH = { maju: "halaman-maju", mundur: "halaman-mundur", default: "none" };
+
 export default function LandingPage() {
   return (
+    <ViewTransition enter={ARAH} exit={ARAH} default="none">
     <div
       className={`${geist.className} landing`}
       style={{
@@ -164,7 +169,10 @@ export default function LandingPage() {
       >
         <div style={{ maxWidth: 1240, margin: "0 auto", display: "flex", alignItems: "center", gap: 12, height: 66, padding: "0 24px" }}>
         <div style={{ display: "flex", gap: 11, alignItems: "center" }}>
-          <MerekIkon />
+          {/* Pasangan transisi dengan merek di halaman login: ikon "berpindah", bukan berganti */}
+          <ViewTransition name="arsiva-merek" share="merek" default="none">
+            <MerekIkon />
+          </ViewTransition>
           <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.02em" }}>ARSIVA</span>
         </div>
         <nav className="hidden md:flex landing-nav" style={{ marginLeft: 36, gap: 24, alignItems: "center", fontSize: 14 }}>
@@ -172,7 +180,7 @@ export default function LandingPage() {
           <a href="#alur">Cara kerja</a>
           <a href="#keamanan">Keamanan</a>
         </nav>
-        <Link href="/login" className="btn btn-primary btn-solid" style={{ marginLeft: "auto", textDecoration: "none", whiteSpace: "nowrap", borderRadius: 8 }}>
+        <Link href="/login" transitionTypes={["maju"]} className="btn btn-primary btn-solid" style={{ marginLeft: "auto", textDecoration: "none", whiteSpace: "nowrap", borderRadius: 8 }}>
           <SignIn size={16} />
           Masuk
         </Link>
@@ -209,7 +217,7 @@ export default function LandingPage() {
             </p>
 
             <div className="landing-muncul" style={{ animationDelay: "240ms", display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Link href="/login" className="btn btn-primary btn-solid" style={{ textDecoration: "none", minHeight: 54, paddingInline: 30, fontSize: 16, borderRadius: 10, whiteSpace: "nowrap" }}>
+              <Link href="/login" transitionTypes={["maju"]} className="btn btn-primary btn-solid" style={{ textDecoration: "none", minHeight: 54, paddingInline: 30, fontSize: 16, borderRadius: 10, whiteSpace: "nowrap" }}>
                 <SignIn size={18} />
                 Masuk
               </Link>
@@ -275,21 +283,26 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CARA KERJA - pita bernomor; di HP bertumpuk dengan garis atas, mulai sm berjajar dengan garis kiri */}
-      <section id="alur" style={{ background: "var(--color-surface)", borderBlock: "1px solid var(--color-divider)" }}>
+      {/* CARA KERJA - gulir bercerita: rel terisi mengikuti gulir dan tiap langkah menyala saat
+          rel mencapainya (.alur-*). Di HP bertumpuk dengan garis atas, rel disembunyikan. */}
+      <section id="alur" className="alur" style={{ background: "var(--color-surface)", borderBlock: "1px solid var(--color-divider)" }}>
         <div style={{ maxWidth: 1240, margin: "0 auto", padding: "104px 24px" }}>
+          <div style={{ position: "relative" }}>
+          <div className="alur-rel hidden sm:block" aria-hidden="true" />
           <div className="grid grid-cols-1 sm:grid-cols-3">
-            {LANGKAH.map((s) => (
+            {LANGKAH.map((s, i) => (
               <div
                 key={s.n}
-                className="landing-gulir py-6 border-t first:pt-0 first:border-t-0 sm:py-1 sm:pr-7 sm:pl-7 sm:border-t-0 sm:border-l sm:first:pt-1 sm:first:pl-0 sm:first:border-l-0"
-                style={{ borderColor: "var(--color-divider)" }}
+                className="landing-gulir py-6 border-t first:pt-0 first:border-t-0 sm:py-0 sm:pr-10 sm:border-t-0"
+                style={{ borderColor: "var(--color-divider)", ["--i" as string]: i }}
               >
-                <div aria-hidden="true" style={{ fontSize: "clamp(64px, 8vw, 96px)", fontWeight: 700, letterSpacing: "-0.05em", lineHeight: 0.85, color: "var(--color-accent-600)", marginBottom: 22 }}>{s.n}</div>
+                <span className="alur-simpul" aria-hidden="true" />
+                <div className="alur-angka" aria-hidden="true" style={{ fontSize: "clamp(64px, 8vw, 96px)", fontWeight: 700, letterSpacing: "-0.05em", lineHeight: 0.85, marginBottom: 22 }}>{s.n}</div>
                 <h3 style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-0.03em", margin: "0 0 8px" }}>{s.judul}</h3>
                 <p style={{ fontSize: 15, lineHeight: 1.6, color: muted(68), margin: 0, maxWidth: "30ch" }}>{s.desk}</p>
               </div>
             ))}
+          </div>
           </div>
         </div>
       </section>
@@ -377,7 +390,7 @@ export default function LandingPage() {
           </div>
 
           <Link
-            href="/login"
+            href="/login" transitionTypes={["maju"]}
             className="btn btn-primary btn-solid"
             style={{
               textDecoration: "none", flex: "none",
@@ -404,5 +417,6 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
+    </ViewTransition>
   );
 }
