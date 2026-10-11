@@ -1,6 +1,7 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"main": ".open-next/worker.js",
+	// worker.mjs membungkus .open-next/worker.js dan menambah handler `scheduled`.
+	"main": "worker.mjs",
 	"name": "arsiva",
 	"compatibility_date": "2026-10-01",
 	// nodejs_compat wajib: kode memakai node:crypto (randomBytes, randomUUID).
@@ -16,6 +17,12 @@
 			"service": "arsiva"
 		}
 	],
+	"triggers": {
+		// Pengingat kedaluwarsa: 01:00–04:00 UTC (08.00–11.00 WIB), tiap jam. Satu putaran
+		// memproses paling banyak 20 dokumen (batas subrequest paket gratis); putaran
+		// berikutnya melanjutkan sisanya. Putaran tanpa dokumen baru hanya 1 query.
+		"crons": ["0 1-4 * * *"]
+	},
 	"r2_buckets": [
 		{
 			// Berkas hasil scan dokumen. Bucket PRIVATE: berkas hanya disalurkan

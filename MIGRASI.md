@@ -373,6 +373,20 @@ perangkat baru), dan form login sudah menyediakan langkah input kodenya.
 - `README.md` dan `.env.example` sudah disesuaikan. Penjadwalan pengingat lewat Cron
   Triggers masih menjadi pekerjaan Langkah 4.
 
+### Hasil Langkah 4a (Cron Triggers, 2026-10-11)
+
+- `worker.mjs` menjadi `main` di `wrangler.jsonc`: meneruskan `fetch` OpenNext dan
+  menambah `scheduled`. Jadwal `0 1-4 * * *` UTC (08.00–11.00 WIB).
+- **Jebakan:** permintaan buatan `scheduled` wajib membawa header `Host` yang sama
+  dengan host URL-nya. Tanpa itu, routing OpenNext (`isExternal` di
+  `@opennextjs/aws`) menganggapnya rewrite eksternal dan meneruskannya lewat jaringan
+  ke `NEXT_PUBLIC_APP_URL` (di lokal: server dev yang mati → "Network connection lost").
+- Route cron: maksimal 20 dokumen per putaran, tulis dalam satu `db.batch` sebelum
+  kirim email, jeda 550 ms antar-email, mode `?kering=1` / `CRON_KERING=1` untuk uji.
+- **Terverifikasi** di `wrangler dev --test-scheduled`: putaran kering hanya 1
+  subrequest (Neon), hasil tercatat di log; tidak ada permintaan keluar selain Neon.
+  Putaran sungguhan tidak dijalankan agar data demo tidak berubah.
+
 ## 6. Bagian yang tidak perlu diubah
 
 - **Logika domain:** `src/lib/arsiva.ts`, `dto.ts`, `master-crud.ts`.

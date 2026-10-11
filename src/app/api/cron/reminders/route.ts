@@ -5,16 +5,28 @@
 // dokumen. Jejaknya dicatat di `document_reminders.notified_at` agar tidak
 // mengirim berulang.
 //
-// Cara memanggil:
+// Dijadwalkan lewat Cron Triggers Cloudflare (lihat `triggers` di wrangler.jsonc
+// dan handler `scheduled` di worker.mjs). Manual:
 //   curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/reminders
-// Penjadwalan otomatis di Cloudflare (Cron Triggers) belum dipasang; lihat README.
+//   …/api/cron/reminders?kering=1  → hanya menampilkan rencana, tanpa kirim/simpan
+//
+// Hemat subrequest: di Workers, tiap query (neon-http) dan tiap email adalah satu
+// `fetch`, dan paket gratis membatasi 50 per eksekusi. Karena itu satu putaran
+// memproses paling banyak BATAS_PER_PUTARAN dokumen (yang paling mendesak dulu),
+// dan semua penulisan digabung dalam satu `db.batch`. Sisanya ditangani putaran
+// berikutnya (cron berjalan beberapa kali per pagi).
 
 import { db, schema } from "@/db";
-import { notify, emailHtml, getMailer } from "@/lib/notify";
+import { emailHtml, getMailer } from "@/lib/notify";
 import { fmt } from "@/lib/arsiva";
 import { envUrl } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
+
+/** 1 query baca + 1 batch tulis + 20 email = 22 subrequest, jauh di bawah 50. */
+const BATAS_PER_PUTARAN = 20;
+/** Resend paket gratis: 2 permintaan per detik. */
+const JEDA_EMAIL_MS = 550;
 
 function hariMenuju(iso: string): number {
   const target = new Date(iso + "T00:00:00");
@@ -23,7 +35,9 @@ function hariMenuju(iso: string): number {
   return Math.round((target.getTime() - now.getTime()) / 86400000);
 }
 
-async function jalankan() {
+const tunggu = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function jalankan(kering: boolean) {
   const docs = await db.query.documents.findMany({
     with: {
       pengunggah: { columns: { id: true, name: true, email: true, reminderThresholdDays: true, aktif: true } },
@@ -31,23 +45,21 @@ async function jalankan() {
     },
   });
 
-  let dikirim = 0;
-  let gagalEmail = 0;
-  const rincian: { dokumen: string; kepada: string; sisaHari: number }[] = [];
+  const calon = docs
+    .flatMap((d) => {
+      if (d.status === "diproses") return [];
+      const owner = d.pengunggah;
+      if (!owner || owner.aktif === false) return [];
+      const sisa = hariMenuju(d.tanggalKadaluarsa);
+      if (sisa > (owner.reminderThresholdDays ?? 60)) return []; // belum masuk ambang
+      if (d.reminders.some((r) => r.notifiedAt !== null)) return []; // sudah pernah diberi tahu
+      return [{ d, owner, sisa }];
+    })
+    .sort((a, b) => a.sisa - b.sisa);
 
-  for (const d of docs) {
-    if (d.status === "diproses") continue;
-    const owner = d.pengunggah;
-    if (!owner || owner.aktif === false) continue;
-
-    const sisa = hariMenuju(d.tanggalKadaluarsa);
-    const ambang = owner.reminderThresholdDays ?? 60;
-    if (sisa > ambang) continue; // belum masuk ambang
-
-    // Sudah pernah diberi tahu? (baris reminder dengan notified_at terisi)
-    const sudah = d.reminders.some((r) => r.notifiedAt !== null);
-    if (sudah) continue;
-
+  const putaranIni = calon.slice(0, BATAS_PER_PUTARAN);
+  const base = envUrl(process.env.NEXT_PUBLIC_APP_URL, "http://localhost:3000");
+  const pesan = putaranIni.map(({ d, owner, sisa }) => {
     const judul =
       sisa < 0
         ? `Dokumen kedaluwarsa: ${d.namaDokumen}`
@@ -58,37 +70,53 @@ async function jalankan() {
         : `Dokumen "${d.namaDokumen}" akan berakhir masa berlakunya pada ${fmt(d.tanggalKadaluarsa)}.`,
       "Silakan tindak lanjuti melalui halaman Pengingat Kedaluwarsa di ARSIVA.",
     ];
-    const base = envUrl(process.env.NEXT_PUBLIC_APP_URL, "http://localhost:3000");
+    return { d, owner, sisa, judul, paragraf };
+  });
 
-    const kirim = await notify({
-      userId: owner.id,
-      email: owner.email,
-      judul,
-      pesan: paragraf.join("\n\n"),
-      html: emailHtml(judul, paragraf, { teks: "Buka Pengingat", url: `${base}/pengingat` }),
-      tipe: "kadaluarsa",
-      documentId: d.id,
-    });
-
-    // Jejak dicatat walau email gagal, supaya tidak dikirim berulang tiap jam.
-    await db.insert(schema.documentReminders).values({
-      documentId: d.id,
-      notifiedAt: new Date(),
-    });
-
-    dikirim++;
-    if (!kirim.terkirim) gagalEmail++;
-    rincian.push({ dokumen: d.namaDokumen, kepada: owner.email, sisaHari: sisa });
+  const rincian = pesan.map(({ d, owner, sisa }) => ({ dokumen: d.namaDokumen, kepada: owner.email, sisaHari: sisa }));
+  const ringkas = { diperiksa: docs.length, perluDiberiTahu: calon.length, ditunda: calon.length - putaranIni.length };
+  if (kering || pesan.length === 0) {
+    return { ...ringkas, kering, dikirim: 0, gagalEmail: 0, driver: getMailer().nama, rincian };
   }
 
-  return { diperiksa: docs.length, dikirim, gagalEmail, driver: getMailer().nama, rincian };
+  // Jejak dan notifikasi in-app disimpan LEBIH DULU, dalam satu batch: bila putaran
+  // terputus di tengah pengiriman email, dokumen yang sama tidak dikirimi ulang.
+  // (Kebijakan lama tetap: jejak dicatat walau email gagal.)
+  const sekarang = new Date();
+  await db.batch([
+    db.insert(schema.documentReminders).values(pesan.map(({ d }) => ({ documentId: d.id, notifiedAt: sekarang }))),
+    db.insert(schema.notifications).values(
+      pesan.map(({ d, owner, judul, paragraf }) => ({
+        userId: owner.id, documentId: d.id, judul, pesan: paragraf.join("\n\n"), tipe: "kadaluarsa" as const,
+      })),
+    ),
+  ]);
+
+  const driver = getMailer();
+  let gagalEmail = 0;
+  for (const [i, { owner, judul, paragraf }] of pesan.entries()) {
+    if (i > 0 && driver.nama !== "log") await tunggu(JEDA_EMAIL_MS);
+    try {
+      await driver.send({
+        to: owner.email,
+        subject: judul,
+        text: paragraf.join("\n\n"),
+        html: emailHtml(judul, paragraf, { teks: "Buka Pengingat", url: `${base}/pengingat` }),
+      });
+    } catch (err) {
+      gagalEmail++;
+      console.error(`[arsiva:cron] gagal kirim ke ${owner.email}:`, err instanceof Error ? err.message : err);
+    }
+  }
+
+  return { ...ringkas, kering, dikirim: pesan.length, gagalEmail, driver: driver.nama, rincian };
 }
 
 function sahkan(req: Request): boolean {
   const secret = process.env.CRON_SECRET;
   if (!secret) return false;
   const header = req.headers.get("authorization") ?? "";
-  // Pemanggil (curl, atau Cron Trigger kelak) wajib mengirim Bearer <CRON_SECRET>.
+  // Pemanggil (curl, atau handler `scheduled` di worker.mjs) wajib mengirim Bearer <CRON_SECRET>.
   return header === `Bearer ${secret}`;
 }
 
@@ -97,7 +125,8 @@ export async function GET(req: Request) {
     return Response.json({ error: "Tidak diizinkan." }, { status: 401 });
   }
   try {
-    return Response.json(await jalankan());
+    const kering = new URL(req.url).searchParams.get("kering") === "1";
+    return Response.json(await jalankan(kering));
   } catch (err) {
     console.error("[arsiva:cron]", err);
     return Response.json({ error: "Gagal menjalankan pengingat." }, { status: 500 });

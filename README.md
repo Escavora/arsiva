@@ -18,7 +18,8 @@ yang berbatas waktu dan bisa dicabut.
 | 2.5 | Email sungguhan (Resend) | ✅ Selesai |
 | 3 | Pindah stack: Neon, Clerk, Cloudflare R2, build untuk Cloudflare Workers | ✅ Selesai (lihat [`MIGRASI.md`](MIGRASI.md)) |
 | 3.5 | Penyempurnaan antarmuka: warna, tipografi, tata letak, gerak, adaptasi HP/tablet, performa, polish | ✅ Selesai |
-| 4 | Deploy ke Cloudflare Workers dan penjadwalan pengingat | ⏳ Belum |
+| 4 | Penjadwalan pengingat (Cron Triggers) | ✅ Selesai, teruji di runtime Workers lokal |
+| 5 | Deploy ke Cloudflare Workers | ⏳ Belum |
 
 ## Fitur
 
@@ -163,7 +164,8 @@ src/
 drizzle/              # migrasi SQL (Postgres)
 scripts/              # reset-db, sandi demo, uji email
 reference/            # PRD dan rancangan visual awal
-wrangler.jsonc        # konfigurasi Worker + binding R2 "FILES"
+wrangler.jsonc        # konfigurasi Worker, binding R2 "FILES", jadwal cron
+worker.mjs            # worker entry: fetch dari OpenNext + handler scheduled
 open-next.config.ts   # konfigurasi adapter OpenNext
 ```
 
@@ -194,14 +196,39 @@ dan pengingat tetap tersimpan, dan antarmuka meminta tautannya disalin manual.
 lalu mencatat `document_reminders.notified_at` agar **tidak mengirim ganda**.
 Endpoint ini mewajibkan header `Authorization: Bearer <CRON_SECRET>`.
 
+**Jadwal otomatis:** Cron Trigger `0 1-4 * * *` (UTC), yaitu tiap jam pukul
+08.00–11.00 WIB (`triggers.crons` di [`wrangler.jsonc`](wrangler.jsonc)). Worker entry
+[`worker.mjs`](worker.mjs) membungkus `.open-next/worker.js` dan menambah handler
+`scheduled`, yang memanggil route di atas di dalam worker yang sama (tanpa lewat
+jaringan publik).
+
+**Hemat subrequest** (paket gratis Workers: 50 per eksekusi): satu putaran memproses
+paling banyak 20 dokumen, yang paling mendesak lebih dulu. Notifikasi in-app dan
+jejak pengingat disimpan dalam satu `db.batch` sebelum email dikirim, supaya putaran
+yang terputus tidak mengirim ganda. Email diberi jeda ±0,55 detik (batas Resend
+gratis 2 permintaan/detik). Sisa dokumen dilanjutkan putaran berikutnya; putaran
+tanpa dokumen baru hanya memakai satu query.
+
+Menjalankan manual:
+
 ```bash
+# rencana saja: dokumen mana yang akan diberi tahu, tanpa kirim/simpan
+curl -H "Authorization: Bearer $CRON_SECRET" "http://localhost:3000/api/cron/reminders?kering=1"
+# sungguhan
 curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/reminders
 ```
 
-> **Belum terjadwal otomatis.** Rencananya: Cron Triggers lewat worker entry yang
-> membungkus `.open-next/worker.js`, dengan handler `scheduled` memanggil route ini
-> (keputusan dan batasan subrequest ada di [`MIGRASI.md`](MIGRASI.md)). Sampai
-> itu dipasang, jalankan pengingat dengan perintah di atas.
+Menguji handler `scheduled` di runtime Workers lokal (tanpa efek: `CRON_KERING=1`
+membuat putaran hanya menghitung rencana):
+
+```bash
+npx opennextjs-cloudflare build
+npx wrangler dev --test-scheduled --var CRON_KERING:1
+curl "http://localhost:8787/__scheduled?cron=0+1-4+*+*+*"
+```
+
+`next dev` mengunci folder `.open-next/assets` (simulasi Cloudflare membacanya),
+jadi hentikan server dev sebelum menjalankan `opennextjs-cloudflare build`.
 
 ## Deploy ke Cloudflare Workers
 
@@ -213,7 +240,8 @@ Belum dikerjakan; langkah yang diperlukan:
    secret/variabel Worker. `NEXT_PUBLIC_*` harus tersedia **saat build**.
 3. `npm run deploy`. OpenNext belum sepenuhnya mendukung Windows; build di WSL atau
    di Cloudflare (terhubung ke GitHub) lebih aman.
-4. Pasang penjadwalan pengingat (lihat bagian di atas).
+4. Pastikan `CRON_SECRET` terisi sebagai secret Worker; tanpa itu putaran terjadwal
+   gagal dengan pesan jelas di log. Jadwal ikut terpasang otomatis dari `wrangler.jsonc`.
 5. Di Clerk, ganti ke instance produksi dan pasang OAuth client Google sendiri
    (di development Clerk memakai kredensial Google bersama).
 
@@ -238,7 +266,7 @@ Ukuran bundle Worker terakhir terukur sekitar 2,3 MB gzip (batas paket gratis 3 
 
 ## Yang belum dikerjakan
 
-- Deploy ke Cloudflare Workers dan penjadwalan pengingat.
+- Deploy ke Cloudflare Workers.
 - Verifikasi domain di Resend agar bisa mengirim ke penerima mana pun.
 - Kata sandi awal pengguna baru masih `arsiva123` bila Admin tidak mengisinya;
   sebaiknya diganti acak per pengguna.
