@@ -37,16 +37,28 @@ export function galatClerk(err: unknown, fallback = "Gagal memproses akun di Cle
  * Satu panggilan untuk semua id. Bila Clerk tidak terjangkau, kembalikan null agar
  * daftar pengguna tetap bisa tampil tanpa penanda ini.
  */
+// Status tautan Google hanya label informatif di halaman Akses, tetapi membacanya butuh
+// panggilan ke Clerk (~0,5 dtk) di setiap GET /api/users. Hasilnya disimpan sebentar di memori
+// instance server; daftar ID yang berubah (pengguna ditambah/dihapus) otomatis membaca ulang.
+const CACHE_GOOGLE_MS = 5 * 60 * 1000;
+let cacheGoogle: { kunci: string; hasil: Set<string>; kedaluwarsa: number } | null = null;
+
 export async function idTertautGoogle(clerkIds: string[]): Promise<Set<string> | null> {
   if (clerkIds.length === 0) return new Set();
+  const kunci = [...clerkIds].sort().join(",");
+  if (cacheGoogle && cacheGoogle.kunci === kunci && cacheGoogle.kedaluwarsa > Date.now()) {
+    return cacheGoogle.hasil;
+  }
   try {
     const clerk = await clerkClient();
     const { data } = await clerk.users.getUserList({ userId: clerkIds, limit: Math.min(clerkIds.length, 500) });
-    return new Set(
+    const hasil = new Set(
       data
         .filter((u) => u.externalAccounts.some((a) => a.provider.includes("google")))
         .map((u) => u.id),
     );
+    cacheGoogle = { kunci, hasil, kedaluwarsa: Date.now() + CACHE_GOOGLE_MS };
+    return hasil;
   } catch (err) {
     console.error("[arsiva:clerk] gagal membaca tautan Google:", err);
     return null;

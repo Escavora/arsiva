@@ -53,10 +53,14 @@ function ArsipInner() {
   const [jenisF, setJenisF] = React.useState("Semua jenis");
   const [tujuanF, setTujuanF] = React.useState("Semua tujuan");
 
-  React.useEffect(() => {
-    const urlQ = searchParams.get("q") ?? "";
+  // Pencarian dari topbar mengubah ?q=; ikuti nilainya saat render (bukan lewat effect),
+  // supaya tidak ada satu frame yang masih memakai kata kunci lama.
+  const urlQ = searchParams.get("q") ?? "";
+  const [urlQSebelum, setUrlQSebelum] = React.useState(urlQ);
+  if (urlQ !== urlQSebelum) {
+    setUrlQSebelum(urlQ);
     setQ(urlQ);
-  }, [searchParams]);
+  }
 
   const resetFilter = () => {
     setQ("");

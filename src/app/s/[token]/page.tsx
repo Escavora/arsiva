@@ -73,6 +73,9 @@ export default async function SharePage({ params }: Props) {
   if (share.revokedAt) {
     return <Pesan judul="Akses dicabut" ikon={LockKey} rona="var(--color-danger-text)" isi="Pemilik dokumen telah mencabut akses tautan ini." />;
   }
+  // Server Component: dirender sekali per request, jadi "sekarang" memang harus dibaca di sini
+  // (aturan kemurnian render ditujukan untuk komponen klien yang dirender ulang).
+  // eslint-disable-next-line react-hooks/purity
   const kini = Date.now();
   if (share.expiresAt.getTime() < kini) {
     return <Pesan judul="Tautan kadaluarsa" ikon={ClockCountdown} rona="var(--color-neutral-400)" isi="Masa berlaku tautan sudah habis. Silakan minta tautan baru kepada pengirim." />;

@@ -64,13 +64,15 @@ export default function NotarisPage() {
   const { minta, dialog: dialogKonfirmasi } = useKonfirmasi();
   const aktif = state.notarisAktif;
 
-  const [sc, setSc] = React.useState({ notarisId: "", agenda: "", tanggal: "", jam: "10:00" });
+  const [sc, setSc] = React.useState(() => ({ notarisId: aktif != null ? String(aktif) : "", agenda: "", tanggal: "", jam: "10:00" }));
   const [nn, setNn] = React.useState({ nama: "", kantor: "", email: "", tel: "" });
 
-  // Selaraskan pilihan mitra pada form dengan kartu yang sedang aktif.
-  React.useEffect(() => {
+  // Selaraskan pilihan mitra pada form dengan kartu yang sedang aktif (saat render, bukan effect).
+  const [aktifSebelum, setAktifSebelum] = React.useState(aktif);
+  if (aktif !== aktifSebelum) {
+    setAktifSebelum(aktif);
     if (aktif != null) setSc((v) => ({ ...v, notarisId: String(aktif) }));
-  }, [aktif]);
+  }
 
   const cards = state.notaris.map((n) => ({
     ...n,

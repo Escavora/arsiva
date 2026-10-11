@@ -74,6 +74,14 @@ type Me = { nama: string; panggilan: string; peran: Role; peranText: string; ini
 /** Batas tunggu satu permintaan; tanpa ini koneksi database yang tersendat bisa menggantung selamanya. */
 const BATAS_TUNGGU_MS = 20_000;
 
+/** Bagian data = nama endpoint /api/<bagian>, dipetakan ke kunci di State. */
+type Bagian = "documents" | "categories" | "types" | "purposes" | "notaris" | "schedules" | "shares" | "users" | "notifications";
+const KUNCI_STATE = {
+  documents: "docs", categories: "cats", types: "types", purposes: "purposes", notaris: "notaris",
+  schedules: "schedules", shares: "shares", users: "users", notifications: "notifications",
+} as const satisfies Record<Bagian, string>;
+const SEMUA_BAGIAN = Object.keys(KUNCI_STATE) as Bagian[];
+
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
@@ -235,38 +243,36 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
     toast.error(e instanceof Error ? e.message : "Terjadi kesalahan.");
   }, []);
 
-  /* ── memuat seluruh data ── */
-  // Tiap bagian dimuat terpisah: satu endpoint yang gagal tidak mengosongkan seluruh aplikasi.
-  // Bagian yang gagal mempertahankan data sebelumnya (undefined = pakai nilai lama).
-  const refresh = React.useCallback(async () => {
-    const gagal: unknown[] = [];
-    const ambil = <T,>(p: Promise<T>) => p.catch((e) => { gagal.push(e); return undefined; });
-    const [d, c, t, p, n, s, sh, u, nt] = await Promise.all([
-      ambil(api<{ docs: ApiDoc[] }>("/api/documents")),
-      ambil(api<{ cats: ApiCat[] }>("/api/categories")),
-      ambil(api<{ types: ApiNamed[] }>("/api/types")),
-      ambil(api<{ purposes: ApiNamed[] }>("/api/purposes")),
-      ambil(api<{ notaris: ApiNotaris[] }>("/api/notaris")),
-      ambil(api<{ schedules: ApiSchedule[] }>("/api/schedules")),
-      ambil(api<{ shares: ApiShare[] }>("/api/shares")),
-      ambil(api<{ users: ApiUser[] }>("/api/users")),
-      ambil(api<{ notifications: ApiNotif[] }>("/api/notifications")),
-    ]);
-    setState((prev) => {
-      const notaris = n?.notaris ?? prev.notaris;
-      return {
-        docs: d?.docs ?? prev.docs, cats: c?.cats ?? prev.cats, types: t?.types ?? prev.types,
-        purposes: p?.purposes ?? prev.purposes, notaris, schedules: s?.schedules ?? prev.schedules,
-        shares: sh?.shares ?? prev.shares, users: u?.users ?? prev.users,
-        notifications: nt?.notifications ?? prev.notifications,
-        notarisAktif:
-          prev.notarisAktif && notaris.some((x) => x.id === prev.notarisAktif)
-            ? prev.notarisAktif
-            : (notaris[0]?.id ?? null),
-        loading: false,
-      };
-    });
-    if (gagal.length) fail(gagal[0]);
+  /* ── memuat data ── */
+  // Tiap bagian dimuat terpisah dan langsung ditampilkan begitu tiba: halaman tidak menunggu
+  // endpoint paling lambat (mis. /api/users yang bertanya ke Clerk) untuk menampilkan dokumen.
+  // Bagian yang gagal mempertahankan data sebelumnya. `bagian` membatasi apa yang dimuat ulang
+  // setelah sebuah aksi; tanpa argumen, semuanya dimuat.
+  const refresh = React.useCallback(async (bagian: readonly Bagian[] = SEMUA_BAGIAN) => {
+    let gagalPertama: unknown;
+    await Promise.all(
+      bagian.map((b) =>
+        api<Record<string, unknown>>(`/api/${b}`)
+          .then((r) => {
+            setState((prev) => {
+              const next = { ...prev, [KUNCI_STATE[b]]: r[KUNCI_STATE[b]] } as State;
+              if (b === "documents") next.loading = false;
+              if (b === "notaris") {
+                next.notarisAktif =
+                  prev.notarisAktif && next.notaris.some((x) => x.id === prev.notarisAktif)
+                    ? prev.notarisAktif
+                    : (next.notaris[0]?.id ?? null);
+              }
+              return next;
+            });
+          })
+          .catch((e) => {
+            gagalPertama ??= e;
+            if (b === "documents") setState((prev) => ({ ...prev, loading: false }));
+          }),
+      ),
+    );
+    if (gagalPertama) fail(gagalPertama);
   }, [fail]);
 
   React.useEffect(() => {
@@ -295,10 +301,10 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
 
   /* ── helper mutasi ── */
   const run = React.useCallback(
-    async (fn: () => Promise<unknown>, pesanSukses?: string): Promise<boolean> => {
+    async (fn: () => Promise<unknown>, pesanSukses: string | undefined, bagian: readonly Bagian[]): Promise<boolean> => {
       try {
         await fn();
-        await refresh();
+        await refresh(bagian);
         if (pesanSukses) toast.success(pesanSukses);
         return true;
       } catch (e) {
@@ -327,13 +333,14 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
       await run(
         () => api(`/api/documents/${id}`, { method: "PATCH", body: JSON.stringify({ p: sudah }) }),
         sudah ? "Dokumen ditandai sudah diproses." : 'Penandaan "diproses" dibatalkan.',
+        ["documents"],
       );
     },
     [run],
   );
 
   const addDoc = React.useCallback(
-    (form: FormData) => run(() => api("/api/documents", { method: "POST", body: form }), "Dokumen tersimpan di arsip."),
+    (form: FormData) => run(() => api("/api/documents", { method: "POST", body: form }), "Dokumen tersimpan di arsip.", ["documents", "categories", "notifications"]),
     [run],
   );
 
@@ -345,22 +352,23 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
       run(
         () => api(`/api/documents/${id}`, { method: "PATCH", body: JSON.stringify(fields) }),
         "Informasi dokumen diperbarui.",
+        ["documents", "categories"],
       ),
     [run],
   );
 
   const removeDoc = React.useCallback(
-    (id: number) => run(() => api(`/api/documents/${id}`, { method: "DELETE" }), "Dokumen dihapus dari arsip."),
+    (id: number) => run(() => api(`/api/documents/${id}`, { method: "DELETE" }), "Dokumen dihapus dari arsip.", ["documents", "categories", "shares", "notifications"]),
     [run],
   );
 
   const addCategory = React.useCallback(
     (nama: string, desk: string) =>
-      run(() => api("/api/categories", { method: "POST", body: JSON.stringify({ nama, desk }) }), `Kategori "${nama}" ditambahkan.`),
+      run(() => api("/api/categories", { method: "POST", body: JSON.stringify({ nama, desk }) }), `Kategori "${nama}" ditambahkan.`, ["categories"]),
     [run],
   );
   const removeCategory = React.useCallback(
-    async (id: number) => { await run(() => api(`/api/categories/${id}`, { method: "DELETE" }), "Kategori dihapus."); },
+    async (id: number) => { await run(() => api(`/api/categories/${id}`, { method: "DELETE" }), "Kategori dihapus.", ["categories", "documents"]); },
     [run],
   );
   const updateCategory = React.useCallback(
@@ -368,45 +376,46 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
       run(
         () => api(`/api/categories/${id}`, { method: "PATCH", body: JSON.stringify(fields) }),
         `Kategori "${fields.nama}" diperbarui.`,
+        ["categories", "documents"],
       ),
     [run],
   );
 
   const addType = React.useCallback(
-    (nama: string) => run(() => api("/api/types", { method: "POST", body: JSON.stringify({ nama }) }), `Jenis "${nama}" ditambahkan.`),
+    (nama: string) => run(() => api("/api/types", { method: "POST", body: JSON.stringify({ nama }) }), `Jenis "${nama}" ditambahkan.`, ["types"]),
     [run],
   );
   const removeType = React.useCallback(
-    async (id: number) => { await run(() => api(`/api/types/${id}`, { method: "DELETE" }), "Jenis dokumen dihapus."); },
+    async (id: number) => { await run(() => api(`/api/types/${id}`, { method: "DELETE" }), "Jenis dokumen dihapus.", ["types", "documents"]); },
     [run],
   );
   const addPurpose = React.useCallback(
-    (nama: string) => run(() => api("/api/purposes", { method: "POST", body: JSON.stringify({ nama }) }), `Tujuan "${nama}" ditambahkan.`),
+    (nama: string) => run(() => api("/api/purposes", { method: "POST", body: JSON.stringify({ nama }) }), `Tujuan "${nama}" ditambahkan.`, ["purposes"]),
     [run],
   );
   const removePurpose = React.useCallback(
-    async (id: number) => { await run(() => api(`/api/purposes/${id}`, { method: "DELETE" }), "Tujuan dokumen dihapus."); },
+    async (id: number) => { await run(() => api(`/api/purposes/${id}`, { method: "DELETE" }), "Tujuan dokumen dihapus.", ["purposes", "documents"]); },
     [run],
   );
 
   const setNotarisAktif = React.useCallback((id: number) => setState((s) => ({ ...s, notarisAktif: id })), []);
   const addNotaris = React.useCallback(
     (n: { nama: string; kantor: string; email: string; tel: string }) =>
-      run(() => api("/api/notaris", { method: "POST", body: JSON.stringify(n) }), `Mitra notaris "${n.nama}" ditambahkan.`),
+      run(() => api("/api/notaris", { method: "POST", body: JSON.stringify(n) }), `Mitra notaris "${n.nama}" ditambahkan.`, ["notaris"]),
     [run],
   );
   const removeNotaris = React.useCallback(
-    async (id: number) => { await run(() => api(`/api/notaris/${id}`, { method: "DELETE" }), "Mitra notaris dihapus beserta jadwalnya."); },
+    async (id: number) => { await run(() => api(`/api/notaris/${id}`, { method: "DELETE" }), "Mitra notaris dihapus beserta jadwalnya.", ["notaris", "schedules"]); },
     [run],
   );
   const addSchedule = React.useCallback(
     (s: { notarisId: number; agenda: string; tgl: string; jam: string }) =>
-      run(() => api("/api/schedules", { method: "POST", body: JSON.stringify(s) }), "Jadwal kerja sama tersimpan."),
+      run(() => api("/api/schedules", { method: "POST", body: JSON.stringify(s) }), "Jadwal kerja sama tersimpan.", ["schedules", "notaris"]),
     [run],
   );
   const cancelSchedule = React.useCallback(
     async (id: number) => {
-      await run(() => api(`/api/schedules/${id}`, { method: "PATCH", body: JSON.stringify({ st: "Dibatalkan" }) }), "Jadwal dibatalkan.");
+      await run(() => api(`/api/schedules/${id}`, { method: "PATCH", body: JSON.stringify({ st: "Dibatalkan" }) }), "Jadwal dibatalkan.", ["schedules", "notaris"]);
     },
     [run],
   );
@@ -418,7 +427,7 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
           method: "POST",
           body: JSON.stringify(s),
         });
-        await refresh();
+        await refresh(["shares"]);
         if (res.email.terkirim) {
           toast.success(`Tautan dikirim ke ${s.email}.`);
         } else if (res.email.driver === "log") {
@@ -436,14 +445,14 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
     [refresh, fail],
   );
   const revokeShare = React.useCallback(
-    async (id: number) => { await run(() => api(`/api/shares/${id}`, { method: "DELETE" }), "Akses tautan dicabut."); },
+    async (id: number) => { await run(() => api(`/api/shares/${id}`, { method: "DELETE" }), "Akses tautan dicabut.", ["shares"]); },
     [run],
   );
 
   const clearShares = React.useCallback(async () => {
     try {
       const res = await api<{ dihapus: number }>("/api/shares", { method: "DELETE" });
-      await refresh();
+      await refresh(["shares"]);
       toast.success(
         res.dihapus > 0
           ? `${res.dihapus} tautan tidak aktif dihapus dari riwayat.`
@@ -456,33 +465,33 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
 
   const setUserPeran = React.useCallback(
     async (id: string, p: Role) => {
-      await run(() => api(`/api/users/${id}`, { method: "PATCH", body: JSON.stringify({ peran: p }) }), `Peran diubah menjadi ${p}.`);
+      await run(() => api(`/api/users/${id}`, { method: "PATCH", body: JSON.stringify({ peran: p }) }), `Peran diubah menjadi ${p}.`, ["users"]);
     },
     [run],
   );
   const toggleUser = React.useCallback(
     async (id: string, aktif: boolean) => {
-      await run(() => api(`/api/users/${id}`, { method: "PATCH", body: JSON.stringify({ aktif }) }), aktif ? "Pengguna diaktifkan." : "Pengguna dinonaktifkan.");
+      await run(() => api(`/api/users/${id}`, { method: "PATCH", body: JSON.stringify({ aktif }) }), aktif ? "Pengguna diaktifkan." : "Pengguna dinonaktifkan.", ["users"]);
     },
     [run],
   );
   const removeUser = React.useCallback(
-    async (id: string) => { await run(() => api(`/api/users/${id}`, { method: "DELETE" }), "Pengguna dihapus."); },
+    async (id: string) => { await run(() => api(`/api/users/${id}`, { method: "DELETE" }), "Pengguna dihapus.", ["users"]); },
     [run],
   );
   const addUser = React.useCallback(
     (u: { nama: string; email: string; unit: string; peran: Role }) =>
-      run(() => api("/api/users", { method: "POST", body: JSON.stringify(u) }), `Pengguna ${u.nama} ditambahkan (kata sandi awal: arsiva123).`),
+      run(() => api("/api/users", { method: "POST", body: JSON.stringify(u) }), `Pengguna ${u.nama} ditambahkan (kata sandi awal: arsiva123).`, ["users"]),
     [run],
   );
   const updateUser = React.useCallback(
     (id: string, fields: { nama: string; email: string; unit: string }) =>
-      run(() => api(`/api/users/${id}`, { method: "PATCH", body: JSON.stringify(fields) }), "Data pengguna diperbarui."),
+      run(() => api(`/api/users/${id}`, { method: "PATCH", body: JSON.stringify(fields) }), "Data pengguna diperbarui.", ["users", "documents"]),
     [run],
   );
 
   const markNotificationsRead = React.useCallback(
-    async () => { await run(() => api("/api/notifications", { method: "PATCH" })); },
+    async () => { await run(() => api("/api/notifications", { method: "PATCH" }), undefined, ["notifications"]); },
     [run],
   );
 
