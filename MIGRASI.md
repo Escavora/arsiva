@@ -363,6 +363,16 @@ perangkat baru), dan form login sudah menyediakan langkah input kodenya.
 - Waktu development pakai kredensial Google bersama milik Clerk; production butuh OAuth
   client sendiri di Google Cloud Console.
 
+### Hasil Langkah 5 (bersih-bersih, 2026-10-11)
+
+- `better-auth`, `@libsql/client`, dan `@vercel/blob` sudah keluar sejak Langkah 1–3.
+  Kini `nodemailer`, `@types/nodemailer`, dan `vercel.json` ikut dibuang.
+- Driver email `smtp` dihapus dari `src/lib/notify.ts`; tersisa `resend` dan `log`.
+  `EMAIL_DRIVER=smtp` yang masih tertinggal di `.env` lama jatuh ke driver `log`
+  dengan peringatan di konsol. Variabel `SMTP_*` dibuang dari `.env.example`.
+- `README.md` dan `.env.example` sudah disesuaikan. Penjadwalan pengingat lewat Cron
+  Triggers masih menjadi pekerjaan Langkah 4.
+
 ## 6. Bagian yang tidak perlu diubah
 
 - **Logika domain:** `src/lib/arsiva.ts`, `dto.ts`, `master-crud.ts`.

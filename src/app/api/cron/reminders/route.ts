@@ -88,7 +88,7 @@ function sahkan(req: Request): boolean {
   const secret = process.env.CRON_SECRET;
   if (!secret) return false;
   const header = req.headers.get("authorization") ?? "";
-  // Vercel Cron mengirim header ini; lokal bisa pakai Bearer manual.
+  // Pemanggil (curl, atau Cron Trigger kelak) wajib mengirim Bearer <CRON_SECRET>.
   return header === `Bearer ${secret}`;
 }
 

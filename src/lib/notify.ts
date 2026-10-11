@@ -3,7 +3,6 @@
 // Driver dipilih lewat EMAIL_DRIVER di .env:
 //   log    → dicetak ke console server (pengembangan, tanpa kredensial)
 //   resend → dikirim sungguhan lewat Resend HTTP API (butuh RESEND_API_KEY)
-//   smtp   → dikirim sungguhan lewat SMTP/Nodemailer (butuh SMTP_HOST dst.)
 //
 // PENTING: pengiriman email sengaja dibuat TIDAK mematikan alur bisnis. Kalau
 // email gagal (kredensial salah, layanan mati), tautan/pengingat tetap tersimpan
@@ -67,33 +66,6 @@ const resendDriver: EmailDriver = {
   },
 };
 
-/* ───────────────────────── Driver: SMTP ───────────────────────── */
-
-let transporter: import("nodemailer").Transporter | null = null;
-
-const smtpDriver: EmailDriver = {
-  nama: "smtp",
-  async send({ to, subject, text, html }) {
-    const host = process.env.SMTP_HOST;
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
-    if (!host || !user || !pass) {
-      throw new Error("SMTP_HOST/SMTP_USER/SMTP_PASS belum lengkap di .env.");
-    }
-    if (!transporter) {
-      const nodemailer = await import("nodemailer");
-      const port = Number(process.env.SMTP_PORT ?? 587);
-      transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure: port === 465, // 465 = SMTPS; 587 = STARTTLS
-        auth: { user, pass },
-      });
-    }
-    await transporter.sendMail({ from: from(), to, subject, text, html });
-  },
-};
-
 /* ───────────────────────── Pemilihan driver ───────────────────────── */
 
 /**
@@ -107,8 +79,6 @@ export function getMailer(): EmailDriver {
   switch (process.env.EMAIL_DRIVER ?? "log") {
     case "resend":
       return resendDriver;
-    case "smtp":
-      return smtpDriver;
     case "log":
       return logDriver;
     default:

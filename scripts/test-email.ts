@@ -31,7 +31,7 @@ async function main() {
   if (driver === "log") {
     console.log(
       'ℹ  EMAIL_DRIVER masih "log" — email hanya dicetak ke layar, tidak benar-benar dikirim.\n' +
-        '   Ubah EMAIL_DRIVER di .env menjadi "resend" atau "smtp" untuk mengirim sungguhan.\n',
+        '   Ubah EMAIL_DRIVER di .env menjadi "resend" untuk mengirim sungguhan.\n',
     );
   }
 
@@ -59,10 +59,7 @@ async function main() {
         (driver === "resend"
           ? "   RESEND_API_KEY, EMAIL_FROM (domain harus terverifikasi di Resend,\n" +
             "   atau pakai onboarding@resend.dev untuk uji coba ke email Anda sendiri)"
-          : driver === "smtp"
-            ? "   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS\n" +
-              "   (Gmail wajib memakai App Password, bukan kata sandi akun)"
-            : "   EMAIL_DRIVER"),
+          : "   EMAIL_DRIVER (nilai yang dikenal: resend, log)"),
     );
   }
 }

@@ -47,7 +47,7 @@ Laporan ringkasan arsip bisa diunduh sebagai CSV dari dashboard.
 | Autentikasi | **Clerk** — peran, status aktif, dan batas idle dikelola di server |
 | Database | **Neon** (Postgres) lewat `neon-http` + Drizzle ORM |
 | Storage berkas | **Cloudflare R2** lewat binding Worker `FILES` (bucket private) |
-| Email | Adapter `resend` / `smtp` / `log` + notifikasi in-app |
+| Email | Adapter `resend` / `log` + notifikasi in-app |
 | Hosting | **Cloudflare Workers** lewat `@opennextjs/cloudflare` |
 
 ## Menjalankan di lokal
@@ -88,9 +88,8 @@ Salin [`.env.example`](.env.example) ke `.env` (berkas `.env` diabaikan git).
 | `DATABASE_URL` | Connection string Neon. Pakai yang *pooled*; migrasi otomatis memakai host langsung (tanpa `-pooler`), atau timpa dengan `DATABASE_URL_UNPOOLED` |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` | Kunci dari dashboard Clerk |
 | `NEXT_PUBLIC_APP_URL` | Alamat publik aplikasi, dipakai untuk tautan `/s/<token>` di email |
-| `EMAIL_DRIVER` | `resend`, `smtp`, atau `log` (cetak ke konsol) |
+| `EMAIL_DRIVER` | `resend` atau `log` (cetak ke konsol) |
 | `EMAIL_FROM`, `RESEND_API_KEY` | Pengirim dan kunci Resend |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | Hanya bila `EMAIL_DRIVER=smtp` |
 | `CRON_SECRET` | Rahasia untuk memanggil `/api/cron/reminders` |
 
 Dua hal yang perlu diatur di dashboard **Clerk**:
@@ -170,16 +169,15 @@ open-next.config.ts   # konfigurasi adapter OpenNext
 
 ## Email
 
-Tiga driver di [`src/lib/notify.ts`](src/lib/notify.ts), dipilih lewat `EMAIL_DRIVER`:
+Dua driver di [`src/lib/notify.ts`](src/lib/notify.ts), dipilih lewat `EMAIL_DRIVER`:
 
 | Driver | Kredensial | Kegunaan |
 | --- | --- | --- |
 | `log` | Tidak ada | Email dicetak ke konsol server — untuk pengembangan |
 | `resend` | `RESEND_API_KEY` | Kirim lewat Resend (HTTP API; jalan di Workers) |
-| `smtp` | `SMTP_HOST/USER/PASS` | Kirim lewat SMTP (mis. Gmail dengan *App password*) |
 
-**Untuk deploy di Cloudflare Workers, pakai `resend`.** Driver `smtp` memakai
-Nodemailer dan belum tentu berjalan di runtime Workers.
+Driver SMTP (Nodemailer) sudah dibuang: ia belum tentu berjalan di runtime Workers,
+sedangkan Resend memakai `fetch` biasa.
 
 **Batas Resend tanpa domain terverifikasi:** hanya bisa mengirim ke alamat email
 pemilik akun Resend, dan `EMAIL_FROM` harus `onboarding@resend.dev`. Untuk
@@ -200,8 +198,7 @@ Endpoint ini mewajibkan header `Authorization: Bearer <CRON_SECRET>`.
 curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/reminders
 ```
 
-> **Belum terjadwal otomatis.** `vercel.json` adalah sisa dari hosting lama dan
-> tidak dipakai di Cloudflare. Rencananya: Cron Triggers lewat worker entry yang
+> **Belum terjadwal otomatis.** Rencananya: Cron Triggers lewat worker entry yang
 > membungkus `.open-next/worker.js`, dengan handler `scheduled` memanggil route ini
 > (keputusan dan batasan subrequest ada di [`MIGRASI.md`](MIGRASI.md)). Sampai
 > itu dipasang, jalankan pengingat dengan perintah di atas.
