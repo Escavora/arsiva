@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { CheckCircle } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
+import { LabelKategori } from "@/components/arsiva/warna";
 
 export default function PengingatPage() {
   const { allDocs, counts, threshold, setThreshold, tandai } = useArsiva();
@@ -60,7 +61,7 @@ export default function PengingatPage() {
             <thead>
               <tr>
                 <th>Dokumen</th>
-                <th className="hidden md:table-cell" style={{ width: 150 }}>Kategori</th>
+                <th className="hidden md:table-cell" style={{ width: 178 }}>Kategori</th>
                 <th className="hidden sm:table-cell" style={{ width: 120 }}>Kadaluarsa</th>
                 <th style={{ width: 110 }}>Sisa waktu</th>
                 <th className="hidden sm:table-cell" style={{ width: 132 }}>Status</th>
@@ -76,7 +77,7 @@ export default function PengingatPage() {
                     </div>
                     <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{r.j} · {r.o}</div>
                   </td>
-                  <td className="hidden md:table-cell" style={{ fontSize: 12.5 }}>{r.k}</td>
+                  <td className="hidden md:table-cell"><LabelKategori nama={r.k} /></td>
                   <td className="hidden sm:table-cell" style={{ fontSize: 12.5 }}>{r.expText}</td>
                   <td style={{ fontSize: 12.5, color: r.sisaC }}>{r.sisa}</td>
                   <td className="hidden sm:table-cell"><span className={`tag ${r.tag}`}>{r.status}</span></td>

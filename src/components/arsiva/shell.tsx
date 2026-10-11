@@ -30,28 +30,32 @@ type NavItem = {
   icon: Icon;
   adminOnly?: boolean;
   badge?: boolean;
+  /** Rona penunjuk arah: ikon menu memakai warna ini, dan latar saat aktif ikut berona. */
+  rona: string;
 };
 
 const OPERASIONAL: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: SquaresFour },
-  { href: "/arsip", label: "Arsip Dokumen", icon: Folders },
-  { href: "/unggah", label: "Unggah Dokumen", icon: UploadSimple },
+  { href: "/dashboard", label: "Dashboard", icon: SquaresFour, rona: "var(--color-accent-500)" },
+  { href: "/arsip", label: "Arsip Dokumen", icon: Folders, rona: "var(--kat-sian)" },
+  { href: "/unggah", label: "Unggah Dokumen", icon: UploadSimple, rona: "var(--kat-toska)" },
   {
     href: "/pengingat",
     label: "Pengingat Kadaluarsa",
     icon: BellRinging,
     badge: true,
+    rona: "var(--color-accent-2-500)", // sama dengan rona "Segera kadaluarsa"
   },
-  { href: "/bagikan", label: "Bagikan Dokumen", icon: ShareNetwork },
+  { href: "/bagikan", label: "Bagikan Dokumen", icon: ShareNetwork, rona: "var(--kat-ungu)" },
 ];
 const MASTER: NavItem[] = [
-  { href: "/notaris", label: "Jadwal Notaris", icon: CalendarDots },
-  { href: "/kategori", label: "Kategori & Jenis", icon: Tag },
+  { href: "/notaris", label: "Jadwal Notaris", icon: CalendarDots, rona: "var(--kat-nila)" },
+  { href: "/kategori", label: "Kategori & Jenis", icon: Tag, rona: "var(--kat-magenta)" },
   {
     href: "/akses",
     label: "Kelola Hak Akses",
     icon: ShieldCheck,
     adminOnly: true,
+    rona: "var(--color-ok)",
   },
 ];
 
@@ -85,15 +89,20 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
           fontSize: 14,
           textDecoration: "none",
           color: on
-            ? "var(--color-accent-200)"
+            ? "var(--color-text)"
             : "color-mix(in srgb, var(--color-text) 72%, transparent)",
           background: on
-            ? "color-mix(in srgb, var(--color-accent) 14%, transparent)"
+            ? `color-mix(in srgb, ${item.rona} 17%, transparent)`
             : "transparent",
-          boxShadow: on ? "inset 2px 0 0 var(--color-accent)" : "none",
+          boxShadow: on ? `inset 0 0 0 1px color-mix(in srgb, ${item.rona} 34%, transparent)` : "none",
         }}
       >
-        <IconEl size={18} />
+        {/* ikon: berona redup saat diam, penuh saat aktif */}
+        <IconEl
+          size={18}
+          weight={on ? "fill" : "regular"}
+          style={{ flex: "none", color: on ? item.rona : `color-mix(in srgb, ${item.rona} 70%, var(--color-text))` }}
+        />
         {item.label}
         {item.badge && counts.perluAksi > 0 && (
           <span

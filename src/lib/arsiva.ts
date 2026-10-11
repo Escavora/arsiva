@@ -209,8 +209,10 @@ export function viewDoc<T extends Doc & { id: number }>(d: T, th: number): T & V
     sisa,
     expText: fmt(d.e),
     upText: fmt(d.u),
-    sisaC:
-      dl < 0
+    // Dokumen yang sudah diproses tidak lagi mendesak: sisa harinya diredam, bukan merah.
+    sisaC: d.p
+      ? "color-mix(in srgb, var(--color-text) 62%, transparent)"
+      : dl < 0
         ? "var(--color-danger-text)"
         : dl <= th
         ? "var(--color-accent-2-400)"

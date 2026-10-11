@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Info, Plus, X, FloppyDisk } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
+import { LabelKategori } from "@/components/arsiva/warna";
 import { useKonfirmasi } from "@/components/arsiva/konfirmasi";
 
 export default function KategoriPage() {
@@ -72,7 +73,7 @@ export default function KategoriPage() {
               <tbody>
                 {catRows.map((c) => (
                   <tr key={c.id}>
-                    <td style={{ fontSize: 13.5 }}>{c.nama}</td>
+                    <td><LabelKategori nama={c.nama} fontSize={13.5} /></td>
                     <td style={{ fontSize: 12, color: "color-mix(in srgb, var(--color-text) 60%, transparent)" }}>{c.desk}</td>
                     <td style={{ fontSize: 12.5 }}>{c.jumlah}</td>
                     <td style={{ textAlign: "right" }}>

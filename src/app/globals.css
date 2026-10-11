@@ -85,6 +85,19 @@
   /* Teks merah di atas latar gelap (≥5.3:1 di bg/surface/surface-2). --color-danger tetap untuk isian & tepi. */
   --color-danger-text: #ec7c72;
 
+  /* ── Warna identitas kategori (data, bukan status) ──
+     Rona dipilih di sela rona status (biru Aman, jingga Segera, merah Kadaluarsa, hijau Diproses)
+     dan selalu tampil sebagai titik + nama, tidak pernah sebagai pil berisi seperti tag status.
+     -teks ≥ 7:1 di bg/surface/surface-2. Dipetakan lewat src/components/arsiva/warna.tsx. */
+  --kat-ungu: #a07cf0;    --kat-ungu-teks: #c9b6ff;
+  --kat-sian: #33b6d6;    --kat-sian-teks: #8ddcef;
+  --kat-magenta: #d46bb8; --kat-magenta-teks: #f2afdf;
+  --kat-kuning: #cfbb45;  --kat-kuning-teks: #e9da8c;
+  --kat-toska: #2fb5a0;   --kat-toska-teks: #86dfcf;
+  --kat-nila: #7a88f0;    --kat-nila-teks: #b6bfff;
+  --kat-pasir: #b89a78;   --kat-pasir-teks: #e0cbb2;
+  --kat-limau: #8fbf45;   --kat-limau-teks: #c5e394;
+
   --color-section: #0d2f52;
   --color-section-glow: #164a7d;
   --color-section-ghost: #2f6798;

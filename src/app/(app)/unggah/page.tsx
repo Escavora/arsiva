@@ -18,6 +18,7 @@ import {
   CalendarBlank,
 } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
+import { TagKategori } from "@/components/arsiva/warna";
 import { days, fmt } from "@/lib/arsiva";
 
 const kosong = { nama: "", typeId: "", purposeId: "", categoryId: "", exp: "", ket: "" };
@@ -267,7 +268,7 @@ export default function UnggahPage() {
                 </div>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 6 }}>
                   {status && <span className="tag" style={{ background: `color-mix(in srgb, ${status.warna} 22%, transparent)`, color: status.teks }}>{status.label}</span>}
-                  {nama(up.categoryId, state.cats) && <span className="tag tag-neutral">{nama(up.categoryId, state.cats)}</span>}
+                  {nama(up.categoryId, state.cats) && <TagKategori nama={nama(up.categoryId, state.cats)!} />}
                   {nama(up.typeId, state.types) && <span className="tag tag-neutral">{nama(up.typeId, state.types)}</span>}
                 </div>
               </div>

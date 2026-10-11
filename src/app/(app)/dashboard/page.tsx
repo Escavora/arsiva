@@ -16,6 +16,7 @@ import {
   Sparkle,
 } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
+import { LabelKategori, useRonaKategori } from "@/components/arsiva/warna";
 import { fmt, MONTHS, todayISO } from "@/lib/arsiva";
 
 const muted = (pct: number) => `color-mix(in srgb, var(--color-text) ${pct}%, transparent)`;
@@ -199,6 +200,7 @@ export default function DashboardPage() {
     { kunci: "Diproses", label: "Diproses", nilai: counts.diproses, warna: "var(--color-ok)", teks: "var(--color-ok-100)", ikon: <CheckCircle size={18} weight="duotone" /> },
   ];
 
+  const rona = useRonaKategori();
   const sebaran = tab === "kategori" ? stats.katBars : tab === "jenis" ? stats.jenisBars : stats.ownerBars;
   const warnaUrgensi = (dl: number) => (dl < 0 ? "var(--color-danger)" : "var(--color-accent-2-500)");
 
@@ -335,12 +337,11 @@ export default function DashboardPage() {
                     className="baris-tautan row-hover"
                     style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: "var(--radius-md)", background: "var(--color-surface-2)" }}
                   >
-                    <span style={{ width: 4, alignSelf: "stretch", borderRadius: 2, background: w, flex: "none" }} />
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ fontSize: 13.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
                       </div>
-                      <div style={{ fontSize: 12, color: muted(62) }}>{r.k}</div>
+                      <div style={{ color: muted(66), marginTop: 2 }}><LabelKategori nama={r.k} fontSize={12} /></div>
                     </div>
                     <span
                       style={{
@@ -390,7 +391,7 @@ export default function DashboardPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {terbaru.map((r) => (
                 <div key={r.id} className="baris-tautan row-hover" style={{ display: "flex", gap: 10, alignItems: "center", padding: "6px 8px", margin: "0 -8px", borderRadius: "var(--radius-sm)" }}>
-                  <span style={{ width: 30, height: 30, flex: "none", borderRadius: 8, display: "grid", placeItems: "center", background: "var(--color-accent-900)", color: "var(--color-accent-300)" }}>
+                  <span style={{ width: 30, height: 30, flex: "none", borderRadius: 8, display: "grid", placeItems: "center", background: rona(r.k).latar, color: rona(r.k).teks }}>
                     <FilePdf size={16} />
                   </span>
                   <div style={{ minWidth: 0, flex: 1 }}>
@@ -421,11 +422,15 @@ export default function DashboardPage() {
           {sebaran.map((b, i) => (
             <div key={b.nama}>
               <div style={{ display: "flex", gap: 8, fontSize: 13, marginBottom: 5 }}>
-                <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: muted(78) }}>{b.nama}</span>
+                {tab === "kategori" ? (
+                  <span style={{ minWidth: 0, overflow: "hidden", whiteSpace: "nowrap", color: muted(78) }}><LabelKategori nama={b.nama} fontSize={13} /></span>
+                ) : (
+                  <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: muted(78) }}>{b.nama}</span>
+                )}
                 <span style={{ marginLeft: "auto", fontFamily: "var(--font-heading)", flex: "none" }}>{b.jumlah}</span>
               </div>
               <div style={{ height: 8, borderRadius: 4, background: "var(--color-neutral-800)", overflow: "hidden" }}>
-                <div className="dasbor-isi" style={{ animationDelay: `${i * 50}ms`, height: "100%", width: b.w, borderRadius: 4, background: "linear-gradient(90deg, var(--color-accent-700), var(--color-accent-500))" }} />
+                <div className="dasbor-isi" style={{ animationDelay: `${i * 50}ms`, height: "100%", width: b.w, borderRadius: 4, background: tab === "kategori" ? rona(b.nama).titik : "linear-gradient(90deg, var(--color-accent-700), var(--color-accent-500))" }} />
               </div>
             </div>
           ))}

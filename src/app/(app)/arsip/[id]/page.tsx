@@ -18,6 +18,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
+import { LabelKategori, TagKategori } from "@/components/arsiva/warna";
 import { useKonfirmasi } from "@/components/arsiva/konfirmasi";
 import { fmt, fmtShort } from "@/lib/arsiva";
 
@@ -138,7 +139,7 @@ export default function DetailPage() {
         <div style={{ minWidth: 0 }}>
           <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
             <span className={`tag ${cur.tag}`}>{cur.status}</span>
-            <span className="tag tag-neutral">{cur.k}</span>
+            <TagKategori nama={cur.k} />
           </div>
           <h3 style={{ margin: "0 0 4px", maxWidth: 760 }}>{cur.n}</h3>
           <div className="text-muted" style={{ fontSize: 13 }}>Diunggah {cur.upText} oleh {cur.o} · No. arsip {cur.kode}</div>
@@ -254,9 +255,9 @@ export default function DetailPage() {
             <div style={{ display: "grid", gridTemplateColumns: "132px 1fr", rowGap: 11, columnGap: 14, fontSize: 13 }}>
               <div className="text-muted">Jenis dokumen</div><div>{cur.j}</div>
               <div className="text-muted">Tujuan</div><div>{cur.t}</div>
-              <div className="text-muted">Kategori</div><div>{cur.k}</div>
+              <div className="text-muted">Kategori</div><div><LabelKategori nama={cur.k} fontSize={13} /></div>
               <div className="text-muted">Tanggal unggah</div><div>{cur.upText}</div>
-              <div className="text-muted">Tanggal kadaluarsa</div><div>{cur.expText} <span className="text-muted">({cur.sisa})</span></div>
+              <div className="text-muted">Tanggal kadaluarsa</div><div>{cur.expText} <span className={cur.sisaC === "inherit" ? "text-muted" : undefined} style={cur.sisaC === "inherit" ? undefined : { color: cur.sisaC }}>({cur.sisa})</span></div>
               <div className="text-muted">Ambang pengingat</div><div>{threshold} hari sebelum kadaluarsa</div>
             </div>
             <div style={{ display: "flex", gap: 8, marginTop: 2, flexWrap: "wrap" }}>

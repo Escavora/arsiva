@@ -12,6 +12,7 @@ import {
   FolderOpen,
 } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
+import { LabelKategori, TitikKategori, useRonaKategori } from "@/components/arsiva/warna";
 
 function chipStyle(active: boolean): React.CSSProperties {
   return active
@@ -80,6 +81,7 @@ function ArsipInner() {
   }, [allDocs, q, cat, status, jenisF, tujuanF]);
 
   const catChips = ["Semua", ...state.cats.map((c) => c.nama)];
+  const rona = useRonaKategori();
 
   return (
     <div>
@@ -122,7 +124,22 @@ function ArsipInner() {
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
             <span style={{ fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "color-mix(in srgb, var(--color-text) 62%, transparent)", marginRight: 2 }}>Kategori</span>
             {catChips.map((c) => (
-              <button key={c} type="button" onClick={() => setCat(c)} style={{ fontSize: 12, padding: "4px 11px", borderRadius: 999, cursor: "pointer", border: "none", ...chipStyle(cat === c) }}>{c}</button>
+              <button
+                key={c}
+                type="button"
+                aria-pressed={cat === c}
+                onClick={() => setCat(c)}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  fontSize: 12, padding: "4px 11px", borderRadius: 999, cursor: "pointer", border: "none",
+                  ...chipStyle(cat === c),
+                  // chip kategori yang aktif memakai rona kategorinya sendiri
+                  ...(cat === c && c !== "Semua" ? { color: rona(c).teks, background: rona(c).latar, boxShadow: `inset 0 0 0 1px ${rona(c).tepi}` } : null),
+                }}
+              >
+                {c !== "Semua" && <TitikKategori nama={c} size={7} />}
+                {c}
+              </button>
             ))}
           </div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", marginLeft: "auto" }}>
@@ -139,7 +156,7 @@ function ArsipInner() {
             <thead>
               <tr>
                 <th>Nama Dokumen</th>
-                <th className="hidden sm:table-cell" style={{ width: 150 }}>Kategori</th>
+                <th className="hidden sm:table-cell" style={{ width: 178 }}>Kategori</th>
                 <th className="hidden md:table-cell" style={{ width: 130 }}>Jenis</th>
                 <th className="hidden md:table-cell" style={{ width: 112 }}>Tujuan</th>
                 <th className="hidden sm:table-cell" style={{ width: 118 }}>Kadaluarsa</th>
@@ -152,7 +169,10 @@ function ArsipInner() {
                 <tr key={r.id} className="baris-tautan">
                   <td>
                     <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
-                      <FilePdf size={17} style={{ color: "var(--color-accent-400)", flex: "none" }} />
+                      {/* ubin berkas berona kategori: baris sekategori langsung terlihat berkelompok */}
+                      <span title={r.k} style={{ width: 30, height: 30, flex: "none", borderRadius: 7, display: "grid", placeItems: "center", background: rona(r.k).latar, color: rona(r.k).teks }}>
+                        <FilePdf size={16} />
+                      </span>
                       <div style={{ minWidth: 0 }}>
                         <div style={{ fontSize: 13.5, maxWidth: "min(330px, 40vw)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           <Link href={`/arsip/${r.id}`} className="tautan-baris">{r.n}</Link>
@@ -161,12 +181,12 @@ function ArsipInner() {
                       </div>
                     </div>
                   </td>
-                  <td className="hidden sm:table-cell" style={{ fontSize: 12.5 }}>{r.k}</td>
+                  <td className="hidden sm:table-cell"><LabelKategori nama={r.k} /></td>
                   <td className="hidden md:table-cell" style={{ fontSize: 12.5 }}>{r.j}</td>
                   <td className="hidden md:table-cell" style={{ fontSize: 12.5 }}>{r.t}</td>
                   <td className="hidden sm:table-cell" style={{ fontSize: 12.5 }}>
                     {r.expText}
-                    <div style={{ fontSize: 11, color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }}>{r.sisa}</div>
+                    <div style={{ fontSize: 11, color: r.sisaC === "inherit" ? "color-mix(in srgb, var(--color-text) 62%, transparent)" : r.sisaC }}>{r.sisa}</div>
                   </td>
                   <td><span className={`tag ${r.tag}`}>{r.status}</span></td>
                   <td className="hidden sm:table-cell" style={{ textAlign: "right" }}><CaretRight size={15} style={{ color: "color-mix(in srgb, var(--color-text) 62%, transparent)" }} /></td>
