@@ -8,6 +8,7 @@ yang berbatas waktu dan bisa dicabut.
 - PRD: [`reference/Arsiva.md`](reference/Arsiva.md) · rancangan visual awal: [`reference/Arsiva.html`](reference/Arsiva.html)
 - Konteks produk dan pengguna: [`PRODUCT.md`](PRODUCT.md)
 - Catatan pemindahan stack dan keputusan teknis: [`MIGRASI.md`](MIGRASI.md)
+- **Produksi:** https://arsiva.aliefathallahmohd.workers.dev
 
 ## Status
 
@@ -19,7 +20,7 @@ yang berbatas waktu dan bisa dicabut.
 | 3 | Pindah stack: Neon, Clerk, Cloudflare R2, build untuk Cloudflare Workers | ✅ Selesai (lihat [`MIGRASI.md`](MIGRASI.md)) |
 | 3.5 | Penyempurnaan antarmuka: warna, tipografi, tata letak, gerak, adaptasi HP/tablet, performa, polish | ✅ Selesai |
 | 4 | Penjadwalan pengingat (Cron Triggers) | ✅ Selesai, teruji di runtime Workers lokal |
-| 5 | Deploy ke Cloudflare Workers | ⏳ Belum |
+| 5 | Deploy ke Cloudflare Workers (otomatis dari GitHub) | ✅ Live sejak 11 Okt 2026 |
 
 ## Fitur
 
@@ -232,18 +233,48 @@ jadi hentikan server dev sebelum menjalankan `opennextjs-cloudflare build`.
 
 ## Deploy ke Cloudflare Workers
 
-Belum dikerjakan; langkah yang diperlukan:
+Aplikasi berjalan di **https://arsiva.aliefathallahmohd.workers.dev** (Worker `arsiva`).
+Deploy dilakukan **Workers Builds** yang terhubung ke repo GitHub: setiap `git push`
+ke `main` otomatis membangun di server Linux Cloudflare lalu men-deploy.
 
-1. Buat bucket: `npx wrangler r2 bucket create arsiva-files`.
-2. Isi variabel produksi (`DATABASE_URL`, kunci Clerk, `NEXT_PUBLIC_APP_URL`,
-   `EMAIL_DRIVER=resend`, `EMAIL_FROM`, `RESEND_API_KEY`, `CRON_SECRET`) sebagai
-   secret/variabel Worker. `NEXT_PUBLIC_*` harus tersedia **saat build**.
-3. `npm run deploy`. OpenNext belum sepenuhnya mendukung Windows; build di WSL atau
-   di Cloudflare (terhubung ke GitHub) lebih aman.
-4. Pastikan `CRON_SECRET` terisi sebagai secret Worker; tanpa itu putaran terjadwal
-   gagal dengan pesan jelas di log. Jadwal ikut terpasang otomatis dari `wrangler.jsonc`.
-5. Di Clerk, ganti ke instance produksi dan pasang OAuth client Google sendiri
-   (di development Clerk memakai kredensial Google bersama).
+| Pengaturan Workers Builds | Nilai |
+| --- | --- |
+| Production branch | `main` |
+| Build command | `npx opennextjs-cloudflare build` |
+| Deploy command | `npx opennextjs-cloudflare deploy` |
+
+Variabel dibagi dua, dan jangan tertukar:
+
+| Jenis | Di mana | Isi |
+| --- | --- | --- |
+| **Build variables** (tertanam ke kode klien saat build) | Settings → Builds | `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` |
+| **Secrets** (dibaca saat Worker berjalan) | Settings → Variables and Secrets, atau `wrangler secret` | `DATABASE_URL`, `CLERK_SECRET_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_DRIVER`, `CRON_SECRET` |
+
+Sumber daya lain di akun Cloudflare: bucket R2 `arsiva-files` (private, binding
+`FILES`) dan Cron Trigger `0 1-4 * * *` (terpasang otomatis dari `wrangler.jsonc`).
+
+**Teruji di produksi (11 Okt 2026):** halaman publik dan login tampil, Clerk termuat,
+rute privat dialihkan ke `/login`, API tanpa sesi ditolak (401), query ke Neon
+berjalan, dan cron mode kering dengan `CRON_SECRET` berhasil. **Belum teruji di
+produksi:** login sampai dasbor, unggah berkas ke R2, dan login Google.
+
+Hal yang perlu dijaga agar build Cloudflare tidak gagal:
+
+- **Lockfile dibuat dengan npm 10.9.2.** npm 11 di Windows tidak menulis dependensi
+  opsional lintas platform (mis. `@emnapi/*`), sehingga `npm ci` di Linux menolak
+  lockfile. Setiap kali dependensi berubah, jalankan
+  `npx -y npm@10.9.2 install --package-lock-only` sebelum push, dan cek dengan
+  `npx -y npm@10.9.2 ci --dry-run`.
+- **Jangan membaca secret saat modul dimuat.** `next build` memuat setiap route,
+  sedangkan secret baru ada saat Worker berjalan. Karena itu klien database di
+  [`src/db/index.ts`](src/db/index.ts) dibuat saat query pertama.
+- **Clerk masih instance development** (`pk_test`/`sk_test`). Untuk pemakaian
+  sungguhan, buat instance produksi (butuh domain sendiri) dan OAuth client Google
+  sendiri; di development Clerk memakai kredensial Google bersama.
+- **Database produksi = database lokal.** Keduanya memakai Neon yang sama.
+
+Deploy manual dari laptop (`npm run deploy`) tetap mungkin, tapi OpenNext belum
+sepenuhnya mendukung Windows; pakai WSL atau andalkan Workers Builds.
 
 Ukuran bundle Worker terakhir terukur sekitar 2,3 MB gzip (batas paket gratis 3 MB).
 
@@ -266,11 +297,12 @@ Ukuran bundle Worker terakhir terukur sekitar 2,3 MB gzip (batas paket gratis 3 
 
 ## Yang belum dikerjakan
 
-- Deploy ke Cloudflare Workers.
+- Uji di produksi: login sampai dasbor, unggah berkas ke R2, dan login Google
+  dengan akun sungguhan.
+- Instance produksi Clerk dengan domain sendiri.
 - Verifikasi domain di Resend agar bisa mengirim ke penerima mana pun.
 - Kata sandi awal pengguna baru masih `arsiva123` bila Admin tidak mengisinya;
   sebaiknya diganti acak per pengguna.
-- Uji menyelesaikan login Google dengan akun sungguhan.
 - Verifikasi dua langkah dan audit log persisten.
 - Tombol "Lupa kata sandi?" dan "Ingat perangkat ini" di halaman login belum berfungsi.
 - `GET /api/documents` mengembalikan semua dokumen tanpa paginasi; pencarian dan
