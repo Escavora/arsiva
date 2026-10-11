@@ -12,7 +12,7 @@ import {
   FolderOpen,
   Folders,
 } from "@phosphor-icons/react";
-import { KepalaHalaman, RONA_HALAMAN } from "@/components/arsiva/kepala";
+import { KepalaHalaman, Memuat, RONA_HALAMAN } from "@/components/arsiva/kepala";
 import { useArsiva } from "@/components/arsiva/store";
 import { LabelKategori, TitikKategori, useRonaKategori } from "@/components/arsiva/warna";
 
@@ -95,7 +95,9 @@ function ArsipInner() {
         ikon={Folders}
         rona={RONA_HALAMAN.arsip}
         judul="Arsip Dokumen"
-        ket={<><strong style={{ color: "var(--color-text)", fontWeight: 600 }}>{rows.length}</strong> dari {allDocs.length} dokumen · diurutkan dari yang terbaru</>}
+        ket={state.siap.documents
+          ? <><strong style={{ color: "var(--color-text)", fontWeight: 600 }}>{rows.length}</strong> dari {allDocs.length} dokumen · diurutkan dari yang terbaru</>
+          : "Memuat arsip…"}
         aksi={
           <Link className="btn btn-primary btn-solid" href="/unggah">
             <UploadSimple size={16} />
@@ -203,7 +205,8 @@ function ArsipInner() {
           </table>
         </div>
 
-        {rows.length === 0 && (
+        {!state.siap.documents && <Memuat teks="Memuat dokumen…" />}
+        {state.siap.documents && rows.length === 0 && (
           <div style={{ padding: "34px 0", textAlign: "center" }}>
             <FolderOpen size={30} style={{ color: "var(--color-neutral-700)", margin: "0 auto" }} />
             <div style={{ fontSize: "var(--t-isi)", marginTop: 8 }}>Tidak ada dokumen yang cocok</div>

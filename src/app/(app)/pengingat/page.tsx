@@ -3,12 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import { CheckCircle, BellRinging } from "@phosphor-icons/react";
-import { KepalaHalaman, RONA_HALAMAN, AngkaNaik } from "@/components/arsiva/kepala";
+import { KepalaHalaman, RONA_HALAMAN, AngkaNaik, Memuat } from "@/components/arsiva/kepala";
 import { useArsiva } from "@/components/arsiva/store";
 import { LabelKategori } from "@/components/arsiva/warna";
 
 export default function PengingatPage() {
-  const { allDocs, counts, threshold, setThreshold, tandai } = useArsiva();
+  const { state, allDocs, counts, threshold, setThreshold, tandai } = useArsiva();
+  const siap = state.siap.documents;
   const th = threshold;
 
   const rows = React.useMemo(
@@ -22,7 +23,7 @@ export default function PengingatPage() {
         ikon={BellRinging}
         rona={RONA_HALAMAN.pengingat}
         judul="Pengingat Kadaluarsa"
-        ket={`${counts.perluAksi} dokumen perlu ditindaklanjuti pada ambang ${th} hari.`}
+        ket={siap ? `${counts.perluAksi} dokumen perlu ditindaklanjuti pada ambang ${th} hari.` : "Memuat dokumen…"}
         aksi={
           <>
             <span style={{ fontSize: "var(--t-ket)", color: "color-mix(in srgb, var(--color-text) 66%, transparent)" }}>Ambang pengingat</span>
@@ -46,7 +47,7 @@ export default function PengingatPage() {
           ].map((p) => (
             <div key={p.label} className="papan-pengingat-sel">
               <div style={{ display: "flex", alignItems: "baseline", gap: "4px 10px", flexWrap: "wrap" }}>
-                <span style={{ fontFamily: "var(--font-heading)", fontWeight: 600, letterSpacing: "-0.04em", lineHeight: 0.9, fontSize: p.besar ? 56 : 40, color: p.warna, fontVariantNumeric: "tabular-nums" }}><AngkaNaik nilai={p.n} /></span>
+                <span style={{ fontFamily: "var(--font-heading)", fontWeight: 600, letterSpacing: "-0.04em", lineHeight: 0.9, fontSize: p.besar ? 56 : 40, color: p.warna, fontVariantNumeric: "tabular-nums" }}>{siap ? <AngkaNaik nilai={p.n} /> : "–"}</span>
                 <span style={{ fontSize: "var(--t-bacaan)", fontWeight: 500, color: p.warna }}>{p.label}</span>
               </div>
               <div className="papan-pengingat-ket" style={{ fontSize: "var(--t-ket)", marginTop: 8, color: "color-mix(in srgb, var(--color-text) 66%, transparent)" }}>{p.ket}</div>
@@ -91,7 +92,8 @@ export default function PengingatPage() {
             </tbody>
           </table>
         </div>
-        {rows.length === 0 && (
+        {!siap && <Memuat teks="Memuat dokumen…" />}
+        {siap && rows.length === 0 && (
           <div style={{ padding: "30px 0", textAlign: "center" }}>
             <CheckCircle size={28} style={{ color: "var(--color-ok)", margin: "0 auto" }} />
             <div style={{ fontSize: "var(--t-isi)", marginTop: 8 }}>Tidak ada dokumen yang mendekati kadaluarsa</div>

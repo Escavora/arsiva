@@ -16,6 +16,7 @@ import {
   Sparkle,
 } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
+import { Memuat } from "@/components/arsiva/kepala";
 import { LabelKategori, useRonaKategori } from "@/components/arsiva/warna";
 import { fmt, MONTHS, todayISO } from "@/lib/arsiva";
 
@@ -176,9 +177,11 @@ type Tab = "kategori" | "jenis" | "pengelola";
 
 export default function DashboardPage() {
   const { me, counts, stats, allDocs, state, threshold } = useArsiva();
+  // Sebelum dokumen tiba, angka nol bukan "arsip kosong". Bagian berbasis data baru dipasang
+  // setelah siap, sehingga animasi masuknya (cincin, batang, ubin) berjalan dengan data sungguhan.
+  const siap = state.siap.documents;
   const th = threshold;
   const [tab, setTab] = React.useState<Tab>("kategori");
-  const total = useHitung(counts.total);
 
   // Sama dengan counts.perluAksi: dalam ambang dan belum ditandai diproses.
   const prioritas = allDocs.filter((r) => r.dl <= th && r.status !== "Diproses").sort((a, b) => a.dl - b.dl).slice(0, 5);
@@ -205,7 +208,7 @@ export default function DashboardPage() {
   const warnaUrgensi = (dl: number) => (dl < 0 ? "var(--color-danger)" : "var(--color-accent-2-500)");
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--jarak-blok)" }}>
       {/* HERO */}
       <section
         className="card dasbor-muncul"
@@ -218,10 +221,12 @@ export default function DashboardPage() {
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
             <span className="tag tag-accent">{fmt(hariIni)}</span>
-            <span className="tag tag-neutral">{total} dokumen di arsip</span>
+            {siap && <span className="tag tag-neutral">{counts.total} dokumen di arsip</span>}
           </div>
           <h3 style={{ margin: "0 0 10px", fontSize: "clamp(24px, 2.4vw, 30px)" }}>Halo, {me.panggilan}</h3>
-          {counts.perluAksi > 0 ? (
+          {!siap ? (
+            <Memuat teks="Memuat ringkasan arsip…" ringkas />
+          ) : counts.perluAksi > 0 ? (
             <Link href="/pengingat" style={{ display: "inline-flex", alignItems: "center", gap: 10, fontSize: "var(--t-bacaan)", color: "var(--color-text)", textDecoration: "none" }}>
               <span className="dasbor-denyut" style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--color-accent-2-500)", flex: "none" }} />
               <span><strong style={{ color: "var(--color-accent-2-300)" }}>{counts.perluAksi} dokumen</strong> perlu tindakan</span>
@@ -249,8 +254,10 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {siap && (
+      <>
       {/* UBIN STATUS */}
-      <div className="grid gap-3 grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
         {ubin.map((u, i) => <UbinStatus key={u.kunci} u={u} total={counts.total} i={i} />)}
       </div>
 
@@ -366,7 +373,9 @@ export default function DashboardPage() {
               <h5 style={{ margin: 0 }}>Jadwal notaris</h5>
               <Link className="btn btn-ghost" href="/notaris" style={{ marginLeft: "auto", fontSize: "var(--t-ket)" }}>Kelola</Link>
             </div>
-            {jadwalDekat.length === 0 ? (
+            {!state.siap.schedules ? (
+              <Memuat teks="Memuat jadwal…" ringkas />
+            ) : jadwalDekat.length === 0 ? (
               <Kosong ikon={<CalendarBlank size={24} weight="duotone" />} judul="Belum ada jadwal mendatang" warna="var(--color-accent-500)" />
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -436,6 +445,8 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }

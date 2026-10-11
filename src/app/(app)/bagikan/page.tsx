@@ -14,7 +14,7 @@ import {
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
-import { KepalaHalaman, RONA_HALAMAN } from "@/components/arsiva/kepala";
+import { KepalaHalaman, Memuat, RONA_HALAMAN } from "@/components/arsiva/kepala";
 import { useArsiva } from "@/components/arsiva/store";
 import { fmtShort } from "@/lib/arsiva";
 
@@ -359,7 +359,8 @@ function BagikanIsi() {
               </tbody>
             </table>
           </div>
-          {shareRows.length === 0 && (
+          {!state.siap.shares && <Memuat teks="Memuat riwayat tautan…" />}
+          {state.siap.shares && shareRows.length === 0 && (
             <div className="text-muted" style={{ fontSize: "var(--t-ket)", padding: "16px 0", textAlign: "center" }}>
               Belum ada tautan berbagi yang dibuat.
             </div>

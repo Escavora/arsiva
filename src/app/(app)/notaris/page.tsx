@@ -9,7 +9,7 @@ import {
   UserPlus,
   CalendarDots,
 } from "@phosphor-icons/react";
-import { KepalaHalaman, RONA_HALAMAN } from "@/components/arsiva/kepala";
+import { KepalaHalaman, Memuat, RONA_HALAMAN } from "@/components/arsiva/kepala";
 import { useArsiva, type ApiSchedule } from "@/components/arsiva/store";
 import { useKonfirmasi } from "@/components/arsiva/konfirmasi";
 import { fmt, initials, todayISO } from "@/lib/arsiva";
@@ -223,7 +223,8 @@ export default function NotarisPage() {
               </tbody>
             </table>
           </div>
-          {jadwalRows.length === 0 && (
+          {!state.siap.schedules && <Memuat teks="Memuat jadwal…" />}
+          {state.siap.schedules && jadwalRows.length === 0 && (
             <div className="text-muted" style={{ fontSize: "var(--t-ket)", padding: "16px 0", textAlign: "center" }}>Belum ada jadwal kerja sama dengan mitra ini.</div>
           )}
           {riwayatJadwal.length > 0 && (

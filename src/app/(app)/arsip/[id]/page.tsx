@@ -18,7 +18,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { useArsiva } from "@/components/arsiva/store";
-import { KepalaHalaman } from "@/components/arsiva/kepala";
+import { KepalaHalaman, Memuat } from "@/components/arsiva/kepala";
 import { LabelKategori, TagKategori } from "@/components/arsiva/warna";
 import { useKonfirmasi } from "@/components/arsiva/konfirmasi";
 import { fmt, fmtShort } from "@/lib/arsiva";
@@ -292,7 +292,8 @@ export default function DetailPage() {
                   <span className={`tag ${s.tag}`}>{s.status}</span>
                 </div>
               ))}
-              {curShares.length === 0 && (
+              {!state.siap.shares && <Memuat teks="Memuat tautan…" ringkas />}
+              {state.siap.shares && curShares.length === 0 && (
                 <div className="text-muted" style={{ fontSize: "var(--t-ket)" }}>Belum ada tautan berbagi untuk dokumen ini.</div>
               )}
             </div>

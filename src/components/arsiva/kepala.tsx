@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { Icon } from "@phosphor-icons/react";
+import { CircleNotch, type Icon } from "@phosphor-icons/react";
 
 /**
  * Rona penunjuk arah tiap halaman. Satu sumber untuk sidebar (shell.tsx) dan kepala halaman,
@@ -122,4 +122,23 @@ export function AngkaNaik({ nilai }: { nilai: number }) {
   }, [nilai]);
 
   return <>{tampil}</>;
+}
+
+/**
+ * Keadaan "sedang memuat" untuk bagian data yang belum tiba. Dipakai sebagai pengganti
+ * pesan kosong dan angka nol, supaya arsip yang belum termuat tidak terbaca sebagai arsip kosong.
+ */
+export function Memuat({ teks = "Memuat data…", ringkas = false }: { teks?: string; ringkas?: boolean }) {
+  return (
+    <div
+      role="status"
+      style={{
+        display: "flex", alignItems: "center", justifyContent: ringkas ? "flex-start" : "center", gap: 8,
+        padding: ringkas ? "6px 0" : "30px 0", fontSize: "var(--t-ket)", color: muted(66),
+      }}
+    >
+      <CircleNotch size={16} className="memuat-putar" aria-hidden="true" />
+      {teks}
+    </div>
+  );
 }

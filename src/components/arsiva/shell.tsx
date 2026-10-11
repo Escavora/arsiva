@@ -22,7 +22,7 @@ import {
   CheckCircle,
   type Icon,
 } from "@phosphor-icons/react";
-import { RONA_HALAMAN } from "./kepala";
+import { Memuat, RONA_HALAMAN } from "./kepala";
 import { useArsiva } from "./store";
 
 type NavItem = {
@@ -400,7 +400,8 @@ function LoncengNotifikasi() {
           </div>
 
           <div style={{ maxHeight: 340, overflowY: "auto" }}>
-            {notif.length === 0 && (
+            {!state.siap.notifications && <Memuat teks="Memuat notifikasi…" />}
+            {state.siap.notifications && notif.length === 0 && (
               <div style={{ padding: "28px 14px", textAlign: "center" }}>
                 <CheckCircle size={26} style={{ color: "var(--color-neutral-700)", margin: "0 auto" }} />
                 <div className="text-muted" style={{ fontSize: "var(--t-ket)", marginTop: 8 }}>Belum ada notifikasi.</div>

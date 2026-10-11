@@ -59,12 +59,18 @@ type State = {
   notifications: ApiNotif[];
   notarisAktif: number | null; // id notaris terpilih
   loading: boolean;
+  /** bagian yang sudah selesai dimuat (berhasil atau gagal); sebelum itu, nol ≠ kosong */
+  siap: Record<Bagian, boolean>;
 };
 
 const EMPTY: State = {
   docs: [], cats: [], types: [], purposes: [], notaris: [],
   schedules: [], shares: [], users: [], notifications: [],
   notarisAktif: null, loading: true,
+  siap: {
+    documents: false, categories: false, types: false, purposes: false, notaris: false,
+    schedules: false, shares: false, users: false, notifications: false,
+  },
 };
 
 type Me = { nama: string; panggilan: string; peran: Role; peranText: string; inisial: string; email: string };
@@ -255,7 +261,7 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
         api<Record<string, unknown>>(`/api/${b}`)
           .then((r) => {
             setState((prev) => {
-              const next = { ...prev, [KUNCI_STATE[b]]: r[KUNCI_STATE[b]] } as State;
+              const next = { ...prev, [KUNCI_STATE[b]]: r[KUNCI_STATE[b]], siap: { ...prev.siap, [b]: true } } as State;
               if (b === "documents") next.loading = false;
               if (b === "notaris") {
                 next.notarisAktif =
@@ -268,7 +274,7 @@ export function ArsivaProvider({ children }: { children: React.ReactNode }) {
           })
           .catch((e) => {
             gagalPertama ??= e;
-            if (b === "documents") setState((prev) => ({ ...prev, loading: false }));
+            setState((prev) => ({ ...prev, siap: { ...prev.siap, [b]: true }, loading: b === "documents" ? false : prev.loading }));
           }),
       ),
     );
